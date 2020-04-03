@@ -1,50 +1,80 @@
-function draw() {
-  var canvas = document.getElementById('canvas');
-  if (canvas.getContext) {
-    var context = canvas.getContext('2d');
+var canvas = document.getElementById("canvas");
+let context = canvas.getContext("2d");
+context.beginPath();
+let vert = 0
+let startX =0
+let startY =0
+let endX =0
+let endY =0
+canvas.addEventListener('mousedown', function(e) {
+    getCursorPosition(canvas, context, e, vert)
+})
 
-    context.fillRect(20,20,100,100);
-    context.clearRect(40,40,60,60);
-    context.strokeRect(45,45,50,50);
-  }
-}
-var startX;
-var startY;
-function setStartCoords(event) {
-	var cX = event.clientX;
-	var sX = event.screenX;
-	var cY = event.clientY;
-	var sY = event.screenY;
-	var coords1 = "client - X: " + cX + ", Y coords: " + cY;
-	startX = cX;
-	startY = cY;
-	var coords2 = "screen - X: " + sX + ", Y coords: " + sY;
-	document.getElementById("demo").innerHTML =
-		coords1 + "<br>" + coords2;
+function getCursorPosition(canvas, context, event, vertex) {
+	var z = vertex % 2;
+	vert++;
+    const rect = canvas.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width
+    const y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+    document.getElementById("demo").innerHTML = "x: " + x + " y: " + y;
+
+    if (z==0){
+		context.moveTo(x, y);
+		startX =x;
+		startY =y;
+	}
+    else{
+		context.lineTo(x, y);
+		endX =x;
+		endY =y;
+		//offset from point 1 to 2
+		let dX = endX - startX;
+		let dY = endY - startY;
+		//rotate and add to point 1 to find point 3
+		let x3 = (Math.cos(60) * dX - Math.sin(60) * dY) + startX;
+		let y3 = (Math.sin(60) * dX + Math.cos(60) * dY) + startY;
+
+		context.lineTo(x3, y3);
+		context.closePath();
+		// the outline
+		context.lineWidth = 1;
+		context.strokeStyle = "#666666";
+		context.stroke();
+
+		// the fill color
+		context.fillStyle = "#FFCC00";
+		context.fill();
 }
 
-var endX;
-var endY;
-function setEndCoords(event) {
-	var cX = event.clientX;
-	var sX = event.screenX;
-	var cY = event.clientY;
-	var sY = event.screenY;
-	var coords1 = "client - X: " + cX + ", Y coords: " + cY;
-	endX = cX;
-	endY = cY;
-	var coords2 = "screen - X: " + sX + ", Y coords: " + sY;
-	document.getElementById("demo").innerHTML =
-		coords1 + "<br>" + coords2;
-}
-function showCoords(event) {
-  var cX = event.clientX;
-  var sX = event.screenX;
-  var cY = event.clientY;
-  var sY = event.screenY;
-  var coords1 = "client - X: " + cX + ", Y coords: " + cY;
-  var coords2 = "screen - X: " + sX + ", Y coords: " + sY;
-  document.getElementById("demo").innerHTML = coords1 + "<br>" + coords2;
 }
 
-// document.getElementById("screenBox").onmousemove = findScreenCoords;
+
+function drawTriangle(startX,startY,endX,endY) {
+	// var canvas = document.getElementById("canvas");
+	// let context = canvas.getContext("2d");
+	// // context.clearRect(0, 0, canvas.width, canvas.height);
+	// // context.fillStyle = "#808080";
+	// // context.fillRect(0, 0, canvas.width, canvas.height);
+
+	context.beginPath();
+	context.moveTo(startX, startY);
+	context.lineTo(endX, endY);
+	//offset from point 1 to 2
+	let dX = endX - startX;
+	let dY = endY - startY;
+	//rotate and add to point 1 to find point 3
+	let x3 = (Math.cos(60) * dX - Math.sin(60) * dY) + startX;
+	let y3 = (Math.sin(60) * dX + Math.cos(60) * dY) + startY;
+
+	context.lineTo(x3, y3);
+	context.closePath();
+
+	// the outline
+	context.lineWidth = 1;
+	context.strokeStyle = "#666666";
+	context.stroke();
+
+	// the fill color
+	context.fillStyle = "#FFCC00";
+	context.fill();
+}
