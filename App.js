@@ -1,8 +1,5 @@
 var canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
-// context.globalCompositeOperation = 'destination-atop';
-// context.strokeStyle = "rgba(1, 1, 1, 0)";
-context.globalAlpha = 0.2;
 context.beginPath();
 let vert = 0
 let startX =0
@@ -10,30 +7,29 @@ let startY =0
 let endX =0
 let endY =0
 var hex_colors = [];
-var hex_colors_copy = [];
 var triangles=[];
 
-var triangles_copy =[];
-
+// mosedown event listener 
 canvas.addEventListener('mousedown', function(e) {
     getCursorPosition(e)
 })
 
+// simple clear screen 
 function clearscreen(){
 	context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function getCursorPosition(event) {
+// get cursor positions and then draw
+function getCursorPosition(event){
 	var z = vert % 2;
 	vert++;
     const rect = canvas.getBoundingClientRect()
     const x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width
     const y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
-    document.getElementById("demo").innerHTML = "x: " + x + " y: " + y;
     draw(x,y,z)
-
 }
 
+//remove deleleted trianglels from stack
 function removeTriangle(hex_val) {
 	index=hex_colors.indexOf(hex_val);
 	for (i = index; i < triangles.length-1; i++) { 
@@ -42,11 +38,11 @@ function removeTriangle(hex_val) {
 	}
 	triangles.pop();
 	hex_colors.pop();
-
 	clearscreen()
 	loadAllTriangles()
 }
 
+// edit triangle location in stack
 function moveTriangle(hex_val,x1,y1,x2,y2) {
 	index=hex_colors.indexOf(hex_val);
 	clearscreen()
@@ -57,6 +53,7 @@ function moveTriangle(hex_val,x1,y1,x2,y2) {
 	loadAllTriangles()
 }
 
+// check the type of operation necessary based on the mouse clicks
 function checkTriangle(){
 	var data = context.getImageData(startX, startY, 1, 1).data;
 	hex_val=rgb2hex(data[0],data[1],data[2]);
@@ -67,15 +64,16 @@ function checkTriangle(){
 			removeTriangle(hex_val);// Deleting Triangle
 		}
 		else{
-			moveTriangle(hex_val,startX,startY,endX,endY);
+			moveTriangle(hex_val,startX,startY,endX,endY);// Moving the triangle
 		}
 			return true;
 	}
 	else{
-		return false;//returns false if the colours are not present in the array
+		return false;// returns false if the colours are not present in the array
 	}
 }
 
+// rgb to hex
 function rgb2hex(r,g,b){
   r = r.toString(16);
   g = g.toString(16);
@@ -90,11 +88,14 @@ function rgb2hex(r,g,b){
 
   return "#" + r + g + b;
 }
+
+// adding new triangles to stack
 function addTriangles(){
 	var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 	triangles[triangles.length] = imageData;
 }
 
+// loading all triangles onto canvas
 function loadAllTriangles(){
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	context.drawImage(canvas, 0, 0);
@@ -106,9 +107,10 @@ function loadAllTriangles(){
 	context.drawImage(canvas, 0, 0);
 }
 
+// combining triangle stack for a complete picture
 function combine(triangle1,triangle2){ 
-    var triangle3 = triangle1;//copying triangle 1
-    for (var i = 0; i < triangle1.data.length; i++) {//go through all the datapoints in triangle 1
+    var triangle3 = triangle1;
+    for (var i = 0; i < triangle1.data.length; i++) {
         if(triangle2.data[i]>0){
         triangle3.data[i] = triangle2.data[i];
         }
@@ -116,6 +118,7 @@ function combine(triangle1,triangle2){
     return triangle3;
 }
 
+// drawing the new triangles based on mose locations
 function draw(x,y,z){
     if (z==0){
 		startX =x;
@@ -133,11 +136,9 @@ function draw(x,y,z){
 			while(hex_colors.includes(randomColor));
 			hex_colors[hex_colors.length] = randomColor;
 
-
-			//offset from point 1 to 2
 			let dX = endX - startX;
 			let dY = endY - startY;
-			//rotate and add to point 1 to find point 3
+			//calculating the third point, assuming it is equilateral, since shape isnt specified
 			let x3 = Math.round(Math.cos(60* Math.PI / 180) * dX - Math.sin(60* Math.PI / 180) * dY) + startX;
 			let y3 = Math.round(Math.sin(60* Math.PI / 180) * dX + Math.cos(60* Math.PI / 180) * dY) + startY;
 
@@ -153,7 +154,6 @@ function draw(x,y,z){
 			context.fillStyle = randomColor;
 			context.fill();
 			context.drawImage(canvas, 0, 0);
-
 
 			addTriangles()
 			loadAllTriangles()

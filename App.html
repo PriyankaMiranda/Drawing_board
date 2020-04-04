@@ -6,14 +6,12 @@
 	body {
 		height: 100%;
 		width: 100%;
-/*		margin: 10px;*/
 		padding: 0;
 		text-align: center;
 	}
 	canvas {
-		width: 95%;
-		height: 85%;
-/*		margin: 5px;*/
+		width: 85%;
+		height: 75%;
 		border: 5px solid black;
 		text-align: center;
 	}
@@ -22,9 +20,13 @@
 	  margin: 10px;
 	  padding: 0px 30px;
 	}
+	h5 {
+	  text-align: center;
+	  margin: 10px;
+	  padding: 0px 30px;
+	}
 	button {
 	  background-color: #4CAF50; /* Green */
-/*	  margin: 10px;*/
 	  border: none;
 	  color: white;
 	  padding: 10px 30px;
@@ -37,116 +39,16 @@
 <title>Draw a rectangular shape</title>
 </head>
 <body >
-<!-- <p>
-	Write instructions here
-</p> -->
+<h5 text-align= 'center'>
+Drawing a triangle - Click at two distinct points on the canvas.</br>
+Draging triangle - Click the triangle then the new location.</br>
+Deleting a triangle - Double click the triangle.</br>
+Clearing screen - Doublel click all triangles or click clear button below.
+</h5>
 <canvas id="canvas"></canvas>
-<p id="demo"></p>
 <p>
 <button id='button' onclick="clearscreen()">Clear</button>
 </p>
 <script src="App.js"></script>
 </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html>
-	<head>
-		<style>
-			html,
-			body {
-				height: 100%;
-				width: 100%;
-				margin: 0;
-				padding: 0;
-				text-align: center;
-			}
-			div {
-				width: 95%;
-				height: 85%;
-				margin: 10px;
-				border: 10px solid black;
-				text-align: center;
-			}
-		</style>
-	</head>
-
-	<body>
-		<p>
-			Click in the div element below to get the x (horizontal) and y
-			(vertical) coordinates of the mouse pointer, when it is clicked.
-		</p>
-		<div
-			onmouseup="setStartCoords(event)"
-			onmousedown="setEndCoords(event)"
-		>
-			<p id="demo"></p>
-		</div>
-		<p><strong>Tip:</strong> Try to click different places in the div.</p>
-		<script type="text/javascript">
-			let canvas = document.querySelector("#myCanvas");
-			let context = canvas.getContext("2d");
-			context.clearRect(0, 0, canvas.width, canvas.height);
-			context.fillStyle = "#808080";
-			context.fillRect(0, 0, canvas.width, canvas.height);
-		</script>
-
-		<script>
-			let canvas = document.querySelector("#myCanvas");
-			let context = canvas.getContext("2d");
-			context.clearRect(0, 0, canvas.width, canvas.height);
-			context.fillStyle = "#808080";
-			context.fillRect(0, 0, canvas.width, canvas.height);
-
-			var startX;
-			var startY;
-			function setStartCoords(event) {
-				var cX = event.clientX;
-				var sX = event.screenX;
-				var cY = event.clientY;
-				var sY = event.screenY;
-				var coords1 = "client - X: " + cX + ", Y coords: " + cY;
-				startX = cX;
-				startY = cY;
-				var coords2 = "screen - X: " + sX + ", Y coords: " + sY;
-				document.getElementById("demo").innerHTML =
-					coords1 + "<br>" + coords2;
-			}
-
-			var endX;
-			var endY;
-			function setEndCoords(event) {
-				var cX = event.clientX;
-				var sX = event.screenX;
-				var cY = event.clientY;
-				var sY = event.screenY;
-				var coords1 = "client - X: " + cX + ", Y coords: " + cY;
-				endX = cX;
-				endY = cY;
-				var coords2 = "screen - X: " + sX + ", Y coords: " + sY;
-				document.getElementById("demo").innerHTML =
-					coords1 + "<br>" + coords2;
-			}
-
-			function drawTriangle() {
-				let height = 200 * Math.cos(Math.PI / 6);
-				context.beginPath();
-				context.moveTo(startX, startY);
-				context.lineTo(300, 300);
-				context.lineTo(200, 300 - height);
-				context.closePath();
-
-				// the outline
-				context.lineWidth = 10;
-				context.strokeStyle = "#666666";
-				context.stroke();
-
-				// the fill color
-				context.fillStyle = "#FFCC00";
-				context.fill();
-			}
-			//
-		</script>
-	</body>
-</html>
- -->
