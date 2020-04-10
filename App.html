@@ -1,54 +1,104 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Draw Anything!</title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" type="text/css" href="App.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div class="jumbotron text-center text-white" >
+  <h3>Draw Anything</h3>
+  <p> ♡ ♡ My Pet Project ♡ ♡</p> 
+  <img src="./images/simple_colour_palette.png" id="colour_palette" style="display:none;">
+</div>
+  
+<div class="container">
+  <div class="row">
+    
+    <div class="col-sm-9">
+		<canvas id="canvas"></canvas>
+    </div>
+
+    <div class="col-sm-1">
+    	<canvas id="canvas2"></canvas>
+    </div>
+
+    <div class="btn-group-vertical" >
+		<div class="btn btn-primary">
+			<button id='button1' onclick="clearscreen()">Clear</button>
+		</div>
+		<div class="btn btn-primary">
+			<button id='button1' onclick="clearscreen()">Clear</button>
+		</div>
+		<div class="btn btn-primary">
+			<button id='button1' onclick="clearscreen()">Pen</button>
+		</div>
+		<div class="btn btn-primary">
+			<button id='button1' onclick="clearscreen()">Stamp</button>
+		</div>
+		<div class="btn btn-primary">
+			<button id='button1' onclick="clearscreen()">Stamp</button>
+		</div>
+		<div class="btn btn-primary">
+			<button id='button1' onclick="clearscreen()">Stamp</button>
+		</div>
+    
+    </div>
+
+
+  </div>
+</div>
+
+
+<script src="App.js"></script>
+</body>
+</html>
+
+
+
+
+<!-- <!DOCTYPE html>
 <html>
 <head>
-<style>
-	html,
-	body {
-		height: 100%;
-		width: 100%;
-		padding: 0;
-		text-align: center;
-	}
-	canvas {
-		width: 85%;
-		height: 75%;
-		border: 5px solid black;
-		text-align: center;
-	}
-	p {
-	  text-align: right;
-	  margin: 10px;
-	  padding: 0px 30px;
-	}
-	h5 {
-	  text-align: center;
-	  margin: 10px;
-	  padding: 0px 30px;
-	}
-	button {
-	  background-color: #4CAF50; /* Green */
-	  border: none;
-	  color: white;
-	  padding: 10px 30px;
-	  text-align: center;
-	  text-decoration: none;
-	  display: inline-block;
-	  font-size: 16px;
-	}
-</style>	
+<link rel="stylesheet" type="text/css" href="App.css">
 <title>Draw a rectangular shape</title>
 </head>
-<body >
-<h5 text-align= 'center'>
+<body > -->
+
+<!-- <div class="float-left"><canvas id="canvas"></canvas></div>
+<div class="float-right"><img src="simple_colour_palette.png" alt="colour palette"></div>
+<div class="class-clear"><button id='button' onclick="clearscreen()">Clear</button></div>
+ -->
+<!-- <div class="d-flex flex-nowrap">
+  <div class="order-1 p-2"><canvas id="canvas"></canvas></div>
+  <div class="order-2 p-2"><img src="simple_colour_palette.png" alt="colour palette"></div>
+  <div class="order-3 p-2"><button id='button' onclick="clearscreen()">Clear</button></div>
+</div> -->
+
+<!-- <h5 text-align= 'center'>
 Drawing a triangle - Click at two distinct points on the canvas.</br>
 Draging triangle - Click the triangle then the new location.</br>
 Deleting a triangle - Double click the triangle.</br>
 Clearing screen - Doublel click all triangles or click clear button below.
-</h5>
-<canvas id="canvas"></canvas>
+</h5> -->
+<!-- <canvas id="canvas"></canvas>
+<img src="simple_colour_palette.png" alt="colour palette">
 <p>
 <button id='button' onclick="clearscreen()">Clear</button>
-</p>
-<script src="App.js"></script>
+</p> -->
+
+
+<!-- <script src="App.js"></script>
 </body>
 </html>
+ -->

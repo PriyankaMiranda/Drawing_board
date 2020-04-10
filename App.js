@@ -1,6 +1,26 @@
+//---------------Set palette---------------
+let canvas2 = document.getElementById("canvas2");
+let ctx = canvas2.getContext("2d");
+var img = document.getElementById("colour_palette");
+var scale = Math.max(ctx.canvas.width / img.width, ctx.canvas.height / img.height); // get the max scale to fit
+var x = (ctx.canvas.width - (img.width * scale) ) / 2;
+var y = (ctx.canvas.height - (img.height * scale) ) / 2;
+ctx.drawImage(img, x, 0, img.width * scale, ctx.canvas.height);
+//--------------------------------------------
+
+//-------------Selecting color--------------
+
+
+//-------------Set drawing board--------------
 var canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
+//--------------------------------------------
+
+
 context.beginPath();
+context.lineToWidth = 0;
+context.globalAlpha = 1;
+const rect = canvas.getBoundingClientRect()
 let vert = 0
 let startX =0
 let startY =0
@@ -9,24 +29,61 @@ let endY =0
 var hex_colors = [];
 var triangles=[];
 
-// mosedown event listener 
+var x = 0;
+var y = 0;
+var z = 1;
+var start = true;
+// mousedown event listener 
 canvas.addEventListener('mousedown', function(e) {
-    getCursorPosition(e)
+	z=0;
 })
-
+// mouseup event listener 
+canvas.addEventListener('mouseup', function(e) {
+	z=1,start=true;
+})
+// mousemove event listener 
+canvas.addEventListener('mousemove', function(e) {
+	if(z==0){
+	x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+    y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+	if(start){
+	context.moveTo(x, y);
+	start=false;
+	}
+    else{
+   	context.lineTo(x, y);
+  	context.stroke();
+    }
+	}
+}) 
 // simple clear screen 
 function clearscreen(){
 	context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 // get cursor positions and then draw
+function startCursor(rect,event){
+    const x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+    const y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+    context.moveTo(x, y);
+}
+
+// get cursor positions and then draw
+function continueCursor(rect,event){		
+    const x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+    const y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+	context.lineTo(x, y);
+}
+// get cursor positions and then draw
 function getCursorPosition(event){
 	var z = vert % 2;
 	vert++;
     const rect = canvas.getBoundingClientRect()
-    const x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width
-    const y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
-    draw(x,y,z)
+    const x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+    const y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+	line_draw(x,y,z);    
+    
+    // draw(x,y,z)
 }
 
 //remove deleleted trianglels from stack
@@ -118,12 +175,24 @@ function combine(triangle1,triangle2){
     return triangle3;
 }
 
+
+
+function line_draw(x,y,z){
+    if (z==0){
+		startX =x;
+		startY =y;
+		context.moveTo(x, y);
+	}
+
+}
+
+
 // drawing the new triangles based on mose locations
 function draw(x,y,z){
     if (z==0){
 		startX =x;
 		startY =y;
-		context.moveTo(x, y);
+		context.moveTo(x, y);f`a`
 	}
     else{
 		endX =x;
