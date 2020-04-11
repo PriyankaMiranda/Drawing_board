@@ -16,51 +16,51 @@
 </head>
 <body>
 
-<div class="jumbotron text-center text-white" >
-  <h3>Draw Anything</h3>
-  <p> ♡ ♡ My Pet Project ♡ ♡</p> 
+<div class="jumbotron text-center text-black" id="header" >
+	<div id="inner-box" >
+  <p id='head-1-text'>Draw Anything</p>
+  <p id='head-2-text'> ♡ ♡ My Pet Project ♡ ♡</p> 
   <img src="./images/simple_colour_palette.png" id="colour_palette" style="display:none;">
+</div>
 </div>
   
 <div class="container">
-  <div class="row">
+  <div class="row-1">
     
     <div class="col-sm-9">
 		<canvas id="canvas"></canvas>
     </div>
-
     <div class="col-sm-1">
-    	<canvas id="canvas2"></canvas>
+    	<canvas id="palette-canvas"></canvas>
     </div>
 
+  </div>
+  <div class="row-2">
     <div class="btn-group-vertical" >
 		<div class="btn btn-primary">
-			<button id='button1' >Clear</button>
+			<button id='button-1' >Clear</button>
 		</div>
 		<div class="btn btn-primary">
-			<button id='button2' >Clear</button>
+			<button id='button-2' >Pen</button>
 		</div>
 		<div class="btn btn-primary">
-			<button id='button3' >Pen</button>
+			<button id='button-3' >Fill</button>
 		</div>
 		<div class="btn btn-primary">
-			<button id='button4' >Stamp</button>
+			<button id='button-4' >Stamp</button>
 		</div>
 		<div class="btn btn-primary">
-			<button id='button5' >Stamp</button>
-		</div>
-		<div class="btn btn-primary">
-			<button id='button6' >Stamp</button>
+			<button id='button-5' >Stamp</button>
 		</div>
     
     </div>
+</div>
 
-
-  </div>
 </div>
 
 
 <script src="App.js"></script>
+<script src="utilities.js"></script>
 </body>
 </html>
 

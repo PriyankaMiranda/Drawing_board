@@ -1,25 +1,47 @@
 //---------------Set palette---------------
-let palette_canvas = document.getElementById("canvas2");
+let palette_canvas = document.getElementById("palette-canvas");
 let ctx = palette_canvas.getContext("2d");
 var img = document.getElementById("colour_palette");
+img.crossOrigin = "Anonymous";
+img.width=10000;
+img.height=10;
+
 var scale = Math.max(
 	ctx.canvas.width / img.width,
 	ctx.canvas.height / img.height
 ); // get the max scale to fit
 var x = (ctx.canvas.width - img.width * scale) / 2;
 var y = (ctx.canvas.height - img.height * scale) / 2;
-ctx.drawImage(img, x, 0, img.width * scale, ctx.canvas.height);
+
+var ptrn = ctx.createPattern(img,'no-repeat');
+ctx.fillStyle = ptrn;
+
+ctx.fillRect(0, 0, 10000,ctx.canvas.height);
+
+
+// ctx.drawImage(img, x, 0, img.width * scale, ctx.canvas.height);
+
+
 //--------------------------------------------
 
 //-------------Selecting color--------------
-palette_canvas.addEventListener("click", function(e) {});
+palette_canvas.addEventListener("click", function(e) {
+	// hex_val = getcolour(
+	// 	getloc(palette_canvas.getBoundingClientRect(), palette_canvas)
+	// );
+	locs=(getloc(palette_canvas.getBoundingClientRect(), palette_canvas));
+	context.strokeStyle = getcolour(locs[0],locs[1]);
+});
 //--------------------------------------------
 
 //-------------Set drawing board--------------
 var canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
-const rect = canvas.getBoundingClientRect();
+let rect = canvas.getBoundingClientRect();
 //--------------------------------------------
+
+
+
 
 var x = 0;
 var y = 0;
@@ -37,12 +59,8 @@ canvas.addEventListener("mouseup", function(e) {
 // mousemove event listener
 canvas.addEventListener("mousemove", function(e) {
 	if (z == 0) {
-		x =
-			((event.clientX - rect.left) / (rect.right - rect.left)) *
-			canvas.width;
-		y =
-			((event.clientY - rect.top) / (rect.bottom - rect.top)) *
-			canvas.height;
+		x_y_loc = getloc(rect, canvas);
+		[x, y] = getloc(rect, canvas);
 		if (start) {
 			context.moveTo(x, y);
 			start = false;
@@ -54,11 +72,37 @@ canvas.addEventListener("mousemove", function(e) {
 });
 
 // simple clear screen
-document.getElementById("button1").addEventListener("click", function() {
-
+document.getElementById("button-1").addEventListener("click", function() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	context.beginPath();
 });
+
+function getcolour(locX, locY) {
+	var data_x = ctx.getImageData(locX, locY, 1, 1).data;
+	alert(data_x)
+	return rgb2hex(data_x[0], data_x[1], data_x[2]);
+}
+
+function getloc(rect_x, canvas_x) {
+	const a =
+		((event.clientX - rect_x.left) / (rect_x.right - rect_x.left)) *
+		canvas_x.width;
+	const b =
+		((event.clientY - rect_x.top) / (rect_x.bottom - rect_x.top)) *
+		canvas_x.height;
+	return [a, b];
+}
+
+// rgb to hex
+function rgb2hex(r, g, b) {
+	r = r.toString(16);
+	g = g.toString(16);
+	b = b.toString(16);
+	if (r.length == 1) r = "0" + r;
+	if (g.length == 1) g = "0" + g;
+	if (b.length == 1) b = "0" + b;
+	return "#" + r + g + b;
+}
 
 // get cursor positions and then draw
 // function startCursor(rect,event){
@@ -127,22 +171,6 @@ document.getElementById("button1").addEventListener("click", function() {
 // 	else{
 // 		return false;// returns false if the colours are not present in the array
 // 	}
-// }
-
-// // rgb to hex
-// function rgb2hex(r,g,b){
-//   r = r.toString(16);
-//   g = g.toString(16);
-//   b = b.toString(16);
-
-//   if (r.length == 1)
-//     r = "0" + r;
-//   if (g.length == 1)
-//     g = "0" + g;
-//   if (b.length == 1)
-//     b = "0" + b;
-
-//   return "#" + r + g + b;
 // }
 
 // // adding new triangles to stack

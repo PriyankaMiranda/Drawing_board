@@ -61,12 +61,21 @@ button:hover,button:active,button:target{
 }
 
 
-.jumbotron.text-center.text-white{
-	height: 25%;
+.jumbotron.text-center.text-black{
+	height: 20vh;
 	background-color: #88d8b0;
-/*	table-layout: fixed;*/
 }
-	
+
+#head-1-text{
+	font-size:10vw !important;
+}
+#head-2-text{
+	font-size:4vw !important;
+}
+
+
+
+
 .btn.btn-primary {
     color: #fff;
     background-color: white;
