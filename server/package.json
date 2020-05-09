@@ -8,8 +8,8 @@
     "start": "node index.js"
   },
   "engines": {
-    "node": "8.1.1",
-    "npm": "5.0.3"
+    "node": "10.19.0",
+    "npm": "6.13.7"
   },
   "author": "",
   "license": "ISC",
