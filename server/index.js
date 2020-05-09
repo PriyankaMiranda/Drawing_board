@@ -1,10 +1,10 @@
 
-// const cookieSession = require('cookie-session');
-// const http = require('http').Server(app);
-// const io = require('socket.io')(http);
+const cookieSession = require('cookie-session');
 
 var express = require('express');
 var app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 const port = process.env.PORT || 3000;
 var server = app.listen(port, function () {
