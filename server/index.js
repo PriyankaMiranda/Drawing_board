@@ -1,14 +1,13 @@
-console.log('Node server is running..');
-// const express = require('express');
-// const cookieSession = require('cookie-session');
+const express = require('express');
+const cookieSession = require('cookie-session');
 
-// const app = express();
+const app = express();
 
 
-// const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// var server = app.listen(PORT, function () {
-//     console.log('Node server is running..');
-// });
+var server = app.listen(PORT, function () {
+    console.log('Node server is running..');
+});
 
 
