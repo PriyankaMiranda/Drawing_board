@@ -1,0 +1,23 @@
+{
+  "name": "draw_anything",
+  "version": "1.0.0",
+  "description": "---------------------------------Drawing Application--------------------------------- Written using Plain Javascript and HTML5.  No third party libraries are used. Hence, no installation is necessary. A simple project with multiple possibilities. Drawing borad with colour pallete options. ------------------------------------------------------------------------------------- Coming soon: Hosting on heroku and socket connectivity for multiple players to access ------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/priyankamiranda2/draw_anything.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/priyankamiranda2/draw_anything/issues"
+  },
+  "homepage": "https://gitlab.com/priyankamiranda2/draw_anything#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {}
+}
