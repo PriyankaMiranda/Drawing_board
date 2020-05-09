@@ -1,11 +1,3 @@
-/*
-colour theme - beachy
-#96ceb4  green
-#ffeead  cream
-#ff6f69  red
-#ffcc5c  orange
-#88d8b0  slghtly darker green
-*/
 
 * {
   box-sizing: border-box;
@@ -47,6 +39,7 @@ body{
 
 
 #flex-container > .drawing-board > .whiteboard {
+  border: 5px solid #cbe6ef;
   background-color: white;  
   height:55vh;
   width:95vw;
@@ -63,6 +56,7 @@ body{
 }
 
 #flex-container > .chatbox{
+  background-color: #cbe6ef;
   height:25vh;
   width:100vw;
 }
@@ -73,7 +67,7 @@ body{
 }
 
 .color.a { background-color: #000000; }
-.color.b { background-color: #808080; }
+.color.b { background-color: #808080; } 
 .color.c { background-color: #C0C0C0; }
 .color.d { background-color: #FF0000; }
 .color.e { background-color: #800000; }
@@ -88,16 +82,46 @@ body{
 .color.m { background-color: #000080; }
 .color.n { background-color: #FF00FF; }
 .color.o { background-color: #800080; }
-.color.clear{  text-align:center}
-.color.pencil{  text-align:center }
-/*#icon { 
-  max-width: 100%; 
-  max-height: 100%; 
-  display:block; 
-  margin:auto;
-}*/
+.color.clear{
+    background-image: url(./images/eraser_small.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center
+}
+.color.pencil{
+    background-image: url(./images/pencil_small.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center
+}
 
 
+.footer{
+  background-color: #cbe6ef;
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width:100vw;
+  height: 10vh;
+
+}
+.char.a {background-image: url(./images/characters/1.png);}
+.char.b {background-image: url(./images/characters/2.png);}
+.char.c {background-image: url(./images/characters/3.png);}
+.char.d {background-image: url(./images/characters/4.png);}
+.char.e {background-image: url(./images/characters/5.png);}
+.char.f {background-image: url(./images/characters/6.png);}
+.char.g {background-image: url(./images/characters/7.png);}
+.char.h {background-image: url(./images/characters/8.png);}
+
+.footer > .char{ 
+    width: 5vh; 
+    height: 5vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center
+}
 
 /*for larger screens(large screens and laptops)*/
 @media only screen and (min-device-width: 500px) {
@@ -122,7 +146,7 @@ body{
 
   #flex-container > .drawing-board > .whiteboard {
   height:70vh;
-  width:67vw;
+  width:68vw;
   }
   #flex-container > .drawing-board > .colors {
   background-color: white;
@@ -131,7 +155,7 @@ body{
   align-items: center;
   justify-content: space-between;
   height:70vh;
-  width:3vw;
+  width:2vw;
   }
 
   #flex-container > .chatbox{
@@ -140,21 +164,14 @@ body{
   }   
   .color {
     height:3vw;
-    width:3vw;
+    width:2vw;
   }
-
+  .footer {
+  height: 15vh;
+  }
+  .footer > .char{ 
+      width: 10vh; 
+      height: 10vh;
+  }
 }
 
-
-
-/*for your reference*/
-#check-1{
-  background-color: blue;
-}
-#check-2{
-  background-color: green;
-}
-
-#check-4{
-  background-color: yellow
-}
