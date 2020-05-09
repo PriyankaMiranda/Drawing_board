@@ -1,0 +1,99 @@
+/*
+colour theme - beachy
+#96ceb4  green
+#ffeead  cream
+#ff6f69  red
+#ffcc5c  orange
+#88d8b0  slghtly darker green
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+body{
+  height: 100vh;
+  width: 100vw;
+  background-color: black !important;
+  text-align: center;
+}
+
+.header{
+  width:100vw;
+  height: 10vh;
+  background-color: white;
+  text-align: right;
+}
+
+#logo{
+  height: 100%;
+  width:auto;
+  background-size: contain;
+  background-repeat: no-repeat;                
+}
+
+#flex-container {
+  display:flex;
+  flex-direction: row;
+  height:80vh;
+  width:100vw;
+}
+
+#flex-container > .drawing-board{
+  display:flex;
+  flex-direction: column;
+  width:60vw;
+}
+
+#flex-container > .drawing-board > .colors {
+  height:15vh;
+}
+#flex-container > .drawing-board > .whiteboard {
+  background-color: white;  
+  height:50vh;
+}
+
+#flex-container > .drawing-board > .brushes {
+  height:15vh;
+}
+
+/*#flex-container > .colors {
+  width: 5rem;
+}
+.color {
+  display: inline-block;
+  height: 48px;
+  width: 48px;
+}
+
+.color.black { background-color: black; }
+.color.red { background-color: red; }
+.color.green { background-color: green; }
+.color.blue { background-color: blue; }
+.color.yellow { background-color: yellow; }*/
+
+/*for larger screens(phones)*/
+@media only screen and (min-device-width: 500px) {
+  .header {
+    height: 15vh;
+  }
+  #flex-container {
+    height:70vh;
+  }
+}
+
+
+
+/*for your reference*/
+#check-1{
+  background-color: blue;
+}
+#check-2{
+  background-color: green;
+}
+#check-3{
+  background-color: red;
+}
+#check-4{
+  background-color: yellow
+}

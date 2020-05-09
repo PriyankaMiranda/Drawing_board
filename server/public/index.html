@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Draw Anything!</title>
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div  class="header" >
+  <img id="logo" src="./images/logo2_transparent.png"></img>
+</div>
+
+
+<div id="flex-container">
+  <div class="drawing-board">
+    <div class="colors" id="check-3"></div>
+    <canvas class="whiteboard" ></canvas>
+    <div class="brushes" id="check-4"></div>
+<!--   <div class="colors">
+        <div class="color black"></div>
+        <div class="color red"></div>
+        <div class="color green"></div>
+        <div class="color blue"></div>
+        <div class="color yellow"></div>
+  </div> -->
+  </div>
+  <div class="chatbox" id="check-2"></div>
+</div>
+
+<div class="header" id="check-1"></div>
+
+
+
+
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+
+
