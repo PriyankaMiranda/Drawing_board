@@ -1,13 +1,31 @@
-const express = require('express');
-const cookieSession = require('cookie-session');
+// const express = require('express');
+// const cookieSession = require('cookie-session');
 
+// const app = express();
+
+
+// const PORT = process.env.PORT || 3000;
+
+// var server = app.listen(PORT, function () {
+//     console.log('Node server is running..');
+// });
+
+
+
+
+const express = require('express');
 const app = express();
 
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const port = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 3000;
+// app.use(express.static(__dirname + '/public'));
 
-var server = app.listen(PORT, function () {
-    console.log('Node server is running..');
-});
+// function onConnection(socket){
+//   socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
+// }
 
+// io.on('connection', onConnection);
 
+// http.listen(port, () => console.log('listening on port ' + port));
