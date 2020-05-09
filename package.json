@@ -18,6 +18,5 @@
   "homepage": "https://gitlab.com/priyankamiranda2/draw_anything#readme",
   "dependencies": {
     "express": "^4.17.1"
-  },
-  "devDependencies": {}
+  }
 }
