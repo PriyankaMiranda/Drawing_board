@@ -1,67 +1,63 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Draw Anything!</title>
-  <link rel="stylesheet" href="style.css">
-
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-
+    <meta charset="UTF-8">
+    <title>Draw Anything!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 </head>
+
 <body>
-
-<div  class="header" >
-  <img id="logo" src="./images/logo2_transparent.png"></img>
-</div>
-
-
-<div id="flex-container">
-  
-  <div class="drawing-board">
-    <div class="colors" >
-        <div class="color a"></div>
-        <div class="color b"></div>
-        <div class="color c"></div>
-        <div class="color d"></div>
-        <div class="color e"></div>
-        <div class="color f"></div>
-        <div class="color g"></div> 
-        <div class="color h"></div>
-        <div class="color i"></div>
-        <div class="color j"></div>
-        <div class="color k"></div>
-        <div class="color l"></div>
-        <div class="color m"></div>
-        <div class="color n"></div>
-        <div class="color o"></div>
-        <div class="color clear"></div>
-        <div class="color pencil"></div>
+    <div class="header">
+        <div class="header-contents" id="char-you" src="./images/characters/20.png">
+            <img src="./images/characters/20.png"></img>
+            <h6 id="name">Hello NewUser</h6>
+        </div>
+        <img class="header-contents" id="logo" src="./images/logo2_transparent.png"></img>
     </div>
-    <canvas class="whiteboard" ></canvas>
-  </div>
-  <div class="chatbox" id="check-2"></div>
-</div>
 
-
-<div class="footer">
+    <div id="flex-container">
+        <div class="drawing-board">
+            <div class="colors">
+                <div class="color pen a" style="background-color: #000000;"></div>
+                <div class="color pen b" style="background-color: #808080;"></div>
+                <div class="color pen c" style="background-color: #C0C0C0;"></div>
+                <div class="color pen d" style="background-color: #FF0000;"></div>
+                <div class="color pen e" style="background-color: #800000;"></div>
+                <div class="color pen f" style="background-color: #FFFF00;"></div>
+                <div class="color pen g" style="background-color: #808000;"></div>
+                <div class="color pen h" style="background-color: #00FF00;"></div>
+                <div class="color pen i" style="background-color: #008000;"></div>
+                <div class="color pen j" style="background-color: #00FFFF;"></div>
+                <div class="color pen k" style="background-color: #008080;"></div>
+                <div class="color pen l" style="background-color: #0000FF;"></div>
+                <div class="color pen m" style="background-color: #000080;"></div>
+                <div class="color pen n" style="background-color: #FF00FF;"></div>
+                <div class="color pen o" style="background-color: #800080;"></div>
+                <div class="color pen clear" style="background-color: white;"></div>
+                <div class="color pencil" style="background-image: url(./images/pencil_small.jpg);"></div>
+                <div class="color refresh" style="background-image: url(./images/refresh_small.jpg);"></div>
+            </div>
+            <canvas class="whiteboard" width="600" height="600"></canvas>
+        </div>
+        <div class="chatbox"></div>
+    </div>
+    <div class="footer">
         <div class="char a"></div>
         <div class="char b"></div>
         <div class="char c"></div>
         <div class="char d"></div>
         <div class="char e"></div>
         <div class="char f"></div>
-        <div class="char g"></div> 
+        <div class="char g"></div>
         <div class="char h"></div>
-</div>
-
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="main.js"></script>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="main.js"></script>
 </body>
+
 </html>
-
-

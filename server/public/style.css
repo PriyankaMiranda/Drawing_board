@@ -1,8 +1,3 @@
-
-* {
-  box-sizing: border-box;
-}
-
 body{
   height: 100vh;
   width: 100vw;
@@ -10,17 +5,35 @@ body{
 }
 
 .header{
+  padding-left: 20px;
   width:100vw;
   height: 10vh;
   background-color: white;
   text-align: right;
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between  
+}
+.header-contents{ 
+  background-size: contain;
+  background-repeat: no-repeat;                
+}
+
+
+#char-you {
+  display:flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+#char-you > img{
+  height: 8vh !important;
+  width: 8vh !important;
 }
 
 #logo{
   height: 100%;
   width:auto;
-  background-size: contain;
-  background-repeat: no-repeat;                
 }
 
 #flex-container {
@@ -64,36 +77,12 @@ body{
 .color {
   height:5vw;
   width:5vw;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center
 }
 
-.color.a { background-color: #000000; }
-.color.b { background-color: #808080; } 
-.color.c { background-color: #C0C0C0; }
-.color.d { background-color: #FF0000; }
-.color.e { background-color: #800000; }
-.color.f { background-color: #FFFF00; }
-.color.g { background-color: #808000; }
-.color.h { background-color: #00FF00; }
-.color.i { background-color: #008000; }
-.color.j { background-color: #00FFFF; }
-
-.color.k { background-color: #008080; }
-.color.l { background-color: #0000FF; }
-.color.m { background-color: #000080; }
-.color.n { background-color: #FF00FF; }
-.color.o { background-color: #800080; }
-.color.clear{
-    background-image: url(./images/eraser_small.jpg);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center
-}
-.color.pencil{
-    background-image: url(./images/pencil_small.jpg);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center
-}
+.color.pen.clear{background-image: url(./images/eraser_small.jpg);}
 
 
 .footer{
@@ -106,6 +95,7 @@ body{
   height: 10vh;
 
 }
+
 .char.a {background-image: url(./images/characters/1.png);}
 .char.b {background-image: url(./images/characters/2.png);}
 .char.c {background-image: url(./images/characters/3.png);}
@@ -127,6 +117,10 @@ body{
 @media only screen and (min-device-width: 500px) {
   .header {
   height: 15vh;
+  }
+  #char-you > img{
+  height: 12vh !important;
+  width: 12vh !important;
   }
   #flex-container {
   height:70vh;

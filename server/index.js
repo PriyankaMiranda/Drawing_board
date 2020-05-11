@@ -14,10 +14,7 @@ const io = require('socket.io')(http);
 
 const port = process.env.PORT || 3000;
 
-// var server = app.listen(port, function () {
-//     console.log('Node server is running..');
-//     console.log(port);
-// });
+
 
 app.use(express.static(__dirname + '/public'));
 
