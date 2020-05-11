@@ -4,6 +4,7 @@
 (function() {
 
 var socket = io();
+socket.on('drawing', onDrawingEvent);
 
 //------------------Set drawing board------------------
 var canvas = document.getElementsByClassName('whiteboard')[0];
@@ -12,13 +13,8 @@ let context = canvas.getContext("2d");
 let rect = canvas.getBoundingClientRect();
 //-----------------------------------------------------  
 
-socket.on('drawing', drawingEvent);
-
-
 //-------------Color params and functions-------------
 var current = {color: 'black', prev_color: 'black'};
-
-
 for (var i = 0; i < colors.length; i++){
   colors[i].addEventListener('click', onColorUpdate, false);
 }
@@ -51,112 +47,100 @@ document.getElementsByClassName("color refresh")[0].addEventListener('click', fu
 });
 //-----------------------------------------------------  
 
-var drawing = false;
-var x_elem = 0;
-var y_elem = 0;
-var start = true;
-var x_y_vals = 0;
-var x_pass_1 = 0;
-var y_pass_1 = 0;
-var x_pass_2 = 0;
-var y_pass_2 = 0;
 
 // Mouse support for computer
-canvas.addEventListener("mousedown", mouse_down);
-canvas.addEventListener("mouseup", mouse_up); 
-canvas.addEventListener("mousemove", throttle(mouse_move, 1)); 
-// Touch support for mobile devicesch
-canvas.addEventListener("touchstart", mouse_down);
-canvas.addEventListener("touchend", mouse_up); 
-canvas.addEventListener("touchmove", throttle(mouse_move, 1)); 
+canvas.addEventListener('mousedown', onMouseDown, false);
+canvas.addEventListener('mouseup', onMouseUp, false);
+canvas.addEventListener('mouseout', onMouseUp, false);
+canvas.addEventListener('mousemove', throttle(onMouseMove, 1), false);
+
+//Touch support for mobile devices
+canvas.addEventListener('touchstart', onMouseDown, false);
+canvas.addEventListener('touchend', onMouseUp, false);
+canvas.addEventListener('touchcancel', onMouseUp, false);
+canvas.addEventListener('touchmove', throttle(onMouseMove, 1), false);
 //--------------------------------------------------------------------------------
 
 //----------------------mouse move event listener functions-----------------------
-// mousedown event listener
-function mouse_down(e){
-  x_y_vals =getloc(rect, canvas);
-  current.x0 = x_y_vals[0];
-  current.y0 = x_y_vals[1]; 
+var drawing = false;
+function onMouseDown(e){
   drawing = true;
-  start = true;    
+  if(typeof event.touches === 'undefined'){
+    current.x = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+    current.y = ((e.clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+  }
+  else{
+    current.x = ((e.touches[0].clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+    current.y = ((e.touches[0].clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+  }
 }
-// mouseup event listener
-function mouse_up(e) {
+
+function onMouseUp(e){
   if (!drawing) { return; }
   drawing = false;
+  try{
+    if(typeof event.touches === 'undefined'){
+      current.x_new = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+      current.y_new = ((e.clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+    }
+    else{
+      current.x_new = ((e.touches[0].clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+      current.y_new = ((e.touches[0].clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+    }
+  drawLine(current.x, current.y, current.x_new, current.y_new, current.color, true);
+  }
+  catch{
+   console.log("Drawing line complete") 
+  }
+
 }
-// mousemove event listener
-function mouse_move(e) {
+
+function onMouseMove(e){
   if (!drawing) { return; }
-  x_y_vals =getloc(rect, canvas);
-  current.x1 = x_y_vals[0];
-  current.y1 = x_y_vals[1]; 
-  drawLine(start,current.x0,current.y0,current.x1,current.y1,current.color,true);
-  current.x0 = current.x1
-  current.y0 = current.y1;
-  start = false; 
+  if(typeof event.touches === 'undefined'){
+    current.x_new = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+    current.y_new = ((e.clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+  }
+  else{
+    current.x_new = ((e.touches[0].clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+    current.y_new = ((e.touches[0].clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+  }
+  drawLine(current.x, current.y, current.x_new, current.y_new, current.color, true);
+  if(typeof event.touches === 'undefined'){
+    current.x = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+    current.y = ((e.clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+  }
+  else{
+    current.x = ((e.touches[0].clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
+    current.y = ((e.touches[0].clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
+  }
 }
 //--------------------------------------------------------------------------------
 
 //-----------------------------------draw line------------------------------------
-function drawLine(start_check,x0,y0,x1,y1,color,emit){
+function drawLine(x0, y0, x1, y1, color, emit){
   context.beginPath();
+  context.moveTo(x0,y0);
+  context.lineTo(x1,y1);
+
   context.strokeStyle = color;
   context.lineWidth = 2;
-  if (start_check){
-  context.moveTo(x0, y0);
-  }
-  else{
-  context.lineTo(x0, y0);    
-  }
-  context.lineTo(x1, y1);
-
   context.stroke();
   context.closePath();
 
   if (!emit) { return; }
+  var w = canvas.width;
+  var h = canvas.height;
 
   socket.emit('drawing', {
-    start_check: start_check,
     x0: x0 ,
     y0: y0 ,
     x1: x1 ,
     y1: y1 ,
     color: color
   });
-
 }
 //--------------------------------------------------------------------------------
-
-//--------------------------get location of mouse/finger--------------------------
-function getloc(rect_x, canvas_x) {
-  if(typeof event.touches === 'undefined'){
-    // Mouse location
-    x_elem = event.clientX;
-    y_elem = event.clientY;  
-  }
-  else{
-    // Touch location
-    x_elem = event.touches[0].clientX;
-    y_elem = event.touches[0].clientY;
-  }
-  const a =((x_elem - rect_x.left) / (rect_x.right - rect_x.left)) *canvas_x.width;
-  const b =((y_elem - rect_x.top) / (rect_x.bottom - rect_x.top)) *canvas_x.height;
-  return [a, b];
-}
-//--------------------------------------------------------------------------------
-
-//----------------------------------socket event----------------------------------
-function drawingEvent(data){
-    x_pass_1= data.x0;
-    y_pass_1= data.y0;
-    x_pass_2= data.x1;
-    y_pass_2= data.y0;
-    drawLine(data.start_check,x_pass_1, y_pass_1, x_pass_2, y_pass_2, data.color);
-
-}
-//--------------------------------------------------------------------------------
-
 
 // limit the number of events per second
 function throttle(callback, delay) {
@@ -171,5 +155,17 @@ function throttle(callback, delay) {
   };
 }
 
+function onDrawingEvent(data){
+  drawLine(data.x0 , data.y0 , data.x1 , data.y1 , data.color);
+}
+
+
+window.addEventListener('resize', onResize, false);
+onResize();
+// make the canvas fill its parent
+function onResize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
 
 })();
