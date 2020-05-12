@@ -1,4 +1,5 @@
 body{
+  position: relative;
   height: 100vh;
   width: 100vw;
   text-align: center;
@@ -20,6 +21,12 @@ body{
   background-repeat: no-repeat;                
 }
 
+.header-text{
+  text-align: center;
+  font-style: italic;
+  font-family: cursive;
+  font-size: 25px;
+}
 
 #char-you {
   display:flex;
@@ -56,7 +63,7 @@ body{
   border: 5px solid #cbe6ef;
   background-color: white;  
   height:55vh;
-  width:95vw;
+  width:90vw;
 }
 
 #flex-container > .drawing-board > .colors {
@@ -66,7 +73,7 @@ body{
   align-items: center;
   justify-content: space-between;
   height:55vh;
-  width:5vw;
+  width:10vw;
 }
 
 #flex-container > .chatbox{
@@ -76,8 +83,8 @@ body{
 }
 
 .color {
-  height:5vw;
-  width:5vw;
+  height:6vw;
+  width:6vw;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center
@@ -97,18 +104,10 @@ body{
 
 }
 
-.char.a {background-image: url(./images/characters/1.png);}
-.char.b {background-image: url(./images/characters/2.png);}
-.char.c {background-image: url(./images/characters/3.png);}
-.char.d {background-image: url(./images/characters/4.png);}
-.char.e {background-image: url(./images/characters/5.png);}
-.char.f {background-image: url(./images/characters/6.png);}
-.char.g {background-image: url(./images/characters/7.png);}
-.char.h {background-image: url(./images/characters/8.png);}
 
-.footer > .char{ 
-    width: 5vh; 
-    height: 5vh;
+.char{ 
+    width: 12vh; 
+    height: 12vh;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center
@@ -141,7 +140,7 @@ body{
 
   #flex-container > .drawing-board > .whiteboard {
   height:70vh;
-  width:68vw;
+  width:65vw;
   }
   #flex-container > .drawing-board > .colors {
   background-color: white;
@@ -150,7 +149,7 @@ body{
   align-items: center;
   justify-content: space-between;
   height:70vh;
-  width:2vw;
+  width:5vw;
   }
 
   #flex-container > .chatbox{
@@ -167,6 +166,43 @@ body{
   .footer > .char{ 
       width: 10vh; 
       height: 10vh;
+  }
+}
+
+
+#options{
+  width:  100vw;
+  height:90vh;
+}
+/* Container for flexboxes */
+.row {
+  height:90vh;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Create four equal columns */
+.char {
+  flex: 5%;
+  padding: 20px;
+}
+
+.char > img {
+  max-width: 100%;
+  max-height: 100%;
+} 
+
+/* On screens that are 992px wide or less, go from four columns to two columns */
+@media screen and (max-width: 992px) {
+  .char {
+    flex: 25%;
+  }
+}
+
+/* On screens that are 600px wide or less, make the columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .row {
+    flex-direction: column;
   }
 }
 

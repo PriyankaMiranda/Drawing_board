@@ -2,30 +2,47 @@
 
 
 (function() {
-
 var socket = io();
 socket.on('drawing', onDrawingEvent);
 
-//------------------Set drawing board------------------
+//------------------------------------Set drawing board------------------------------------
 var canvas = document.getElementsByClassName('whiteboard')[0];
 var colors = document.getElementsByClassName('color pen');
 let context = canvas.getContext("2d");
 let rect = canvas.getBoundingClientRect();
-//-----------------------------------------------------  
+//-----------------------------------------------------------------------------------------  
 
-//-------------Color params and functions-------------
-var current = {color: 'black', prev_color: 'black'};
+//--------------------------------Color params and functions-------------------------------
+var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 for (var i = 0; i < colors.length; i++){
   colors[i].addEventListener('click', onColorUpdate, false);
 }
+
 function onColorUpdate(e){
   current.prev_color = current.color;
   current.color = e.target.style.backgroundColor;
+  current.lineWidth = 5;
+  if(current.color == 'white'){
+    current.lineWidth = 25;
+  }
   context.beginPath();
 }
-//-----------------------------------------------------
+//-----------------------------------------------------------------------------------------  
 
-//--------------------Pen selector---------------------
+//---------------------------------set current pizel level---------------------------------
+var orig_zoom = window.visualViewport.scale;
+function checkSizeChange(e){
+  var zoom = window.visualViewport.scale;
+  if (orig_zoom != zoom){
+    console.log("zoomed")
+    e.preventDefault();
+    e.stopPropagation();
+  }
+} 
+
+//-----------------------------------------------------------------------------------------  
+
+//--------------------------------------Pen selector---------------------------------------
 document.getElementsByClassName("color pencil")[0].addEventListener('click', function (e){
   if(current.color == 'white'){  
     if(current.prev_color == 'white'){
@@ -37,33 +54,33 @@ document.getElementsByClassName("color pencil")[0].addEventListener('click', fun
   }
   context.beginPath();
 });
-//-----------------------------------------------------  
+//-----------------------------------------------------------------------------------------  
 
-//-------------------Refresh screen--------------------
+//--------------------------------------Refresh screen-------------------------------------
 document.getElementsByClassName("color refresh")[0].addEventListener('click', function (e){
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.closePath();
   context.beginPath();
 });
-//-----------------------------------------------------  
+//-----------------------------------------------------------------------------------------  
 
-
+//-------------------------------Event listeners for drawing-------------------------------
 // Mouse support for computer
 canvas.addEventListener('mousedown', onMouseDown, false);
 canvas.addEventListener('mouseup', onMouseUp, false);
 canvas.addEventListener('mouseout', onMouseUp, false);
 canvas.addEventListener('mousemove', throttle(onMouseMove, 1), false);
-
 //Touch support for mobile devices
 canvas.addEventListener('touchstart', onMouseDown, false);
 canvas.addEventListener('touchend', onMouseUp, false);
 canvas.addEventListener('touchcancel', onMouseUp, false);
 canvas.addEventListener('touchmove', throttle(onMouseMove, 1), false);
-//--------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 
-//----------------------mouse move event listener functions-----------------------
+//---------------------------mouse move event listener functions---------------------------
 var drawing = false;
 function onMouseDown(e){
+  checkSizeChange(e)
   drawing = true;
   if(typeof event.touches === 'undefined'){
     current.x = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
@@ -76,6 +93,7 @@ function onMouseDown(e){
 }
 
 function onMouseUp(e){
+  checkSizeChange(e)
   if (!drawing) { return; }
   drawing = false;
   try{
@@ -92,10 +110,10 @@ function onMouseUp(e){
   catch{
    console.log("Drawing line complete") 
   }
-
 }
 
 function onMouseMove(e){
+  checkSizeChange(e)
   if (!drawing) { return; }
   if(typeof event.touches === 'undefined'){
     current.x_new = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
@@ -115,16 +133,19 @@ function onMouseMove(e){
     current.y = ((e.touches[0].clientY - rect.top) / (rect.bottom - rect.top)) *canvas.height;
   }
 }
-//--------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 
-//-----------------------------------draw line------------------------------------
+//----------------------------------------draw line----------------------------------------
+function onDrawingEvent(data){
+  drawLine(data.x0 , data.y0 , data.x1 , data.y1 , data.color);
+}
+
 function drawLine(x0, y0, x1, y1, color, emit){
+  context.lineWidth = current.lineWidth;
+  context.strokeStyle = color;
   context.beginPath();
   context.moveTo(x0,y0);
   context.lineTo(x1,y1);
-
-  context.strokeStyle = color;
-  context.lineWidth = 2;
   context.stroke();
   context.closePath();
 
@@ -140,26 +161,22 @@ function drawLine(x0, y0, x1, y1, color, emit){
     color: color
   });
 }
-//--------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 
-// limit the number of events per second
+//-------------------------to limit the number of events per second------------------------
 function throttle(callback, delay) {
   var previousCall = new Date().getTime();
   return function() {
-    var time = new Date().getTime();
-
+    var time = new Date().getTime();  
     if ((time - previousCall) >= delay) {
       previousCall = time;
       callback.apply(null, arguments);
     }
   };
 }
+//-----------------------------------------------------------------------------------------
 
-function onDrawingEvent(data){
-  drawLine(data.x0 , data.y0 , data.x1 , data.y1 , data.color);
-}
-
-
+//--------------------------------Resize even and function--------------------------------
 window.addEventListener('resize', onResize, false);
 onResize();
 // make the canvas fill its parent
@@ -167,5 +184,6 @@ function onResize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
+//-----------------------------------------------------------------------------------------
 
 })();
