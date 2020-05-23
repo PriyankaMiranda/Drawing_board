@@ -3,6 +3,7 @@ const path = require('path');
 const routes = require('./routes');
 const cookieSession = require('cookie-session');
 const keys = require('./constants');
+const port = process.env.PORT || 3000
 
 const app = express();
 
@@ -27,8 +28,9 @@ app.use(
 	);
 
 
-const server = app.listen(3000, () => {
-  console.log('Server is running at localhost:3000');
+
+const server = app.listen(port, () => {
+  console.log('Server is running at port '+ port);
 });
 
 var io = require('socket.io')(server);
