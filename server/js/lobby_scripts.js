@@ -272,7 +272,7 @@ for (i = 1; i < 53; i++) {
   socket.on('login', (data) => {
     connected = true;
     // Display the welcome message
-    var message = "Welcome to the lobby "+data.username+"!";
+    var message = "Welcome to the lobby "+username+"!";
     log(message, {
       prepend: true
     });
