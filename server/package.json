@@ -2,11 +2,11 @@
   "name": "server",
   "version": "1.0.0",
   "description": "---------------------------------Drawing Application--------------------------------- Written using Plain Javascript and HTML5.  No third party libraries are used. Hence, no installation is necessary. A simple project with multiple possibilities. Drawing borad with colour pallete options. ------------------------------------------------------------------------------------- Coming soon: Hosting on heroku and socket connectivity for multiple players to access ------------------------------------------------------------------------------------- -------------------------------------------------------------------------------------",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "engines": {
     "node": "10.19.0",
@@ -16,9 +16,13 @@
   "license": "ISC",
   "dependencies": {
     "cookie-session": "^1.4.0",
+    "ejs": "^3.1.3",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
+    "mongoose": "^5.9.14",
     "nodemon": "^2.0.3",
-    "socket.io": "^2.3.0"
+    "path": "^0.12.7",
+    "socket.io": "^2.3.0",
+    "url": "^0.11.0"
   }
 }
