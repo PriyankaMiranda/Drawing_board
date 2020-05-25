@@ -19,15 +19,9 @@ app.use(express.static(path.join(__dirname, 'node_modules')));
 
 // Set the view engine to ejs
 app.set('view engine', 'ejs');
-
 app.use('/', routes);
 
-app.use(
-	cookieSession({maxAge: 30*24*60*60*1000,
-		keys: [keys.cookieKey]})
-	);
-
-
+app.use(cookieSession({maxAge: 30*24*60*60*1000,keys: [keys.cookieKey]}));
 
 const server = app.listen(port, () => {
   console.log('Server is running at port '+ port);
@@ -37,46 +31,59 @@ var io = require('socket.io')(server);
 var ejs = require('ejs');
 
 
-
-// function onConnection(socket){
-//   socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
-// }
-// io.on('connection', onConnection);
-
-// function onSelectAvatar(socket){
-//   socket.on('userdata', (data) => socket.broadcast.emit('userdata', data));
-  
-// }
-// io.on('connection_2', onSelectAvatar);
-
-
 // Chatroom
 
-var hideChars = [];
+var chars = [];
+var imgs=[];
+
+var disp_chars = [];
+var disp_imgs=[];
 
 var imgUsers = [];
 
 
 io.on('connection', (socket) => {
   var addedUser = false;
-  	
-	// socket.on('load chars', (data) => {
-	// 	socket.username = data.username;
-	// 	socket.img = data.img;
-	// 	// we tell the client to execute 'new message'
-	// 	socket.broadcast.emit('load chars globally', {
-	// 	  username: data.username,
-	// 	  img: data.img
-	// 	});
-	// });
+
+	socket.on('load chars', () => {
+		chars = [];
+		imgs=[];
+		socket.broadcast.emit('get chars');
+	});
+
+	socket.on('send chars', (data) => {
+		if (!chars.includes(data.username) && !imgs.includes(data.img)){
+			chars.push(data.username);
+			imgs.push(data.img);
+		}
+		socket.imgs = imgs;
+
+		socket.broadcast.emit('hide chars globally', {imgs:imgs});	
+	});
+
+	socket.on('get chars on display lobby', (data) => {
+
+		if (!disp_chars.includes(data.username) && !disp_chars.includes(data.img)){
+			disp_chars.push(data.username);
+			disp_imgs.push(data.img);
+		}
+
+		socket.emit('display chars lobby', {
+			chars:disp_chars,
+			imgs:disp_imgs
+		});	
+		socket.broadcast.emit('display chars lobby', {
+			chars:disp_chars,
+			imgs:disp_imgs
+		});	
+	});
+
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
     socket.username = data.username;
     socket.message = data.message;
     // we tell the client to execute 'new message'
-    // console.log(socket.username)
-    // console.log(socket.message)
     socket.broadcast.emit('new message', {
       username: socket.username,
       message: socket.message
@@ -120,12 +127,15 @@ io.on('connection', (socket) => {
 
   // when the user disconnects.. perform this
   socket.on('disconnect', () => {
-    if (addedUser) {
-      // echo globally that this client has left
       socket.broadcast.emit('user left', {
         username: socket.username
       });
-    }
+
+
+  	// socket.broadcast.emit('reload chars');
+	
+	socket.broadcast.emit('get chars on display lobby');
+
   });
 });
 

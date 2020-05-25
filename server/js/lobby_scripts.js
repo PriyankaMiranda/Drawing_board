@@ -1,7 +1,3 @@
-'use strict';
-
-
-(function() {
 
 if (!document.cookie) {
   window.location.href = '/';
@@ -30,78 +26,80 @@ var img;
 const cookie_val = document.cookie;
 username = cookie_val.split('name=')[1].split(';')[0];
 img = cookie_val.split('img=')[1].split(';')[0];
-console.log(username)
-console.log(img)
-
+  
 var socket = io();
 
-  // Sets the client's username
-  const setUsername = () => {
-    // If the username is valid
-    username = cookie_val.split('name=')[1].split(';')[0];
-    img = cookie_val.split('img=')[1];
+socket.emit('get chars on display lobby', {username:username,img:img});
 
-    // Tell the server your username
 
-    var message = $inputMessage.val();
-    // Prevent markup from being injected into the message
-    message = cleanInput(message);
 
-    var data = {username:username, imgloc:img, message: message};
+socket.on('get chars on display lobby', (data)=>{
+  socket.emit('get chars on display lobby', {username:username,img:img});
+});
 
-    socket.emit('add user', data);
-    
+socket.on('display chars lobby', (data)=>{
+  console.log("dataaa:  "+data)
+  removeParticipantsImg()
+  var i;
+  for (i=0 ; i<data.chars.length ; i++){
+    addParticipantsImg({char:data.chars[i], img:data.imgs[i]})
   }
+});
 
-  // const addParticipantsMessage = (data) => {
-  //   var message = '';
-  //   if (data.numUsers === 1) {
-  //     message += "there's 1 participant";
-  //   } else {
-  //     message += "there are " + data.numUsers + " participants";
-  //   }
-  //   log(message);
-  // }
+
+
+// Sets the client's username
+const setUsername = () => {
+  // If the username is valid
+  username = cookie_val.split('name=')[1].split(';')[0];
+  img = cookie_val.split('img=')[1];
+  // Tell the server your username
+  var message = $inputMessage.val();
+  // Prevent markup from being injected into the message
+  message = cleanInput(message);
+  var data = {username:username, imgloc:img, message: message};
+  socket.emit('add user', data);  
+}
 
 const addParticipantsImg = (data) => {
-  console.log(data)
-  // var parent = document.getElementById("row_chars");
+  var parent = document.getElementById("row_chars");
 
-  // var char_div = document.createElement("DIV");
-  // char_div.className = "characters";
-  // char_div.style.maxWidth = "25vh"
-  // char_div.style.maxHeight = "25vh"
-  // char_div.style.flex= "25%";
-  // char_div.style.padding= "40px";
-  // char_div.style.opacity= 1;
-  // char_div.style.transform = "scale(1)"; 
-  // parent.appendChild(char_div);
+  var char_div = document.createElement("DIV");
+  char_div.className = "characters";
+  char_div.style.maxWidth = "25vh"
+  char_div.style.maxHeight = "25vh"
+  char_div.style.flex= "25%";
+  char_div.style.padding= "40px";
+  char_div.style.opacity= 1;
+  char_div.style.transform = "scale(1)"; 
+  parent.appendChild(char_div);
 
-  // var image = document.createElement("IMG");  
-  // image.className = "characters_img";
-  // image.src = data.imgloc;       
-  // image.style.width  = '100%';
-  // image.style.height  = '100%';
-  // char_div.appendChild(image);  
+  var image = document.createElement("IMG");  
+  image.className = "characters_img";
+  image.src = data.img;       
+  image.style.width  = '100%';
+  image.style.height  = '100%';
+  char_div.appendChild(image);  
 
-  // var div_form = document.createElement("FORM");
-  // div_form.className = "characters_form";
+  var div_form = document.createElement("FORM");
+  div_form.className = "characters_form";
   // div_form.style.display = "block";
-  // div_form.style.textAlign = "center";
-  // div_form.style.fontStyle = "italic";
-  // div_form.style.fontFamily = "cursive";
-  // char_div.appendChild(div_form);
+  div_form.style.textAlign = "center";
+  div_form.style.fontStyle = "italic";
+  div_form.style.fontFamily = "cursive";
+  char_div.appendChild(div_form);
 
-  // var div_label = document.createElement("LABEL");  
-  // div_label.className = "characters_label";
-  // div_label.style.width  = '100%';
-  // div_label.innerHTML = data.username; 
-  // div_form.appendChild(div_label);
+  var div_label = document.createElement("LABEL");  
+  div_label.className = "characters_label";
+  div_label.style.width  = '100%';
+  div_label.innerHTML = data.char; 
+  div_form.appendChild(div_label);
 
 }
 
 const removeParticipantsImg = (data) => {
-  console.log(data)
+  var parent = document.getElementById("row_chars");
+  while ( parent.firstChild ) parent.removeChild( parent.firstChild );
 }
 
 // Sends a chat message
@@ -155,7 +153,6 @@ const sendMessage = () => {
   const addChatTyping = (data) => {
     data.typing = true;
     data.message = 'is typing....';
-    console.log("dsvsbjvs"+data.username)
     addChatMessage(data);
   }
 
@@ -207,7 +204,6 @@ const sendMessage = () => {
     
       if (!typing) {
         typing = true;
-
         username = cookie_val.split('name=')[1].split(';')[0];
         socket.emit('typing', {username: username});
       }
@@ -273,17 +269,9 @@ const sendMessage = () => {
 
   // Socket events
 
-  // Whenever the server emits 'login', log the login message
-  socket.on('login', (data) => {
-    // Display the welcome message
-    // var message = "Welcome to the lobby "+username+" !";
-    // log(message, {
-    //   prepend: true
-    // });
-
-    // addParticipantsMessage(data);
-    // addParticipantsImg(data); 
-    
+  //when new user on front page requests for the characters to be loaded
+  socket.on('get chars', ()=>{
+    socket.emit('send chars', {username:username,img:img});
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -293,16 +281,11 @@ const sendMessage = () => {
 
   // Whenever the server emits 'user joined', log it in the chat body
   socket.on('user joined', (data) => {
-
-    // log(data.username + ' joined');
-    // addParticipantsMessage(data);
-    // addParticipantsImg(data); 
     addChatMessage(data);
   });
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', (data) => {
-    log(data.username + ' left');
     // addParticipantsMessage(data);
     removeChatTyping(data);
   });
@@ -335,4 +318,3 @@ const sendMessage = () => {
 
 
 
-})();
