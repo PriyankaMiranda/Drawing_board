@@ -3,7 +3,7 @@ const path = require('path');
 const routes = require('./routes');
 const cookieSession = require('cookie-session');
 const keys = require('./constants');
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000	
 
 const app = express();
 
@@ -52,36 +52,56 @@ var ejs = require('ejs');
 
 // Chatroom
 
-var numUsers = 0;
+var hideChars = [];
+
+var imgUsers = [];
+
 
 io.on('connection', (socket) => {
   var addedUser = false;
+  	
+	// socket.on('load chars', (data) => {
+	// 	socket.username = data.username;
+	// 	socket.img = data.img;
+	// 	// we tell the client to execute 'new message'
+	// 	socket.broadcast.emit('load chars globally', {
+	// 	  username: data.username,
+	// 	  img: data.img
+	// 	});
+	// });
+
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
+    socket.username = data.username;
+    socket.message = data.message;
     // we tell the client to execute 'new message'
+    console.log("1. data : "+data)
     socket.broadcast.emit('new message', {
       username: socket.username,
-      message: data
+      message: socket.message
     });
   });
 
   // when the client emits 'add user', this listens and executes
-  socket.on('add user', (username) => {
+  socket.on('add user', (data) => {
     if (addedUser) return;
 
     // we store the username in the socket session for this client
-    socket.username = username;
-    ++numUsers;
+    socket.username = data.username;
+    socket.imgloc = data.imgloc;
+    socket.message = data.message;
+    
+    imgUsers.push(data)
     addedUser = true;
-    socket.emit('login', {
-      numUsers: numUsers
-    });
+
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
       username: socket.username,
-      numUsers: numUsers
+      imgloc: imgUsers,
+      message: socket.message
     });
   });
+
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', () => {
@@ -100,12 +120,9 @@ io.on('connection', (socket) => {
   // when the user disconnects.. perform this
   socket.on('disconnect', () => {
     if (addedUser) {
-      --numUsers;
-
       // echo globally that this client has left
       socket.broadcast.emit('user left', {
-        username: socket.username,
-        numUsers: numUsers
+        username: socket.username
       });
     }
   });

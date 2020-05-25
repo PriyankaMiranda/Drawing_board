@@ -7,53 +7,19 @@ if (!document.cookie) {
   window.location.href = '/';
 }
 
-var Path = " /characters/"; //Folder where we will search for files
-var i = 0;
-var all_elems = 0;
-var parent = document.getElementsByClassName("row")[0];
-
-for (i = 1; i < 53; i++) {
-  var char_div = document.createElement("DIV");
-  char_div.className = "characters";
-  char_div.style.maxWidth = "25vh"
-  char_div.style.maxHeight = "25vh"
-  char_div.style.flex= "25%";
-  char_div.style.padding= "40px";
-  char_div.style.opacity= 1;
-  char_div.style.transform = "scale(1)"; 
-  parent.appendChild(char_div);
-
-  var image = document.createElement("IMG");  
-  image.className = "characters_img";
-  image.src = Path+i+".png";       
-  image.style.width  = '100%';
-  image.style.height  = '100%';
-  char_div.appendChild(image);  
-
-  var div_form = document.createElement("FORM");
-  div_form.className = "characters_form";
-  div_form.style.display = "block";
-  div_form.style.textAlign = "center";
-  div_form.style.fontStyle = "italic";
-  div_form.style.fontFamily = "cursive";
-  char_div.appendChild(div_form);
-
-  var div_label = document.createElement("LABEL");  
-  div_label.className = "characters_label";
-  div_label.style.width  = '100%';
-  div_label.innerHTML = "arger"; 
-  div_form.appendChild(div_label);
-} 
-
 
 
 
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
   var COLORS = [
-    '#e21400', '#91580f', '#f8a700', '#f78b00',
-    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
-    '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
+    '#008b8b', '#006060', '#1b7742', '#002627',
+    '#3477db', '#870c25', '#d50000', '#d24d57',
+    '#aa2e00', '#d35400', '#aa6b51', '#554800',
+    '#1c2833', '#34515e', '#4b6a88', '#220b38',
+    '#522032', '#7d314c', '#483d8b', '#77448b',
+    '#8a2be2', '#a74165', '#9b59b6', '#db0a5b',
+    
   ];
 
   // Initialize variables
@@ -67,36 +33,81 @@ for (i = 1; i < 53; i++) {
   var $chatPage = $('.chat.page'); // The chatroom page
 
   // Prompt for setting a username
-  var username;
+  // var username;
   var connected = false;
   var typing = false;
   var lastTypingTime;
+  var username;
+  var img;
+
+  const cookie_val = document.cookie;
 
   var socket = io();
 
   // Sets the client's username
   const setUsername = () => {
     // If the username is valid
-    if (document.cookie) {
-      const cookie_val = document.cookie;
-      username = cookie_val.split('name=')[1].split(';')[0];
-      const img = cookie_val.split('img=')[1];
+    username = cookie_val.split('name=')[1].split(';')[0];
+    img = cookie_val.split('img=')[1];
 
-      // Tell the server your username
-      socket.emit('add user', username);
-    }
+    // Tell the server your username
+
+    var message = $inputMessage.val();
+    // Prevent markup from being injected into the message
+    message = cleanInput(message);
+
+    var data = {username:username, imgloc:img, message: message};
+
+    socket.emit('add user', data);
+    
   }
 
-  const addParticipantsMessage = (data) => {
-    var message = '';
-    if (data.numUsers === 1) {
-      message += "there's 1 participant";
-    } else {
-      message += "there are " + data.numUsers + " participants";
-    }
-    log(message);
-  }
+  // const addParticipantsMessage = (data) => {
+  //   var message = '';
+  //   if (data.numUsers === 1) {
+  //     message += "there's 1 participant";
+  //   } else {
+  //     message += "there are " + data.numUsers + " participants";
+  //   }
+  //   log(message);
+  // }
 
+  const addParticipantsImg = (data) => {
+    console.log(data)
+    // var parent = document.getElementById("row_chars");
+
+    // var char_div = document.createElement("DIV");
+    // char_div.className = "characters";
+    // char_div.style.maxWidth = "25vh"
+    // char_div.style.maxHeight = "25vh"
+    // char_div.style.flex= "25%";
+    // char_div.style.padding= "40px";
+    // char_div.style.opacity= 1;
+    // char_div.style.transform = "scale(1)"; 
+    // parent.appendChild(char_div);
+
+    // var image = document.createElement("IMG");  
+    // image.className = "characters_img";
+    // image.src = data.imgloc;       
+    // image.style.width  = '100%';
+    // image.style.height  = '100%';
+    // char_div.appendChild(image);  
+
+    // var div_form = document.createElement("FORM");
+    // div_form.className = "characters_form";
+    // div_form.style.display = "block";
+    // div_form.style.textAlign = "center";
+    // div_form.style.fontStyle = "italic";
+    // div_form.style.fontFamily = "cursive";
+    // char_div.appendChild(div_form);
+
+    // var div_label = document.createElement("LABEL");  
+    // div_label.className = "characters_label";
+    // div_label.style.width  = '100%';
+    // div_label.innerHTML = data.username; 
+    // div_form.appendChild(div_label);
+
+  }
 
   // Sends a chat message
   const sendMessage = () => {
@@ -110,20 +121,23 @@ for (i = 1; i < 53; i++) {
         username: username,
         message: message
       });
+
+      var dataval = {username:username , message: message}
       // tell server to execute 'new message' and send along one parameter
-      socket.emit('new message', message);
+      // socket.emit('new message', dataval);
     }
   }
 
   // Log a message
     const log = (message, options) => {
-    var $el = $('<li>').addClass('log').text(message);
+    var $el = $('<p>').addClass('log').text(message);
     addMessageElement($el, options);
   }
 
   // Adds the visual chat message to the message list
   const addChatMessage = (data, options) => {
     // Don't fade the message in if there is an 'X was typing'
+
     var $typingMessages = getTypingMessages(data);
     options = options || {};
     if ($typingMessages.length !== 0) {
@@ -138,7 +152,7 @@ for (i = 1; i < 53; i++) {
       .text(data.message);
 
     var typingClass = data.typing ? 'typing' : '';
-    var $messageDiv = $('<li class="message"/>')
+    var $messageDiv = $('<p class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .append($usernameDiv, $messageBodyDiv);
@@ -249,7 +263,9 @@ for (i = 1; i < 53; i++) {
         socket.emit('stop typing');
         typing = false;
       } else {
+        connected = true;
         setUsername();
+        sendMessage();
       }
     }
   });
@@ -272,11 +288,14 @@ for (i = 1; i < 53; i++) {
   socket.on('login', (data) => {
     connected = true;
     // Display the welcome message
-    var message = "Welcome to the lobby "+username+"!";
-    log(message, {
-      prepend: true
-    });
-    addParticipantsMessage(data);
+    // var message = "Welcome to the lobby "+username+" !";
+    // log(message, {
+    //   prepend: true
+    // });
+
+    // addParticipantsMessage(data);
+    // addParticipantsImg(data); 
+    
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -286,14 +305,17 @@ for (i = 1; i < 53; i++) {
 
   // Whenever the server emits 'user joined', log it in the chat body
   socket.on('user joined', (data) => {
-    log(data.username + ' joined');
-    addParticipantsMessage(data);
+
+    // log(data.username + ' joined');
+    // addParticipantsMessage(data);
+    // addParticipantsImg(data); 
+    addChatMessage(data);
   });
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', (data) => {
     log(data.username + ' left');
-    addParticipantsMessage(data);
+    // addParticipantsMessage(data);
     removeChatTyping(data);
   });
 

@@ -2,7 +2,7 @@ body{
   height: 100vh;
   width: 100vw;
   text-align: center;
-  background-color: white;
+  background-color: #f6f6ff !important; 
 }
 
 .header{
@@ -28,7 +28,7 @@ body{
 }
 
 .row {
-  background-color: #cbe6ef;
+  background-color: #f6f6ff;
   width: 100vw;
   display: flex;
   flex-wrap: wrap;
@@ -42,18 +42,17 @@ body{
   margin-left:50px;
   width:90vw;
   height: 40vh;
-
-  background-color: #cbe6ef ;
+  background-color: #f6f6ff;
 
 }
 .chat{
   height: 35vh;
-    border-radius: 25px;
-  background-color: #f6f6ff;
+  border-radius: 25px;
+  background-color: #cbe6ef;
 }
 .info{
   height: 4vh;
-  background-color: #cbe6ef;
+  background-color: #f6f6ff;
 }
 
 /*for larger screens(large screens and laptops)*/
@@ -118,7 +117,7 @@ body{
 /* Input */
 
 .inputMessage {
-        border-radius: 25px;
+  border-radius: 25px;
   border: 5px solid white;
   bottom: 0;
   height: 100%;

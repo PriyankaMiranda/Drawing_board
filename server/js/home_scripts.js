@@ -1,12 +1,7 @@
 
 
-// var socket = io();
-
-// socket.on('userdata', onSelectAvatar);
-
-// function onSelectAvatar(data){
-//   update(data.elem);
-// }
+var socket = io();
+    
 
 var parent = document.getElementsByClassName("row")[0];
 
@@ -14,7 +9,7 @@ var parent = document.getElementsByClassName("row")[0];
 if (document.cookie) {
   const cookie_val = document.cookie;
   const name = cookie_val.split('name=')[1].split(';')[0];
-  const img = cookie_val.split('img=')[1];
+  const img = cookie_val.split('img=')[1].split(';')[0];  
   const img_path = cookie_val.split('img=')[1].split('.')[0];  
 
   if (!(name === undefined) && !(img === undefined)){
@@ -30,7 +25,7 @@ if (document.cookie) {
     image.src = img;       
     image.style.width  = '15vh';
     image.style.height  = '15vh';
-    image.onclick = function(){user_operation2(this)};
+    image.onclick = function(){submit_operation2(this)};
     my_div.appendChild(image); 
 
     var div_form = document.createElement("FORM");
@@ -75,7 +70,7 @@ for (i = 1; i < 53; i++) {
   div_form.className = "characters_form";
   div_form.id = Path+i;
   div_form.style.display = "none";
-  div_form.addEventListener('submit', user_operation , false);
+  div_form.addEventListener('submit', submit_operation , false);
   char_div.appendChild(div_form);
 
   var div_label = document.createElement("LABEL");  
@@ -114,24 +109,17 @@ function img_hover(div){
 }
 
 
-function user_operation(e){
+function submit_operation(e){
+  e.preventDefault();
   var children = e.target.childNodes;  
   document.cookie = "name=" + children[1].value;
   document.cookie = "img=" + e.target.id+".png";
-  e.preventDefault();
   window.location.href = '/lobby';
 }
 
-function user_operation2(e){
-  var next_sibling = e.nextSibling; 
+function submit_operation2(e){
+  var next_sibling = e.nextSibling;
   document.cookie = "name=" + next_sibling.childNodes[0].innerHTML.split('<b>')[1].split('</b>')[0];
   document.cookie = "img=" + next_sibling.id+".png";
   window.location.href = '/lobby';
 }
-
-// function update(e){
-//   socket.emit('userdata', {elem: e});
-//   e.preventDefault();
-//   window.location.href = '/lobby';
-// }
-
