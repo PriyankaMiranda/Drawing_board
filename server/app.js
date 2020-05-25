@@ -75,7 +75,8 @@ io.on('connection', (socket) => {
     socket.username = data.username;
     socket.message = data.message;
     // we tell the client to execute 'new message'
-    console.log("1. data : "+data)
+    // console.log(socket.username)
+    // console.log(socket.message)
     socket.broadcast.emit('new message', {
       username: socket.username,
       message: socket.message
@@ -104,9 +105,9 @@ io.on('connection', (socket) => {
 
 
   // when the client emits 'typing', we broadcast it to others
-  socket.on('typing', () => {
+  socket.on('typing', (data) => {
     socket.broadcast.emit('typing', {
-      username: socket.username
+      username: data.username
     });
   });
 

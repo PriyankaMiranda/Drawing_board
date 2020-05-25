@@ -10,39 +10,30 @@ if (!document.cookie) {
 
 
 
-  var FADE_TIME = 150; // ms
-  var TYPING_TIMER_LENGTH = 400; // ms
-  var COLORS = [
-    '#008b8b', '#006060', '#1b7742', '#002627',
-    '#3477db', '#870c25', '#d50000', '#d24d57',
-    '#aa2e00', '#d35400', '#aa6b51', '#554800',
-    '#1c2833', '#34515e', '#4b6a88', '#220b38',
-    '#522032', '#7d314c', '#483d8b', '#77448b',
-    '#8a2be2', '#a74165', '#9b59b6', '#db0a5b',
-    
-  ];
+var FADE_TIME = 150; // ms
+var TYPING_TIMER_LENGTH = 400; // ms
+var COLORS = ['#008b8b', '#006060', '#1b7742', '#002627','#3477db', '#870c25', '#d50000', '#d24d57','#aa2e00', '#d35400', '#aa6b51', '#554800',
+  '#1c2833', '#34515e', '#4b6a88', '#220b38','#522032', '#7d314c', '#483d8b', '#77448b','#8a2be2', '#a74165', '#9b59b6', '#db0a5b'];
 
-  // Initialize variables
-  var $window = $(window);
-  
+// Initialize variables
+var $window = $(window);
+var $messages = $('.messages'); // Messages area
+var $inputMessage = $('.inputMessage'); // Input message input box
+var $chatPage = $('.chat.page'); // The chatroom page
 
 
-  var $messages = $('.messages'); // Messages area
-  var $inputMessage = $('.inputMessage'); // Input message input box
+var typing = false;
+var lastTypingTime;
+var username;
+var img;
 
-  var $chatPage = $('.chat.page'); // The chatroom page
+const cookie_val = document.cookie;
+username = cookie_val.split('name=')[1].split(';')[0];
+img = cookie_val.split('img=')[1].split(';')[0];
+console.log(username)
+console.log(img)
 
-  // Prompt for setting a username
-  // var username;
-  var connected = false;
-  var typing = false;
-  var lastTypingTime;
-  var username;
-  var img;
-
-  const cookie_val = document.cookie;
-
-  var socket = io();
+var socket = io();
 
   // Sets the client's username
   const setUsername = () => {
@@ -72,61 +63,59 @@ if (!document.cookie) {
   //   log(message);
   // }
 
-  const addParticipantsImg = (data) => {
-    console.log(data)
-    // var parent = document.getElementById("row_chars");
+const addParticipantsImg = (data) => {
+  console.log(data)
+  // var parent = document.getElementById("row_chars");
 
-    // var char_div = document.createElement("DIV");
-    // char_div.className = "characters";
-    // char_div.style.maxWidth = "25vh"
-    // char_div.style.maxHeight = "25vh"
-    // char_div.style.flex= "25%";
-    // char_div.style.padding= "40px";
-    // char_div.style.opacity= 1;
-    // char_div.style.transform = "scale(1)"; 
-    // parent.appendChild(char_div);
+  // var char_div = document.createElement("DIV");
+  // char_div.className = "characters";
+  // char_div.style.maxWidth = "25vh"
+  // char_div.style.maxHeight = "25vh"
+  // char_div.style.flex= "25%";
+  // char_div.style.padding= "40px";
+  // char_div.style.opacity= 1;
+  // char_div.style.transform = "scale(1)"; 
+  // parent.appendChild(char_div);
 
-    // var image = document.createElement("IMG");  
-    // image.className = "characters_img";
-    // image.src = data.imgloc;       
-    // image.style.width  = '100%';
-    // image.style.height  = '100%';
-    // char_div.appendChild(image);  
+  // var image = document.createElement("IMG");  
+  // image.className = "characters_img";
+  // image.src = data.imgloc;       
+  // image.style.width  = '100%';
+  // image.style.height  = '100%';
+  // char_div.appendChild(image);  
 
-    // var div_form = document.createElement("FORM");
-    // div_form.className = "characters_form";
-    // div_form.style.display = "block";
-    // div_form.style.textAlign = "center";
-    // div_form.style.fontStyle = "italic";
-    // div_form.style.fontFamily = "cursive";
-    // char_div.appendChild(div_form);
+  // var div_form = document.createElement("FORM");
+  // div_form.className = "characters_form";
+  // div_form.style.display = "block";
+  // div_form.style.textAlign = "center";
+  // div_form.style.fontStyle = "italic";
+  // div_form.style.fontFamily = "cursive";
+  // char_div.appendChild(div_form);
 
-    // var div_label = document.createElement("LABEL");  
-    // div_label.className = "characters_label";
-    // div_label.style.width  = '100%';
-    // div_label.innerHTML = data.username; 
-    // div_form.appendChild(div_label);
+  // var div_label = document.createElement("LABEL");  
+  // div_label.className = "characters_label";
+  // div_label.style.width  = '100%';
+  // div_label.innerHTML = data.username; 
+  // div_form.appendChild(div_label);
 
+}
+
+const removeParticipantsImg = (data) => {
+  console.log(data)
+}
+
+// Sends a chat message
+const sendMessage = () => {
+  var message = $inputMessage.val();
+  // Prevent markup from being injected into the message
+  message = cleanInput(message);
+  if (message) {
+    $inputMessage.val('');
+    var dataval = {username:username , message: message}
+    addChatMessage(dataval);
+    socket.emit('new message', dataval);
   }
-
-  // Sends a chat message
-  const sendMessage = () => {
-    var message = $inputMessage.val();
-    // Prevent markup from being injected into the message
-    message = cleanInput(message);
-    // if there is a non-empty message and a socket connection
-    if (message && connected) {
-      $inputMessage.val('');
-      addChatMessage({
-        username: username,
-        message: message
-      });
-
-      var dataval = {username:username , message: message}
-      // tell server to execute 'new message' and send along one parameter
-      // socket.emit('new message', dataval);
-    }
-  }
+}
 
   // Log a message
     const log = (message, options) => {
@@ -137,9 +126,11 @@ if (!document.cookie) {
   // Adds the visual chat message to the message list
   const addChatMessage = (data, options) => {
     // Don't fade the message in if there is an 'X was typing'
-
     var $typingMessages = getTypingMessages(data);
+
+
     options = options || {};
+
     if ($typingMessages.length !== 0) {
       options.fade = false;
       $typingMessages.remove();
@@ -164,6 +155,7 @@ if (!document.cookie) {
   const addChatTyping = (data) => {
     data.typing = true;
     data.message = 'is typing....';
+    console.log("dsvsbjvs"+data.username)
     addChatMessage(data);
   }
 
@@ -212,13 +204,15 @@ if (!document.cookie) {
 
   // Updates the typing event
   const updateTyping = () => {
-    if (connected) {
+    
       if (!typing) {
         typing = true;
-        socket.emit('typing');
-      }
-      lastTypingTime = (new Date()).getTime();
 
+        username = cookie_val.split('name=')[1].split(';')[0];
+        socket.emit('typing', {username: username});
+      }
+
+      lastTypingTime = (new Date()).getTime();
       setTimeout(() => {
         var typingTimer = (new Date()).getTime();
         var timeDiff = typingTimer - lastTypingTime;
@@ -227,13 +221,13 @@ if (!document.cookie) {
           typing = false;
         }
       }, TYPING_TIMER_LENGTH);
-    }
+    
   }
 
   // Gets the 'X is typing' messages of a user
   const getTypingMessages = (data) => {
     return $('.typing.message').filter(function (i) {
-      return $(this).data('username') === data.username;
+      return data.username;
     });
   }
 
@@ -252,10 +246,6 @@ if (!document.cookie) {
   // Keyboard events
 
   $window.keydown(event => {
-    // Auto-focus the current input when a key is typed
-    // if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-    //   $currentInput.focus();
-    // }
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
       if (username) {
@@ -263,7 +253,6 @@ if (!document.cookie) {
         socket.emit('stop typing');
         typing = false;
       } else {
-        connected = true;
         setUsername();
         sendMessage();
       }
@@ -286,7 +275,6 @@ if (!document.cookie) {
 
   // Whenever the server emits 'login', log the login message
   socket.on('login', (data) => {
-    connected = true;
     // Display the welcome message
     // var message = "Welcome to the lobby "+username+" !";
     // log(message, {
