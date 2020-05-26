@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
 		}
 		socket.imgs = imgs;
 
-		socket.broadcast.emit('hide chars globally', {imgs:imgs});	
+		socket.broadcast.emit('hide chars globally', {imgs:socket.imgs});	
 	});
 
 	socket.on('get chars on display lobby', (data) => {
@@ -131,10 +131,8 @@ io.on('connection', (socket) => {
         username: socket.username
       });
 
-
-  	// socket.broadcast.emit('reload chars');
 	
-	socket.broadcast.emit('get chars on display lobby');
+	// socket.broadcast.emit('get chars on display lobby');
 
   });
 });
