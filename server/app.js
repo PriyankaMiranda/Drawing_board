@@ -57,7 +57,7 @@ io.on('connection', (socket) => {
 			imgs.push(data.img);
 		}
 		socket.imgs = imgs;
-
+		console.log("Hiding chars : "+socket.imgs)
 		socket.broadcast.emit('hide chars globally', {imgs:socket.imgs});	
 	});
 

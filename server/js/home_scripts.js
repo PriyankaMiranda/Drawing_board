@@ -76,7 +76,7 @@ socket.on('hide chars globally', (data)=>{
   var Path = "/characters/"; //Folder where we will search for files
   var i = 0;
   var blocked_list = data.imgs;
-  console.log(blocked_list)
+  console.log("blocked_list : "+blocked_list)
   for (i = 1; i < 53; i++) {
     if (blocked_list.includes(Path+i+".png")){
       console.log(Path+i+".png - Avatar taken")
