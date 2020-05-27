@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
 	socket.on('reload chars for others on homepage', () => {
 		chars = [];
 		imgs=[];
-		// socket.emit('get chars for reloading');
+		socket.emit('get chars for reloading');
 		socket.broadcast.emit('get chars for reloading');
 	});
 
