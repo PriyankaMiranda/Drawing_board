@@ -23,6 +23,8 @@ img = cookie_val.split('img=')[1].split(';')[0];
 
 var socket = io();
 
+socket.emit('reload chars for others on homepage');
+
 socket.emit('load chars on lobby');
 
 socket.on('display chars lobby', (data)=>{
@@ -258,14 +260,13 @@ const sendMessage = () => {
     socket.emit('send chars', {username:username,img:img});
   });
 
+  socket.on('get chars for reloading', ()=>{
+    socket.emit('send chars for homepage', {username:username,img:img});
+  });
 
   socket.on('get chars for lobby', ()=>{
     socket.emit('send chars for lobby', {username:username,img:img});
   });
-
-  // socket.on('in case no one is in lobby except you', ()=>{
-  //   socket.emit('send chars for lobby', {username:username,img:img});
-  // });
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new message', (data) => {

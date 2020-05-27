@@ -1,5 +1,3 @@
-
-
 var socket = io();
 var prev = {node: null};
 var parent = document.getElementsByClassName("row")[0];
