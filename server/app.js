@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
 		socket.emit('hide chars globally', {imgs:socket.imgs});	
 	});
 
-	socket.on('load chars on lobby', (data) => {
+	socket.on('load chars on lobby', () => {
 		disp_chars = [];
 		disp_imgs=[];
 		socket.emit('get chars for lobby');
@@ -72,13 +72,11 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('send chars for lobby', (data) => {
-		if (data.username == "" && data.img == ""){
-			//nothing happens again
-		}
-		else if (!chars.includes(data.username) && !imgs.includes(data.img)){
+		if (!disp_chars.includes(data.username) && !disp_imgs.includes(data.img)){
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
+		
 		socket.disp_chars = disp_chars;
 		socket.disp_imgs = disp_imgs;
 

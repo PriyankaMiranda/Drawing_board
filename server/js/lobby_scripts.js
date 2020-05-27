@@ -1,4 +1,3 @@
-
 if (!document.cookie) {
   window.location.href = '/';
 }
@@ -13,8 +12,6 @@ var $window = $(window);
 var $messages = $('.messages'); // Messages area
 var $inputMessage = $('.inputMessage'); // Input message input box
 var $chatPage = $('.chat.page'); // The chatroom page
-
-
 var typing = false;
 var lastTypingTime;
 var username;
@@ -23,16 +20,10 @@ var img;
 const cookie_val = document.cookie;
 username = cookie_val.split('name=')[1].split(';')[0];
 img = cookie_val.split('img=')[1].split(';')[0];
-  
+
 var socket = io();
 
-socket.emit('load chars on lobby', {username:username,img:img});
-
-
-
-// socket.on('get chars on display lobby', (data)=>{
-//   socket.emit('get chars on display lobby', {username:username,img:img});
-// });
+socket.emit('load chars on lobby');
 
 socket.on('display chars lobby', (data)=>{
   console.log("Data updated.")
@@ -42,8 +33,6 @@ socket.on('display chars lobby', (data)=>{
     addParticipantsImg({char:data.chars[i], img:data.imgs[i]})
   }
 });
-
-
 
 // Sets the client's username
 const setUsername = () => {
