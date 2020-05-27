@@ -64,6 +64,22 @@ io.on('connection', (socket) => {
 		socket.emit('hide chars globally', {imgs:socket.imgs});	
 	});
 
+	socket.on('reload chars for others on homepage', () => {
+		chars = [];
+		imgs=[];
+		// socket.emit('get chars for reloading');
+		socket.broadcast.emit('get chars for reloading');
+	});
+
+	socket.on('send chars for homepage', (data) => {
+		if (!chars.includes(data.username) && !imgs.includes(data.img)){
+			chars.push(data.username);
+			imgs.push(data.img);
+		}
+		socket.imgs = imgs;
+		socket.broadcast.emit('hide chars globally', {imgs:socket.imgs});	
+	});
+
 	socket.on('load chars on lobby', () => {
 		disp_chars = [];
 		disp_imgs=[];
@@ -76,7 +92,7 @@ io.on('connection', (socket) => {
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
-		
+
 		socket.disp_chars = disp_chars;
 		socket.disp_imgs = disp_imgs;
 
