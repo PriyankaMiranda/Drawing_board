@@ -60,27 +60,53 @@ io.on('connection', (socket) => {
 			chars.push(data.username);
 			imgs.push(data.img);
 		}
-
 		socket.imgs = imgs;
 		socket.emit('hide chars globally', {imgs:socket.imgs});	
 	});
 
 	socket.on('get chars on display lobby', (data) => {
+		disp_chars = [];
+		disp_imgs=[];
+		socket.broadcast.emit('get chars for lobby');
+		socket.emit('in case no one is in lobby except you');
 
-		if (!disp_chars.includes(data.username) && !disp_chars.includes(data.img)){
+
+		// if (!disp_chars.includes(data.username) && !disp_chars.includes(data.img)){
+		// 	disp_chars.push(data.username);
+		// 	disp_imgs.push(data.img);
+		// }
+		// socket.emit('display chars lobby', {
+		// 	chars:disp_chars,
+		// 	imgs:disp_imgs
+		// });	
+		// socket.broadcast.emit('display chars lobby', {
+		// 	chars:disp_chars,
+		// 	imgs:disp_imgs
+		// });	
+	});
+
+
+	socket.on('send chars for lobby', (data) => {
+		if (data.username == "" && data.img == ""){
+			//nothing happens again
+		}
+		else if (!chars.includes(data.username) && !imgs.includes(data.img)){
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
+		socket.disp_chars = disp_chars;
+		socket.disp_imgs = disp_imgs;
 
 		socket.emit('display chars lobby', {
-			chars:disp_chars,
-			imgs:disp_imgs
+			chars:socket.disp_chars,
+			imgs:socket.disp_imgs
 		});	
 		socket.broadcast.emit('display chars lobby', {
-			chars:disp_chars,
-			imgs:disp_imgs
+			chars:socket.disp_chars,
+			imgs:socket.disp_imgs
 		});	
 	});
+
 
 
   // when the client emits 'new message', this listens and executes

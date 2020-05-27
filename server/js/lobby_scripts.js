@@ -3,9 +3,6 @@ if (!document.cookie) {
   window.location.href = '/';
 }
 
-
-
-
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var COLORS = ['#008b8b', '#006060', '#1b7742', '#002627','#3477db', '#870c25', '#d50000', '#d24d57','#aa2e00', '#d35400', '#aa6b51', '#554800',
@@ -38,7 +35,7 @@ socket.on('get chars on display lobby', (data)=>{
 });
 
 socket.on('display chars lobby', (data)=>{
-  console.log("dataaa:  "+data)
+  console.log("Data updated.")
   removeParticipantsImg()
   var i;
   for (i=0 ; i<data.chars.length ; i++){
@@ -125,8 +122,6 @@ const sendMessage = () => {
   const addChatMessage = (data, options) => {
     // Don't fade the message in if there is an 'X was typing'
     var $typingMessages = getTypingMessages(data);
-
-
     options = options || {};
 
     if ($typingMessages.length !== 0) {
@@ -272,6 +267,15 @@ const sendMessage = () => {
   //when new user on front page requests for the characters to be loaded
   socket.on('get chars', ()=>{
     socket.emit('send chars', {username:username,img:img});
+  });
+
+
+  socket.on('get chars for lobby', ()=>{
+    socket.emit('send chars for lobby', {username:username,img:img});
+  });
+
+  socket.on('in case no one is in lobby except you', ()=>{
+    socket.emit('send chars for lobby', {username:"",img:""});
   });
 
   // Whenever the server emits 'new message', update the chat body
