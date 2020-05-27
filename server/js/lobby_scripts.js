@@ -275,7 +275,7 @@ const sendMessage = () => {
   });
 
   socket.on('in case no one is in lobby except you', ()=>{
-    socket.emit('send chars for lobby', {username:"",img:""});
+    socket.emit('send chars for lobby', {username:username,img:img});
   });
 
   // Whenever the server emits 'new message', update the chat body
