@@ -37,8 +37,6 @@ if (document.cookie) {
   }
 }
 
-socket.emit('load chars');
-
 function img_hover(div){
   if(prev.node === null){
     console.log("Previous node is null")
@@ -71,12 +69,16 @@ function submit_operation2(e){
   window.location.href = '/lobby';
 }
 
+socket.emit('load chars');
+
+socket.on('in case no one is in lobby', ()=>{
+  socket.emit('send chars', {username:"",img:""});
+});
 
 socket.on('hide chars globally', (data)=>{
   var Path = "/characters/"; //Folder where we will search for files
   var i = 0;
   var blocked_list = data.imgs;
-  console.log("blocked_list : "+blocked_list)
   for (i = 1; i < 53; i++) {
     if (blocked_list.includes(Path+i+".png")){
       console.log(Path+i+".png - Avatar taken")
@@ -122,5 +124,4 @@ socket.on('hide chars globally', (data)=>{
       char_div.onmouseover = function(){img_hover(this)};
     }
   } 
-
 });

@@ -49,16 +49,20 @@ io.on('connection', (socket) => {
 		chars = [];
 		imgs=[];
 		socket.broadcast.emit('get chars');
+		socket.emit('in case no one is in lobby');
 	});
 
 	socket.on('send chars', (data) => {
-		if (!chars.includes(data.username) && !imgs.includes(data.img)){
+		if (data.username == "" && data.img == ""){
+			//nothing happens
+		}
+		else if (!chars.includes(data.username) && !imgs.includes(data.img)){
 			chars.push(data.username);
 			imgs.push(data.img);
 		}
+
 		socket.imgs = imgs;
-		console.log("Hiding chars : "+socket.imgs)
-		socket.broadcast.emit('hide chars globally', {imgs:socket.imgs});	
+		socket.emit('hide chars globally', {imgs:socket.imgs});	
 	});
 
 	socket.on('get chars on display lobby', (data) => {
