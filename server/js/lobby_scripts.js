@@ -26,13 +26,13 @@ img = cookie_val.split('img=')[1].split(';')[0];
   
 var socket = io();
 
-socket.emit('get chars on display lobby', {username:username,img:img});
+socket.emit('load chars on lobby', {username:username,img:img});
 
 
 
-socket.on('get chars on display lobby', (data)=>{
-  socket.emit('get chars on display lobby', {username:username,img:img});
-});
+// socket.on('get chars on display lobby', (data)=>{
+//   socket.emit('get chars on display lobby', {username:username,img:img});
+// });
 
 socket.on('display chars lobby', (data)=>{
   console.log("Data updated.")
