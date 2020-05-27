@@ -68,9 +68,8 @@ io.on('connection', (socket) => {
 		disp_chars = [];
 		disp_imgs=[];
 		socket.broadcast.emit('get chars for lobby');
-		socket.emit('in case no one is in lobby except you');
 
-
+		// socket.emit('in case no one is in lobby except you');
 		// if (!disp_chars.includes(data.username) && !disp_chars.includes(data.img)){
 		// 	disp_chars.push(data.username);
 		// 	disp_imgs.push(data.img);
