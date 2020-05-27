@@ -77,8 +77,8 @@ const addParticipantsImg = (data) => {
 
   var char_div = document.createElement("DIV");
   char_div.className = "characters";
-  char_div.style.maxWidth = "25vh";
-  char_div.style.maxHeight = "25vh";
+  char_div.style.maxWidth = "150px";
+  char_div.style.maxHeight = "150px";
   char_div.style.flex = "25%";
   char_div.style.padding = "40px";
   char_div.style.opacity = 1;
@@ -101,7 +101,9 @@ const addParticipantsImg = (data) => {
 
   var div_label = document.createElement("LABEL");
   div_label.className = "characters_label";
-  div_label.style.width = "100%";
+
+  div_label.style.fontSize = "30px";
+  // div_label.style.width = "100%";
   div_label.innerHTML = data.char;
   div_form.appendChild(div_label);
 };
@@ -286,13 +288,11 @@ socket.on("get chars for reloading", () => {
 });
 
 socket.on("get chars for reloading upon disconnection", () => {
-
-  socket.emit("reload chars for others not the one that left", {username: username, img: img });
-
+  socket.emit("reload chars for others not the one that left");
 });
 
 socket.on("reload chars upon disconnection", () => {
-  socket.emit("reload chars for others except the one that left", {username: username, img: img });
+  socket.emit("reload chars for others except the one that left", {username: username, img: img});
 });
 
 socket.on("get chars for lobby", () => {

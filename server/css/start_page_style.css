@@ -35,27 +35,10 @@ body{
   flex-wrap: wrap;
 }
 
-.chatbox{
-  display : none;
-  padding-left: 20px;
-  width:100vw;
-  height: 40vh;
-  text-align: right;
-  display:flex;
-  flex-direction: row;
-  justify-content: space-between  
-}
-.chat{
-  display : none;
-  margin-top: 20px;
-  margin-left: 20px;
-  width:100%;
-  height: 100%;
-  background-color: black ;
-}
 
 @media only screen and (min-device-width: 500px) {
   .header {
   height: 15vh;
   }
+
 }

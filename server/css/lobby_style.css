@@ -32,7 +32,6 @@ body{
   width: 100vw;
   display: flex;
   flex-wrap: wrap;
-
   align-items: center;
   justify-content: space-between;
 }
@@ -41,15 +40,40 @@ body{
   margin-top:25px;
   margin-left:50px;
   width:90vw;
-  height: 40vh;
+  height: 55vh;
   background-color: #f6f6ff;
 
 }
 .chat{
-  height: 35vh;
+  height: 50vh;
   border-radius: 25px;
   background-color: #cbe6ef;
 }
+
+/*
+.chatbox{
+  display : none;
+  padding-left: 20px;
+  width:100vw;
+  height: 40vh;
+  text-align: right;
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between  
+}
+.chat{
+  display : none;
+  margin-top: 20px;
+  margin-left: 20px;
+  width:100%;
+  height: 100%;
+  background-color: black ;
+}
+*/
+
+
+
+
 .info{
   height: 4vh;
   background-color: #f6f6ff;
