@@ -67,6 +67,13 @@ function submit_operation2(e){
   window.location.href = '/lobby';
 }
 
+function removePrevChars(){
+  var elements = document.getElementsByClassName("characters");
+  while(elements.length > 0){
+    elements[0].parentNode.removeChild(elements[0]);
+  }
+}
+
 socket.emit('load chars');
 
 socket.on('in case no one is in lobby', ()=>{
@@ -74,6 +81,9 @@ socket.on('in case no one is in lobby', ()=>{
 });
 
 socket.on('hide chars globally', (data)=>{
+
+  removePrevChars()
+
   var Path = "/characters/"; //Folder where we will search for files
   var i = 0;
   var blocked_list = data.imgs;
