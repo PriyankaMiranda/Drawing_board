@@ -45,11 +45,20 @@ const cookie_val = document.cookie;
 username = cookie_val.split("name=")[1].split(";")[0];
 img = cookie_val.split("img=")[1].split(";")[0];
 
+
+function start_game(e){
+  socket.emit("enter game")
+}
+
+
 var socket = io();
-
 socket.emit("reload chars for others on homepage");
-
 socket.emit("load chars on lobby");
+
+
+socket.on("enter game", () => {
+  window.location.href = "/game";
+});
 
 socket.on("display chars lobby", (data) => {
   removeParticipantsImg();
@@ -58,6 +67,39 @@ socket.on("display chars lobby", (data) => {
     addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
   }
 });
+
+
+socket.on("delete ready button", () => {
+try{
+  btn = document.getElementById("ready-button")
+  btn.remove();
+}
+catch{
+console.log("Exception(e) - Ready button not present")
+}
+socket.emit("lol")
+});
+
+socket.on("set ready button", () => {
+var parent = document.getElementById("row_ready");
+var btn = document.createElement("BUTTON");
+console.log("Leader!")
+btn.innerHTML = "ready";
+btn.style.backgroundColor = "#cbe6ef";
+btn.style.height = "4vh"; 
+btn.style.marginTop= "0px";
+btn.style.marginLeft= "50px";
+btn.Id = "ready-button";
+btn.style.borderRadius = "12px";
+btn.style.width = "90%";
+btn.style.textAlign = "center";
+btn.style.verticalAlign = "middle";
+parent.appendChild(btn);
+btn.onclick = function() {
+  start_game(this);
+};
+});
+
 
 // Sets the client's username
 const setUsername = () => {

@@ -5,13 +5,27 @@ if (!document.cookie) {
 var socket = io();
 socket.on('drawing', onDrawingEvent);
 
+const cookie_val = document.cookie;
+username = cookie_val.split("name=")[1].split(";")[0];
+img = cookie_val.split("img=")[1].split(";")[0];
+
+function loadLocalChar(){
+document.getElementsByClassName("your char")[0].src = img;
+document.getElementById("your name").innerHTML += username;
+socket.emit('load game char', {username:username,img:img});
+}
+
+loadLocalChar()
+
 //------------------------------------Load leader board------------------------------------
-var Path = "./images/characters/"; //Folder where we will search for files
+var Path = "./characters/"; //Folder where we will search for files
+
+//*******************************load participants*******************************
 var leader_board = document.getElementsByClassName('img');
 for (i = 0; i < leader_board.length; i++) {
   leader_board[i].src =  Path+i+".png";  
 }
-
+//*******************************************************************************
 //-----------------------------------------------------------------------------------------  
 
 //------------------------------------Set drawing board------------------------------------
@@ -32,7 +46,7 @@ function onColorUpdate(e){
   current.color = e.target.style.backgroundColor;
   current.lineWidth = 5;
   if(current.color == 'white'){
-    current.lineWidth = 25;
+    current.lineWidth = 70;
   }
   context.beginPath();
 }
@@ -186,12 +200,12 @@ function throttle(callback, delay) {
 //-----------------------------------------------------------------------------------------
 
 //--------------------------------Resize even and function--------------------------------
-window.addEventListener('resize', onResize, false);
-onResize();
-// make the canvas fill its parent
-function onResize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
+// window.addEventListener('resize', onResize, false);
+// onResize();
+// // make the canvas fill its parent
+// function onResize() {
+//   canvas.width = window.innerWidth;
+//   canvas.height = window.innerHeight;
+// }
 //-----------------------------------------------------------------------------------------
 

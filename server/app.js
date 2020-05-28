@@ -32,10 +32,10 @@ const server = app.listen(port, () => {
 var io = require("socket.io")(server);
 var ejs = require("ejs");
 
-var chars = [];
-var imgs = [];
-var disp_chars = [];
-var disp_imgs = [];
+var chars = [];//for homepage
+var imgs = [];//for homepage
+var disp_chars = [];//for lobby
+var disp_imgs = [];//for lobby
 
 io.on("connection", (socket) => {
 	var addedUser = false;
@@ -65,6 +65,7 @@ io.on("connection", (socket) => {
 		socket.broadcast.emit("get chars for reloading");
 	});
 
+
 	socket.on("reload chars for others not the one that left", () => {
 		disp_chars = [];
 		disp_imgs = [];
@@ -76,6 +77,7 @@ io.on("connection", (socket) => {
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
+
 		socket.disp_chars = disp_chars;
 		socket.disp_imgs = disp_imgs;
 
@@ -87,9 +89,7 @@ io.on("connection", (socket) => {
 			chars: socket.disp_chars,
 			imgs: socket.disp_imgs,
 		});
-		
 	});
-
 
 
 
@@ -119,6 +119,13 @@ io.on("connection", (socket) => {
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
+		console.log("Disp chars: "+disp_chars)
+		console.log("Disp imgs: "+disp_imgs)
+
+		socket.broadcast.emit("delete ready button");
+		if(disp_chars.length==1 && disp_imgs.length==1){
+			socket.emit("set ready button");
+		}
 
 		socket.disp_chars = disp_chars;
 		socket.disp_imgs = disp_imgs;
@@ -131,6 +138,11 @@ io.on("connection", (socket) => {
 			chars: socket.disp_chars,
 			imgs: socket.disp_imgs,
 		});
+	});
+
+	socket.on("enter game", (data) => {
+		socket.emit("enter game");
+		socket.broadcast.emit("enter game");
 	});
 
 	// when the client emits 'new message', this listens and executes
@@ -175,11 +187,14 @@ io.on("connection", (socket) => {
 
 	// when the user disconnects.. perform this
 	socket.on("disconnect", () => {
-		console.log("disconnecting")
 		socket.broadcast.emit("get chars for reloading upon disconnection");
 
 		socket.broadcast.emit("user left", {
 			username: socket.username,
 		});
 	});
+
+	socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
+
+
 });

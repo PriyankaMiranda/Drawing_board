@@ -1,0 +1,64 @@
+body{
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+  background-color: white;
+}
+
+.header{
+  padding-left: 20px;
+  width:100vw;
+  height: 10vh;
+  text-align: right;
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between  
+}
+
+.header-contents{ 
+  background-size: contain;
+  background-repeat: no-repeat;                
+  height: 100%;
+  width:auto;
+}
+
+.header-text{
+  text-align: center;
+  font-style: italic;
+  font-family: cursive;
+  font-size: 25px;
+}
+
+.row {
+  background-color: #cbe6ef;
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chatbox{
+  padding-left: 20px;
+  width:100vw;
+  height: 40vh;
+  text-align: right;
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between  
+}
+.chat{
+  margin-top: 20px;
+  margin-left: 20px;
+  width:100%;
+  height: 100%;
+  background-color: black ;
+}
+
+/*for larger screens(large screens and laptops)*/
+@media only screen and (min-device-width: 500px) {
+  .header {
+  height: 15vh;
+  }
+}

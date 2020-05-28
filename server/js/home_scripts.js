@@ -89,7 +89,7 @@ function submit_operation(e) {
         document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
       var loc_arr = children[0].parentNode.parentNode.childNodes[0].src.split("/");
       var arr_len = loc_arr.length;
-      document.cookie = "img=" + loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1];
+      document.cookie = "img=" +"/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1];
     } else {
       document.cookie = "img=" + e.target.id + ".png";
     }
@@ -122,7 +122,7 @@ socket.on("hide chars globally", (data) => {
   try {
     img = cookie_val.split("img=")[1].split(";")[0];
   } catch {
-    console.log("Hi new user");
+    console.log("Exception(e) - Cookie not available");
   }
 
   if (document.getElementsByClassName("my character").length != 0) {

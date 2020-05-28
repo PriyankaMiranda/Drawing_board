@@ -3,7 +3,6 @@ body{
   height: 100vh;
   width: 100vw;
   text-align: center;
-
   overflow: hidden;
 
 }
@@ -93,9 +92,6 @@ body{
   background-position: center
 }
 
-.color.pen.clear{background-image: url(./images/eraser_small.jpg);}
-
-
 .footer{
   background-color: #cbe6ef;
   display:flex;
@@ -109,8 +105,8 @@ body{
 
 
 .char{ 
-    width: 12vh; 
-    height: 12vh;
+/*    width: 8vh;*/ 
+    height: 8vh;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center
