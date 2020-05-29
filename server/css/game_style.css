@@ -100,12 +100,15 @@ body{
   justify-content: space-between;
   width:100vw;
   height: 10vh;
-
+}
+.row_chars{
+  width:100vw;
+  height: 10vh;
 }
 
 
+
 .char{ 
-/*    width: 8vh;*/ 
     height: 8vh;
     background-size: cover;
     background-repeat: no-repeat;
@@ -115,8 +118,29 @@ body{
 .char >.img {
     width: 100%; 
     height: 100%;
-
 }
+
+.chat {
+    height: 20vh;
+    border-radius: 25px;
+    background-color: #cbe6ef;
+}
+
+
+#row_ready {
+  height: 4vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.info {
+    height: 4vh;
+    background-color: #cbe6ef;
+}
+
 
 /*for larger screens(large screens and laptops)*/
 @media only screen and (min-device-width: 500px) {
@@ -161,6 +185,11 @@ body{
   height:70vh;
   width:30vw;
   }   
+  .chat {
+  height: 65vh;
+  border-radius: 25px;
+  background-color: #cbe6ef;
+  }
   .color {
     height:3vw;
     width:2vw;
@@ -168,9 +197,8 @@ body{
   .footer {
   height: 15vh;
   }
-  .footer > .char{ 
-      width: 10vh; 
-      height: 10vh;
+  .row_char{  
+      height: 15vh;
   }
 }
 
@@ -181,3 +209,61 @@ body{
   }
 }
 
+
+.chat.page {
+    /*  height : 100%;
+  width : 100%;*/
+    display: block;
+}
+
+/* Font */
+
+.messages {
+    font-size: 150%;
+}
+
+.inputMessage {
+    font-size: 100%;
+}
+
+.log {
+    color: gray;
+    font-size: 70%;
+    margin: 5px;
+    text-align: center;
+}
+
+/* Messages */
+
+.chatArea {
+    height: 100%;
+    /*  padding-bottom: 60px;*/
+}
+
+.messages {
+    height: 100%;
+    width: 99%;
+    margin: 0;
+    overflow-y: scroll;
+    padding: 10px 20px 10px 20px;
+}
+
+.message.typing .messageBody {
+    color: gray;
+}
+
+
+/* Input */
+
+.inputMessage {
+    border-radius: 25px;
+    border: 5px solid white;
+    bottom: 0;
+    height: 100%;
+    left: 0;
+    outline: none;
+    padding-left: 10px;
+    /*  position: absolute;*/
+    right: 0;
+    width: 100%;
+}

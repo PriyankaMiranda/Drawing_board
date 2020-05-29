@@ -44,18 +44,26 @@
             </div>
             <canvas class="whiteboard" width="1000" height="1000"></canvas>
         </div>
-        <div class="chatbox"></div>
+        <div class="chatbox">
+            <div class="chat">
+            <li class="chat page">
+                <div class="chatArea">
+                    <ul class="messages"></ul>
+                </div>
+            </li>
+            </div>
+            <div class="info">
+                <input class="inputMessage" placeholder="Type here..."/>
+            </div>
+        </div>
     </div>
+
     <div class="footer">
-        <div class="char a"><img class = "img a"></img></div>
-        <div class="char b"><img class = "img b"></img></div>
-        <div class="char c"><img class = "img c"></img></div>
-        <div class="char d"><img class = "img d"></img></div>
-        <div class="char e"><img class = "img e"></img></div>
-        <div class="char f"><img class = "img f"></img></div>
-        <div class="char g"><img class = "img g"></img></div>
-        <div class="char h"><img class = "img h"></img></div>
+        <div class="row" id="row_chars"></div>
     </div>
+
+
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="/game_scripts.js"></script>
 </body>
