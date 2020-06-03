@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pictionary with Friends</title>
+    <link rel="stylesheet" href="/game_style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body scroll="no">
+    <div class="header">
+
+        <h1 id="timer" style="color: #005582">00:00</h1>
+        <img id="logo" src="/logo2_transparent.png"></img>
+        <h1 id="word" style="color: #005582">Get Ready...</h1>
+
+    </div>
+
+    <div id="flex-container">
+        <div class="drawing-board">
+            <div class="colors">
+                <div class="color pen" style="background-color: #000000; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #808080; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #C0C0C0; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #FF0000; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #800000; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #FFFF00; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #808000; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #00FF00; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #008000; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #00FFFF; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #008080; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #0000FF; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #000080; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #FF00FF; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen" style="background-color: #800080; border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pen clear" style="background-color: white;background-image: url(/eraser_small.jpg); border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color pencil" style="background-image: url(/pencil_small.jpg); border: thick solid rgba(255, 255, 255, .5);"></div>
+                <div class="color refresh" style="background-image: url(/refresh_small.jpg); border: thick solid rgba(255, 255, 255, .5);"></div>
+            </div>
+            <canvas class="whiteboard" width="1000" height="1000"></canvas>
+        </div>
+        <div class="chatbox">
+            <div class="chat">
+            <li class="chat page">
+                <div class="chatArea">
+                    <ul class="messages"></ul>
+                </div>
+            </li>
+            </div>
+            <div class="info">
+                <input class="inputMessage" placeholder="Type here..."/>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="row" id="row_chars"></div>
+    </div>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/game_scripts.js"></script>
+</body>
+
+</html>

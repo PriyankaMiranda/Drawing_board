@@ -9,23 +9,15 @@ const cookie_val = document.cookie;
 username = cookie_val.split("name=")[1].split(";")[0];
 img = cookie_val.split("img=")[1].split(";")[0];
 
-function loadLocalChar(){
-document.getElementsByClassName("your char")[0].src = img;
-document.getElementById("your name").innerHTML += username;
-socket.emit('load game char', {username:username,img:img});
-}
-
-loadLocalChar()
-
 //------------------------------------Load leader board------------------------------------
 var Path = "./characters/"; //Folder where we will search for files
 
-//*******************************load participants*******************************
-var leader_board = document.getElementsByClassName('img');
-for (i = 0; i < leader_board.length; i++) {
-  leader_board[i].src =  Path+i+".png";  
-}
-//*******************************************************************************
+// //*******************************load participants*******************************
+// var leader_board = document.getElementsByClassName('img');
+// for (i = 0; i < leader_board.length; i++) {
+//   leader_board[i].src =  Path+i+".png";  
+// }
+// //*******************************************************************************
 //-----------------------------------------------------------------------------------------  
 
 //------------------------------------Set drawing board------------------------------------
@@ -37,16 +29,26 @@ let rect = canvas.getBoundingClientRect();
 
 //--------------------------------Color params and functions-------------------------------
 var current = {color: 'black', prev_color: 'black',lineWidth: 5};
-for (var i = 1; i < colors.length; i++){
+for (var i = 0; i < colors.length; i++){
   colors[i].addEventListener('click', onColorUpdate, false);
 }
 
 function onColorUpdate(e){
+  // refresh all borders
+  var all_colors = document.getElementsByClassName("color")
+  for (var i = 0; i < all_colors.length; i++) {
+    all_colors[i].style.border = "thick solid rgba(255, 255, 255, .5)"; 
+  }
   current.prev_color = current.color;
   current.color = e.target.style.backgroundColor;
   current.lineWidth = 5;
+  if (current.color == 'black'){
+  e.target.style.border = "thick solid rgba(255, 255, 255, .5)";
+  }else{
+  e.target.style.border = "thick solid rgba(0, 0, 0, .5)";
+  }
   if(current.color == 'white'){
-    current.lineWidth = 25;
+    current.lineWidth = 45;
   }
   context.beginPath();
 }
@@ -56,6 +58,9 @@ function onColorUpdate(e){
 var orig_zoom = window.visualViewport.scale;
 function checkSizeChange(e){
   var zoom = window.visualViewport.scale;
+    console.log(" not zoomed")
+    e.preventDefault();
+    e.stopPropagation();
   if (orig_zoom != zoom){
     console.log("zoomed")
     e.preventDefault();
@@ -67,6 +72,12 @@ function checkSizeChange(e){
 
 //--------------------------------------Pen selector---------------------------------------
 document.getElementsByClassName("color pencil")[0].addEventListener('click', function (e){
+  // refresh all borders
+  var all_colors = document.getElementsByClassName("color")
+  for (var i = 0; i < all_colors.length; i++) {
+    all_colors[i].style.border = "thick solid rgba(255, 255, 255, .5)";
+  }
+  e.target.style.border = "thick solid rgba(0, 0, 0, .5)";
   if(current.color == 'white'){  
     if(current.prev_color == 'white'){
       current.color = 'black';
@@ -75,12 +86,19 @@ document.getElementsByClassName("color pencil")[0].addEventListener('click', fun
       current.color = current.prev_color;  
     }
   }
+  current.lineWidth = 5;
   context.beginPath();
 });
 //-----------------------------------------------------------------------------------------  
 
 //--------------------------------------Refresh screen-------------------------------------
 document.getElementsByClassName("color refresh")[0].addEventListener('click', function (e){
+  // refresh all borders
+  var all_colors = document.getElementsByClassName("color")
+  for (var i = 0; i < all_colors.length; i++) {
+    all_colors[i].style.border = "thick solid rgba(255, 255, 255, .5)";
+  }
+  e.target.style.border = "thick solid rgba(0, 0, 0, .5)";
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.closePath();
   context.beginPath();
@@ -210,11 +228,6 @@ function throttle(callback, delay) {
 // }
 //-----------------------------------------------------------------------------------------
 
-
-
-
-
-
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var COLORS = [
@@ -270,37 +283,6 @@ socket.on("display chars lobby", (data) => {
   }
 });
 
-
-socket.on("delete ready button", () => {
-try{
-  btn = document.getElementById("ready-button")
-  btn.remove();
-}
-catch{
-console.log("Exception(e) - Ready button not present")
-}
-socket.emit("lol")
-});
-
-socket.on("set ready button", () => {
-var parent = document.getElementById("row_ready");
-var btn = document.createElement("BUTTON");
-console.log("Leader!")
-btn.innerHTML = "ready";
-btn.style.backgroundColor = "#cbe6ef";
-btn.style.height = "4vh"; 
-btn.style.marginTop= "0px";
-btn.style.marginLeft= "50px";
-btn.Id = "ready-button";
-btn.style.borderRadius = "12px";
-btn.style.width = "90%";
-btn.style.textAlign = "center";
-btn.style.verticalAlign = "middle";
-parent.appendChild(btn);
-
-});
-
-
 // Sets the client's username
 const setUsername = () => {
   // If the username is valid
@@ -319,10 +301,10 @@ const addParticipantsImg = (data) => {
 
   var char_div = document.createElement("DIV");
   char_div.className = "characters";
-  char_div.style.maxWidth = "150px";
-  char_div.style.maxHeight = "150px";
+  char_div.style.width = "50px";
+  char_div.style.height = "50px";
+  char_div.style.marginLeft = "40px";
   char_div.style.flex = "25%";
-  char_div.style.padding = "40px";
   char_div.style.opacity = 1;
   char_div.style.transform = "scale(1)";
   parent.appendChild(char_div);
@@ -344,7 +326,7 @@ const addParticipantsImg = (data) => {
   var div_label = document.createElement("LABEL");
   div_label.className = "characters_label";
 
-  div_label.style.fontSize = "30px";
+  div_label.style.fontSize = "20px";
   // div_label.style.width = "100%";
   div_label.innerHTML = data.char;
   div_form.appendChild(div_label);
@@ -387,17 +369,12 @@ const addChatMessage = (data, options) => {
     $typingMessages.remove();
   }
 
-  var $usernameDiv = $('<span class="username"/> ')
-    .text(data.username)
-    .css("color", getUsernameColor(data.username));
-  var $messageBodyDiv = $('<span class="messageBody">').text(data.message);
+  var $usernameDiv = $('<span class="username"/>').text(data.username).css("color", getUsernameColor(data.username));
+  var $messageBodyDiv = $('<span class="messageBody">').text(" : "+data.message);
 
   var typingClass = data.typing ? "typing" : "";
-  var $messageDiv = $('<p class="message"/>')
-    .data("username", data.username)
-    .addClass(typingClass)
-    .append($usernameDiv, $messageBodyDiv);
-
+  var $messageDiv = $('<p class="message"/>').data("username", data.username).addClass(typingClass).append($usernameDiv, $messageBodyDiv);
+  
   addMessageElement($messageDiv, options);
 };
 

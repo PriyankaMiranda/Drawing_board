@@ -6,6 +6,40 @@ body{
   background-color: white;
 }
 
+#overlay {
+  text-align: center;
+  position: fixed; 
+  display: none; 
+  width: 100%; 
+  height: 100%; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,1);
+  z-index: 2; 
+  cursor: pointer; 
+  display:block;
+}
+
+#overlay_contents{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
+}
+#login_img{
+ width: 80vw; 
+ height: 80vw; 
+}
+
+#text{
+  font-size: 50px;
+  color: white;
+}
+
+
 .header{
   padding-left: 20px;
   width:100vw;
@@ -39,6 +73,13 @@ body{
 @media only screen and (min-device-width: 500px) {
   .header {
   height: 15vh;
+  }
+  #login_img{
+   width: 40vh; 
+   height: 40vh; 
+  }
+  #text{
+    font-size: 20px;
   }
 
 }

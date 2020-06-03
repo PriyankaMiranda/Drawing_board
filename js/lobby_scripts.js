@@ -47,7 +47,8 @@ img = cookie_val.split("img=")[1].split(";")[0];
 
 
 function start_game(e){
-  socket.emit("enter game")
+  let gameID = Math.random().toString(36).substring(7);
+  socket.emit("enter game", {gameID:gameID})
 }
 
 
@@ -56,7 +57,9 @@ socket.emit("reload chars for others on homepage");
 socket.emit("load chars on lobby");
 
 
-socket.on("enter game", () => {
+socket.on("enter game", (data) => {
+  console.log(data.gameID)
+  document.cookie = "gameID=" + data.gameID;
   window.location.href = "/game";
 });
 
@@ -68,16 +71,13 @@ socket.on("display chars lobby", (data) => {
   }
 });
 
+socket.on("refresh interval function", () => {
+  socket.emit("refresh interval function")
+});
 
 socket.on("delete ready button", () => {
-try{
-  btn = document.getElementById("ready-button")
-  btn.remove();
-}
-catch{
-console.log("Exception(e) - Ready button not present")
-}
-socket.emit("lol")
+  var parent = document.getElementById("row_ready");
+  while (parent.childElementCount>1) parent.removeChild(parent.firstChild);
 });
 
 socket.on("set ready button", () => {

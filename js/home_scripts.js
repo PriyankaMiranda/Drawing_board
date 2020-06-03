@@ -2,42 +2,92 @@ var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
 
-// for old users load their previous character
-if (document.cookie) {
-  const cookie_val = document.cookie;
-  const name = cookie_val.split("name=")[1].split(";")[0];
-  const img = cookie_val.split("img=")[1].split(";")[0];
-  const img_path = cookie_val.split("img=")[1].split(".")[0];
+var login = document.getElementById("overlay");
 
-  if (!(name === undefined) && !(img === undefined)) {
-    var my_div = document.createElement("DIV");
-    my_div.className = "my character";
-    my_div.style.width = "100%";
-    my_div.style.padding = "60px";
-    my_div.style.opacity = 1;
-    my_div.style.textAlign = "center";
-    my_div.style.verticalAlign = "middle";
-    parent.appendChild(my_div);
+var qn = document.getElementById("qn");
 
-    var image = document.createElement("IMG");
-    image.id = "my character img";
-    image.src = img;
-    image.style.width = "15vh";
-    image.style.height = "15vh";
-    my_div.appendChild(image);
 
-    var div_form = document.createElement("FORM");
-    div_form.id = img_path;
-    div_form.addEventListener("submit", submit_operation, false);
-    my_div.appendChild(div_form);
+socket.emit("get question")
 
-    var div_ip = document.createElement("INPUT");
-    div_ip.style.border = "4px solid black";
-    div_ip.style.borderRadius = "4px";
-    div_ip.value = name;
-    div_form.appendChild(div_ip);
-  }
+const cookie_val = document.cookie;
+document.getElementById("entry").addEventListener("submit", check_answer, false);
+var new_user;
+
+// ----------------------------------------------------------------------------------------------
+// get cookie value if it exists, else new user variable is set to true 
+try{
+  const public_key_1 = cookie_val.split("public_key_1=")[1].split(";")[0];
+  const public_key_2 = cookie_val.split("public_key_2=")[1].split(";")[0];
+  new_user = false;
 }
+catch{
+  new_user = true;
+}
+// if the user is not new, we authenticate the user ny checking the public and private key
+if(!new_user){
+  // this person has public coookie keys
+  // authenticating user 
+  socket.emit("authenticate")
+  // suppose authentication is complete, we load the prev character and the rest of the page
+}
+// ----------------------------------------------------------------------------------------------
+   
+
+function check_answer(e){  
+  e.preventDefault();
+  // get ans and pass it to the socket to check it with the correct answer  
+  const qn_no = document.cookie.split("qn_no=")[1].split(";")[0];
+  socket.emit("check ans", {x: qn_no})
+  //if correct call the next function to load all data 
+
+}
+
+function load_data(){
+  document.getElementById("overlay").style.display = "none";
+  var logo = document.getElementById("logo");
+  logo.src = "/logo2_transparent.png";
+  var instruction = document.getElementById("instruction");
+  instruction.innerHTML = "Choose your character";
+  socket.emit("load chars");
+}
+// for old users load their previous character
+function get_prev_char(){
+    const name = cookie_val.split("name=")[1].split(";")[0];
+    const img = cookie_val.split("img=")[1].split(";")[0];
+    const img_path = cookie_val.split("img=")[1].split(".")[0];
+    if (!(name === undefined) && !(img === undefined)) {
+      var my_div = document.createElement("DIV");
+      my_div.className = "my character";
+      my_div.style.width = "100%";
+      my_div.style.padding = "60px";
+      my_div.style.opacity = 1;
+      my_div.style.textAlign = "center";
+      my_div.style.verticalAlign = "middle";
+      parent.appendChild(my_div);
+
+      var image = document.createElement("IMG");
+      image.id = "my character img";
+      image.src = img;
+      image.style.width = "15vh";
+      image.style.height = "15vh";
+      image.onclick = function() {
+        submit_operation(this);
+      };
+      my_div.appendChild(image);
+
+      var div_form = document.createElement("FORM");
+      div_form.id = img_path;
+      div_form.addEventListener("submit", submit_operation, false);
+      my_div.appendChild(div_form);
+
+      var div_ip = document.createElement("INPUT");
+      div_ip.style.border = "4px solid black";
+      div_ip.style.borderRadius = "4px";
+      div_ip.value = name;
+      div_form.appendChild(div_ip);
+    }
+} 
+
 
 function img_hover(div) {
   if (prev.node === null) {
@@ -77,27 +127,31 @@ function img_swap(div) {
 }
 
 function submit_operation(e) {
-  e.preventDefault();
-
-  var children = e.target.childNodes;
-
-  if (children[0].value == "") {
-    children[0].style.borderColor = "red";
-  } else {
-    if (document.getElementsByClassName("my character").length != 0) {
-      document.cookie =
-        document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
-      var loc_arr = children[0].parentNode.parentNode.childNodes[0].src.split("/");
-      var arr_len = loc_arr.length;
-      document.cookie = "img=" +"/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1];
-    } else {
-      document.cookie = "img=" + e.target.id + ".png";
-    }
-
-    document.cookie = "name=" + children[0].value;
-    window.location.href = "/lobby";
+  var tagName = e.tagName || e.target.tagName;
+  if(tagName == 'IMG'){
+    var cookie_name = e.parentNode.childNodes[1].childNodes[0].value;
+    var loc_arr = e.parentNode.childNodes[0].src.split("/");
+    var arr_len = loc_arr.length;
+    var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
   }
-}
+  else if(tagName == 'FORM'){
+    e.preventDefault();
+    var cookie_name = e.target.childNodes[0].value;
+    var loc_arr = e.target.parentNode.childNodes[0].src.split("/");
+    var arr_len = loc_arr.length;
+    var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
+  }
+
+  if (cookie_name == "") {
+      children.style.borderColor = "red";
+  } else{   
+    document.cookie = document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    document.cookie = "img=" + cookie_img;
+    document.cookie = "name=" + cookie_name;
+    socket.emit("get private keys")
+  }
+  
+  }
 
 function removePrevChars() {
   var elements = document.getElementsByClassName("characters");
@@ -106,7 +160,37 @@ function removePrevChars() {
   }
 }
 
-socket.emit("load chars");
+socket.on("question", (data) => {
+  qn.innerHTML = "'"+data.qn+"'"
+  document.cookie = "qn_no=" + data.qn_no;
+});
+
+socket.on("answer", (data) => {
+  var ans = document.getElementById("ans");
+  if(ans.value == data.ans){
+    // if the answer is correct, continnue loading the page
+     load_data()
+  }
+});
+
+socket.on("private key", (data) => {
+  var public_key_1 = Math.random().toString(36).substring(7);
+  document.cookie = "public_key_1=" + public_key_1;
+  var public_key_2 = CryptoJS.AES.encrypt(public_key_1, data.cookieKey);
+  document.cookie = "public_key_2=" + public_key_2;
+  window.location.href = "/lobby";
+});
+
+socket.on("authenticate", (data) => {
+  const public_key_1 = document.cookie.split("public_key_1=")[1].split(";")[0];
+  const public_key_2 = document.cookie.split("public_key_2=")[1].split(";")[0];
+  var decrypted = CryptoJS.AES.decrypt(public_key_2, data.cookieKey).toString(CryptoJS.enc.Utf8);
+  if(decrypted == public_key_1){
+    //access granted
+    get_prev_char()
+    load_data()
+  }
+});
 
 socket.on("in case no one is in lobby", () => {
   socket.emit("send chars", { username: "", img: "" });
@@ -119,6 +203,7 @@ socket.on("hide chars globally", (data) => {
   var blocked_list = data.imgs;
   const cookie_val = document.cookie;
   var img;
+
   try {
     img = cookie_val.split("img=")[1].split(";")[0];
   } catch {

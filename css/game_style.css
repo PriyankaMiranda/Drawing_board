@@ -8,55 +8,31 @@ body{
 }
 
 .header{
-  padding-left: 20px;
+/*  padding-left: 20px;*/
   width:100vw;
-  height: 10vh;
+  height: 3vh;
   background-color: white;
   text-align: right;
   display:flex;
   flex-direction: row;
   justify-content: space-between  
 }
-.header-contents{ 
-  background-size: contain;
-  background-repeat: no-repeat;                
-}
-
-.header-text{
-  text-align: center;
-  font-style: italic;
-  font-family: cursive;
-  font-size: 25px;
-}
-
-#char-you {
-  display:flex;
-  flex-direction: column;
-  text-align: center;
-}
-
-#char-you > img{
-  height: 8vh !important;
-  width: 8vh !important;
-}
 
 #logo{
-  height: 100%;
-  width:auto;
+  height: 3vh;
 }
-
 
 #flex-container {
   display:flex;
   flex-direction: column;
-  height:80vh;
+  height:85vh;
   width:100vw;
 }
 
 #flex-container > .drawing-board{
   display:flex;
   flex-direction: row;
-  height:55vh;
+  height:50vh;
   width:100vw;
 }
 
@@ -64,7 +40,7 @@ body{
 #flex-container > .drawing-board > .whiteboard {
   border: 5px solid #cbe6ef;
   background-color: white;  
-  height:55vh;
+  height:50vh;
   width:90vw;
 }
 
@@ -74,19 +50,19 @@ body{
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  height:55vh;
+  height:50vh;
   width:10vw;
 }
 
 #flex-container > .chatbox{
   background-color: #cbe6ef;
-  height:25vh;
+  height:35vh;
   width:100vw;
 }
 
 .color {
-  height:6vw;
-  width:6vw;
+  height:5vw;
+  width:5vw;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center
@@ -99,11 +75,12 @@ body{
   align-items: center;
   justify-content: space-between;
   width:100vw;
-  height: 10vh;
+  height: 18vh;
 }
+
 .row_chars{
   width:100vw;
-  height: 10vh;
+  height: 18vh;
 }
 
 
@@ -121,7 +98,7 @@ body{
 }
 
 .chat {
-    height: 20vh;
+    height: 33vh;
     border-radius: 25px;
     background-color: #cbe6ef;
 }
@@ -137,7 +114,7 @@ body{
 
 
 .info {
-    height: 4vh;
+    height: 2vh;
     background-color: #cbe6ef;
 }
 
@@ -145,30 +122,27 @@ body{
 /*for larger screens(large screens and laptops)*/
 @media only screen and (min-device-width: 500px) {
   .header {
-  height: 15vh;
+  height: 8vh;
   }
-  #char-you > img{
-  height: 12vh !important;
-  width: 12vh !important;
-  }
-  #flex-container {
-  height:70vh;
+
+  #logo{
+    height: 8vh;
   }
 
   #flex-container {
   flex-direction: row;
-  height:70vh;
+  height:77vh;
   width:100vw;
   }
 
   #flex-container > .drawing-board{
   flex-direction: row;
-  height:70vh;
+  height:77vh;
   width:70vw;
   }
 
   #flex-container > .drawing-board > .whiteboard {
-  height:70vh;
+  height:77vh;
   width:65vw;
   }
   #flex-container > .drawing-board > .colors {
@@ -177,22 +151,22 @@ body{
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  height:70vh;
+  height:77vh;
   width:5vw;
   }
 
   #flex-container > .chatbox{
-  height:70vh;
+  height:77vh;
   width:30vw;
   }   
   .chat {
-  height: 65vh;
+  height: 72vh;
   border-radius: 25px;
   background-color: #cbe6ef;
   }
   .color {
     height:3vw;
-    width:2vw;
+    width:3vw;
   }
   .footer {
   height: 15vh;
@@ -200,6 +174,11 @@ body{
   .row_char{  
       height: 15vh;
   }
+.info {
+    height: 5vh;
+    background-color: #cbe6ef;
+}
+
 }
 
 /* On screens that are 992px wide or less, go from four columns to two columns */

@@ -2,9 +2,8 @@ const express = require("express");
 const path = require("path");
 const routes = require("./routes");
 const cookieSession = require("cookie-session");
-const keys = require("./constants");
+const keys = require("./keys");
 const port = process.env.PORT || 3000;
-
 const app = express();
 
 // Set the default views directory to html folder
@@ -29,6 +28,7 @@ const server = app.listen(port, () => {
 	console.log("Server is running at port " + port);
 });
 
+
 var io = require("socket.io")(server);
 var ejs = require("ejs");
 
@@ -37,8 +37,32 @@ var imgs = [];//for homepage
 var disp_chars = [];//for lobby
 var disp_imgs = [];//for lobby
 
+var qn = [keys.question1,keys.question2,keys.question3,keys.question4,keys.question5,keys.question6,keys.question7,keys.question8,keys.question9,keys.question10,
+keys.question11,keys.question12,keys.question13,keys.question14,keys.question15,keys.question16,keys.question17,keys.question18,keys.question19,keys.question20,
+keys.question21,keys.question22,keys.question23,keys.question24,keys.question25,keys.question26,keys.question27];
+var ans = [keys.answer1,keys.answer2,keys.answer3,keys.answer4,keys.answer5,keys.answer6,keys.answer7,keys.answer8,keys.answer9,keys.answer10,
+keys.answer11,keys.answer12,keys.answer13,keys.answer14,keys.answer15,keys.answer16,keys.answer17,keys.answer18,keys.answer19,keys.answer20,
+keys.answer21,keys.answer22,keys.answer23,keys.answer24,keys.answer25,keys.answer26,keys.answer27];	
+
 io.on("connection", (socket) => {
 	var addedUser = false;
+
+	socket.on("get question", () => {
+		var x = Math.floor(Math.random()*26) + 0;
+		socket.emit("question",{qn:qn[x], qn_no:x});
+	});
+
+	socket.on("check ans", (data) => {
+		socket.emit("answer",{ans:ans[data.x]});
+	});
+
+	socket.on("authenticate", () => {
+		socket.emit("authenticate",{cookieKey:keys.cookieKey});
+	});
+
+	socket.on("get private keys", () => {
+		socket.emit("private key",{cookieKey:keys.cookieKey});
+	});
 
 	socket.on("load chars", () => {
 		chars = [];
@@ -49,7 +73,7 @@ io.on("connection", (socket) => {
 
 	socket.on("send chars", (data) => {
 		if (data.username == "" && data.img == "") {
-			//nothing happens
+			// nothing happens
 		} else if (!chars.includes(data.username) && !imgs.includes(data.img)) {
 			chars.push(data.username);
 			imgs.push(data.img);
@@ -104,12 +128,20 @@ io.on("connection", (socket) => {
 
 
 
-	socket.on("load chars on lobby", () => {
+	socket.on("load chars on lobby", () => {		
 		disp_chars = [];
 		disp_imgs = [];
 		socket.emit("get chars for lobby");
 		socket.broadcast.emit("get chars for lobby");
 	});
+
+	socket.on("refresh interval function", () => {	
+		var myInt = setInterval(function () {
+		socket.emit("get chars for lobby");
+		socket.broadcast.emit("get chars for lobby");
+		}, 500);
+
+	});	
 
 	socket.on("send chars for lobby", (data) => {
 		if (
@@ -119,12 +151,10 @@ io.on("connection", (socket) => {
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
-		console.log("Disp chars: "+disp_chars)
-		console.log("Disp imgs: "+disp_imgs)
-
 		socket.broadcast.emit("delete ready button");
 		if(disp_chars.length==1 && disp_imgs.length==1){
 			socket.emit("set ready button");
+			socket.emit("refresh interval function");
 		}
 
 		socket.disp_chars = disp_chars;
@@ -141,8 +171,11 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("enter game", (data) => {
-		socket.emit("enter game");
-		socket.broadcast.emit("enter game");
+		//remove all ready buttons
+		socket.broadcast.emit("delete ready button");
+		console.log("connected :"+socket.id);
+		socket.emit("enter game", {gameID:data.gameID});
+		socket.broadcast.emit("enter game", {gameID:data.gameID});
 	});
 
 	// when the client emits 'new message', this listens and executes
@@ -192,6 +225,7 @@ io.on("connection", (socket) => {
 		socket.broadcast.emit("user left", {
 			username: socket.username,
 		});
+		
 	});
 
 	socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
