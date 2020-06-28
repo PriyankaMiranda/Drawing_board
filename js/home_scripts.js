@@ -2,12 +2,6 @@ var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
 
-var login = document.getElementById("overlay");
-
-var qn = document.getElementById("qn");
-
-
-socket.emit("get question")
 
 const cookie_val = document.cookie;
 document.getElementById("entry").addEventListener("submit", check_answer, false);
@@ -29,6 +23,8 @@ if(!new_user){
   // authenticating user 
   socket.emit("authenticate")
   // suppose authentication is complete, we load the prev character and the rest of the page
+}else{
+  socket.emit("new user")
 }
 // ----------------------------------------------------------------------------------------------
    
@@ -43,7 +39,6 @@ function check_answer(e){
 }
 
 function load_data(){
-  document.getElementById("overlay").style.display = "none";
   var logo = document.getElementById("logo");
   logo.src = "/logo2_transparent.png";
   var instruction = document.getElementById("instruction");
@@ -160,10 +155,6 @@ function removePrevChars() {
   }
 }
 
-socket.on("question", (data) => {
-  qn.innerHTML = "'"+data.qn+"'"
-  document.cookie = "qn_no=" + data.qn_no;
-});
 
 socket.on("new user", () => {
   load_data()
@@ -174,7 +165,7 @@ socket.on("private key", (data) => {
   document.cookie = "public_key_1=" + public_key_1;
   var public_key_2 = CryptoJS.AES.encrypt(public_key_1, data.cookieKey);
   document.cookie = "public_key_2=" + public_key_2;
-  window.location.href = "/lobby";
+  
 });
 
 socket.on("authenticate", (data) => {

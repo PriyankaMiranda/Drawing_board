@@ -3,7 +3,7 @@ const path = require("path");
 const routes = require("./routes");
 const cookieSession = require("cookie-session");
 const keys = require("./keys");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const app = express();
 
 // Set the default views directory to html folder
@@ -37,19 +37,12 @@ var imgs = [];//for homepage
 var disp_chars = [];//for lobby
 var disp_imgs = [];//for lobby
 
-var qn = [keys.question1,keys.question2,keys.question3,keys.question4,keys.question5,keys.question6,keys.question7,keys.question8,keys.question9,keys.question10,
-keys.question11,keys.question12,keys.question13,keys.question14,keys.question15,keys.question16,keys.question17,keys.question18,keys.question19,keys.question20,
-keys.question21,keys.question22,keys.question23,keys.question24,keys.question25,keys.question26,keys.question27];
-var ans = [keys.answer1,keys.answer2,keys.answer3,keys.answer4,keys.answer5,keys.answer6,keys.answer7,keys.answer8,keys.answer9,keys.answer10,
-keys.answer11,keys.answer12,keys.answer13,keys.answer14,keys.answer15,keys.answer16,keys.answer17,keys.answer18,keys.answer19,keys.answer20,
-keys.answer21,keys.answer22,keys.answer23,keys.answer24,keys.answer25,keys.answer26,keys.answer27];	
-
 io.on("connection", (socket) => {
 	var addedUser = false;
 
-	socket.on("get question", () => {
-		var x = Math.floor(Math.random()*26) + 0;
-		socket.emit("question",{qn:qn[x], qn_no:x});
+	socket.on("new user", () => {
+		socket.emit("private key",{cookieKey:keys.cookieKey});
+		socket.emit("new user");
 	});
 
 	socket.on("check ans", (data) => {
@@ -58,10 +51,6 @@ io.on("connection", (socket) => {
 
 	socket.on("authenticate", () => {
 		socket.emit("authenticate",{cookieKey:keys.cookieKey});
-	});
-
-	socket.on("get private keys", () => {
-		socket.emit("private key",{cookieKey:keys.cookieKey});
 	});
 
 	socket.on("load chars", () => {
