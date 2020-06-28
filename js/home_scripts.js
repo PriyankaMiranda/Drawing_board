@@ -1,10 +1,10 @@
+console.log("allooo")
 var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
 
 
 const cookie_val = document.cookie;
-document.getElementById("entry").addEventListener("submit", check_answer, false);
 var new_user;
 
 // ----------------------------------------------------------------------------------------------
