@@ -165,12 +165,8 @@ socket.on("question", (data) => {
   document.cookie = "qn_no=" + data.qn_no;
 });
 
-socket.on("answer", (data) => {
-  var ans = document.getElementById("ans");
-  if(ans.value == data.ans){
-    // if the answer is correct, continnue loading the page
-     load_data()
-  }
+socket.on("new user", () => {
+  load_data()
 });
 
 socket.on("private key", (data) => {
