@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const routes = require("./routes");
 const cookieSession = require("cookie-session");
-// const keys = require("./keys");
+const keys = require("keys");
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -21,7 +21,7 @@ app.set("view engine", "ejs");
 app.use("/", routes);
 
 app.use(
-	cookieSession({ maxAge: 30 * 24 * 60 * 60 * 1000})
+	cookieSession({ maxAge: 30 * 24 * 60 * 60 * 1000, keys: [keys.cookieKey] })
 );
 
 const server = app.listen(port, () => {
