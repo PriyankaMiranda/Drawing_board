@@ -2,41 +2,9 @@ console.log("allooo")
 var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
-
-
 const cookie_val = document.cookie;
-var new_user;
 
-// ----------------------------------------------------------------------------------------------
-// get cookie value if it exists, else new user variable is set to true 
-try{
-  const public_key_1 = cookie_val.split("public_key_1=")[1].split(";")[0];
-  const public_key_2 = cookie_val.split("public_key_2=")[1].split(";")[0];
-  new_user = false;
-}
-catch{
-  new_user = true;
-}
-// if the user is not new, we authenticate the user ny checking the public and private key
-if(!new_user){
-  // this person has public coookie keys
-  // authenticating user 
-  socket.emit("authenticate")
-  // suppose authentication is complete, we load the prev character and the rest of the page
-}else{
-  socket.emit("new user")
-}
-// ----------------------------------------------------------------------------------------------
-   
-
-function check_answer(e){  
-  e.preventDefault();
-  // get ans and pass it to the socket to check it with the correct answer  
-  const qn_no = document.cookie.split("qn_no=")[1].split(";")[0];
-  socket.emit("check ans", {x: qn_no})
-  //if correct call the next function to load all data 
-
-}
+socket.emit("load chars")
 
 function load_data(){
   var logo = document.getElementById("logo");
@@ -156,28 +124,6 @@ function removePrevChars() {
 }
 
 
-socket.on("new user", () => {
-  load_data()
-});
-
-socket.on("private key", (data) => {
-  var public_key_1 = Math.random().toString(36).substring(7);
-  document.cookie = "public_key_1=" + public_key_1;
-  var public_key_2 = CryptoJS.AES.encrypt(public_key_1, data.cookieKey);
-  document.cookie = "public_key_2=" + public_key_2;
-  
-});
-
-socket.on("authenticate", (data) => {
-  const public_key_1 = document.cookie.split("public_key_1=")[1].split(";")[0];
-  const public_key_2 = document.cookie.split("public_key_2=")[1].split(";")[0];
-  var decrypted = CryptoJS.AES.decrypt(public_key_2, data.cookieKey).toString(CryptoJS.enc.Utf8);
-  if(decrypted == public_key_1){
-    //access granted
-    get_prev_char()
-    load_data()
-  }
-});
 
 socket.on("in case no one is in lobby", () => {
   socket.emit("send chars", { username: "", img: "" });
