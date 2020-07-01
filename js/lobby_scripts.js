@@ -51,6 +51,35 @@ function start_game(e){
   socket.emit("enter game", {gameID:gameID})
 }
 
+function set_ready_button(){  
+  var parent = document.getElementById("row_ready");
+  if (parent.lastElementChild){
+    console.log("Button already exists")
+  }
+  else{    
+  var btn = document.createElement("BUTTON");
+  btn.innerHTML = "ready";
+  btn.style.backgroundColor = "#cbe6ef";
+  btn.style.height = "4vh"; 
+  btn.style.marginTop= "0px";
+  btn.style.marginLeft= "50px";
+  btn.Id = "ready-button";
+  btn.style.borderRadius = "12px";
+  btn.style.width = "90%";
+  btn.style.textAlign = "center";
+  btn.style.verticalAlign = "middle";
+  parent.appendChild(btn);
+  btn.onclick = function() {
+    start_game(this);
+  };
+  }
+}
+function remove_ready_button(){
+  var parent = document.getElementById("row_ready");
+  while (parent.lastElementChild) {
+   parent.removeChild(parent.lastElementChild);
+  } 
+}
 
 var socket = io();
 socket.emit("reload chars for others on homepage");
@@ -58,6 +87,10 @@ socket.emit("load chars on lobby");
 
 
 socket.on("enter game", (data) => {
+  username = cookie_val.split("name=")[1].split(";")[0];
+  img = cookie_val.split("img=")[1].split(";")[0];
+  socket.emit("remove char from lobby", {username:username, img:img})
+
   console.log(data.gameID)
   document.cookie = "gameID=" + data.gameID;
   window.location.href = "/game";
@@ -66,39 +99,52 @@ socket.on("enter game", (data) => {
 socket.on("display chars lobby", (data) => {
   removeParticipantsImg();
   var i;
+  username = cookie_val.split("name=")[1].split(";")[0];
+  img = cookie_val.split("img=")[1].split(";")[0];
+  remove_ready_button()
+  if (username == data.chars[0] && img == data.imgs[0]){
+    // socket.emit("remove old buttons")
+    set_ready_button()
+  }
   for (i = 0; i < data.chars.length; i++) {
     addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
   }
 });
 
-socket.on("refresh interval function", () => {
-  socket.emit("refresh interval function")
-});
-
-socket.on("delete ready button", () => {
+socket.on("remove old buttons", () => {
   var parent = document.getElementById("row_ready");
-  while (parent.childElementCount>1) parent.removeChild(parent.firstChild);
+  while (parent.lastElementChild) {
+    parent.removeChild(parent.lastElementChild);
+  }
 });
+// socket.on("refresh interval function", () => {
+//   socket.emit("refresh interval function")
+// });
 
-socket.on("set ready button", () => {
-var parent = document.getElementById("row_ready");
-var btn = document.createElement("BUTTON");
-console.log("Leader!")
-btn.innerHTML = "ready";
-btn.style.backgroundColor = "#cbe6ef";
-btn.style.height = "4vh"; 
-btn.style.marginTop= "0px";
-btn.style.marginLeft= "50px";
-btn.Id = "ready-button";
-btn.style.borderRadius = "12px";
-btn.style.width = "90%";
-btn.style.textAlign = "center";
-btn.style.verticalAlign = "middle";
-parent.appendChild(btn);
-btn.onclick = function() {
-  start_game(this);
-};
-});
+// socket.on("delete ready button", () => {
+//   var parent = document.getElementById("row_ready");
+//   while (parent.childElementCount>1) parent.removeChild(parent.firstChild);
+// });
+
+// socket.on("set ready button", () => {
+// var parent = document.getElementById("row_ready");
+// var btn = document.createElement("BUTTON");
+// console.log("Leader!")
+// btn.innerHTML = "ready";
+// btn.style.backgroundColor = "#cbe6ef";
+// btn.style.height = "4vh"; 
+// btn.style.marginTop= "0px";
+// btn.style.marginLeft= "50px";
+// btn.Id = "ready-button";
+// btn.style.borderRadius = "12px";
+// btn.style.width = "90%";
+// btn.style.textAlign = "center";
+// btn.style.verticalAlign = "middle";
+// parent.appendChild(btn);
+// btn.onclick = function() {
+//   start_game(this);
+// };
+// });
 
 
 // Sets the client's username
@@ -334,11 +380,11 @@ socket.on("get chars for reloading upon disconnection", () => {
 });
 
 socket.on("reload chars upon disconnection", () => {
-  socket.emit("reload chars for others except the one that left", {username: username, img: img});
+  socket.emit("reload chars for others except the one that left", {username: username, img: img});  
 });
 
 socket.on("get chars for lobby", () => {
-  socket.emit("send chars for lobby", { username: username, img: img });
+  socket.emit("send chars for lobby", { username: username, img: img ,cookie_val:cookie_val});
 });
 
 // Whenever the server emits 'new message', update the chat body

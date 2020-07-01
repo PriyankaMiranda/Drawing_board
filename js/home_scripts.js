@@ -1,10 +1,9 @@
-console.log("allooo")
 var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
 const cookie_val = document.cookie;
 
-socket.emit("load chars")
+load_data()
 
 function load_data(){
   var logo = document.getElementById("logo");
@@ -96,6 +95,7 @@ function submit_operation(e) {
     var loc_arr = e.parentNode.childNodes[0].src.split("/");
     var arr_len = loc_arr.length;
     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
+    window.location.href = "/lobby";
   }
   else if(tagName == 'FORM'){
     e.preventDefault();
@@ -103,6 +103,7 @@ function submit_operation(e) {
     var loc_arr = e.target.parentNode.childNodes[0].src.split("/");
     var arr_len = loc_arr.length;
     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
+    window.location.href = "/lobby";
   }
 
   if (cookie_name == "") {
@@ -111,7 +112,7 @@ function submit_operation(e) {
     document.cookie = document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
     document.cookie = "img=" + cookie_img;
     document.cookie = "name=" + cookie_name;
-    socket.emit("get private keys")
+    window.location.href = "/lobby";
   }
   
   }
@@ -122,8 +123,6 @@ function removePrevChars() {
     elements[0].parentNode.removeChild(elements[0]);
   }
 }
-
-
 
 socket.on("in case no one is in lobby", () => {
   socket.emit("send chars", { username: "", img: "" });

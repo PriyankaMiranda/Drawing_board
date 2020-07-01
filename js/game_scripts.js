@@ -267,21 +267,19 @@ var lastTypingTime;
 
 
 var socket = io();
-socket.emit("reload chars for others on homepage");
-socket.emit("load chars on lobby");
 
-
-socket.on("enter game", () => {
-  window.location.href = "/game";
-});
-
-socket.on("display chars lobby", (data) => {
-  removeParticipantsImg();
-  var i;
-  for (i = 0; i < data.chars.length; i++) {
-    addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
-  }
-});
+// socket.emit("reload chars for others on homepage");
+// socket.emit("load chars on lobby");
+// socket.on("enter game", () => {
+//   window.location.href = "/game";
+// });
+// socket.on("display chars lobby", (data) => {
+//   removeParticipantsImg();
+//   var i;
+//   for (i = 0; i < data.chars.length; i++) {
+//     addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
+//   }
+// });
 
 // Sets the client's username
 const setUsername = () => {
@@ -296,46 +294,46 @@ const setUsername = () => {
   socket.emit("add user", data);
 };
 
-const addParticipantsImg = (data) => {
-  var parent = document.getElementById("row_chars");
+// const addParticipantsImg = (data) => {
+//   var parent = document.getElementById("row_chars");
 
-  var char_div = document.createElement("DIV");
-  char_div.className = "characters";
-  char_div.style.width = "50px";
-  char_div.style.height = "50px";
-  char_div.style.marginLeft = "40px";
-  char_div.style.flex = "25%";
-  char_div.style.opacity = 1;
-  char_div.style.transform = "scale(1)";
-  parent.appendChild(char_div);
+//   var char_div = document.createElement("DIV");
+//   char_div.className = "characters";
+//   char_div.style.width = "50px";
+//   char_div.style.height = "50px";
+//   char_div.style.marginLeft = "40px";
+//   char_div.style.flex = "25%";
+//   char_div.style.opacity = 1;
+//   char_div.style.transform = "scale(1)";
+//   parent.appendChild(char_div);
 
-  var image = document.createElement("IMG");
-  image.className = "characters_img";
-  image.src = data.img;
-  image.style.width = "100%";
-  image.style.height = "100%";
-  char_div.appendChild(image);
+//   var image = document.createElement("IMG");
+//   image.className = "characters_img";
+//   image.src = data.img;
+//   image.style.width = "100%";
+//   image.style.height = "100%";
+//   char_div.appendChild(image);
 
-  var div_form = document.createElement("FORM");
-  div_form.className = "characters_form";
-  div_form.style.textAlign = "center";
-  div_form.style.fontStyle = "italic";
-  div_form.style.fontFamily = "cursive";
-  char_div.appendChild(div_form);
+//   var div_form = document.createElement("FORM");
+//   div_form.className = "characters_form";
+//   div_form.style.textAlign = "center";
+//   div_form.style.fontStyle = "italic";
+//   div_form.style.fontFamily = "cursive";
+//   char_div.appendChild(div_form);
 
-  var div_label = document.createElement("LABEL");
-  div_label.className = "characters_label";
+//   var div_label = document.createElement("LABEL");
+//   div_label.className = "characters_label";
 
-  div_label.style.fontSize = "20px";
-  // div_label.style.width = "100%";
-  div_label.innerHTML = data.char;
-  div_form.appendChild(div_label);
-};
+//   div_label.style.fontSize = "20px";
+//   // div_label.style.width = "100%";
+//   div_label.innerHTML = data.char;
+//   div_form.appendChild(div_label);
+// };
 
-const removeParticipantsImg = (data) => {
-  var parent = document.getElementById("row_chars");
-  while (parent.firstChild) parent.removeChild(parent.firstChild);
-};
+// const removeParticipantsImg = (data) => {
+//   var parent = document.getElementById("row_chars");
+//   while (parent.firstChild) parent.removeChild(parent.firstChild);
+// };
 
 // Sends a chat message
 const sendMessage = () => {
@@ -498,25 +496,25 @@ $inputMessage.click(() => {
 // Socket events
 
 //when new user on front page requests for the characters to be loaded
-socket.on("get chars", () => {
-  socket.emit("send chars", { username: username, img: img });
-});
+// socket.on("get chars", () => {
+//   socket.emit("send chars", { username: username, img: img });
+// });
 
-socket.on("get chars for reloading", () => {
-  socket.emit("send chars for homepage", {username: username, img: img });
-});
+// socket.on("get chars for reloading", () => {
+//   socket.emit("send chars for homepage", {username: username, img: img });
+// });
 
-socket.on("get chars for reloading upon disconnection", () => {
-  socket.emit("reload chars for others not the one that left");
-});
+// socket.on("get chars for reloading upon disconnection", () => {
+//   socket.emit("reload chars for others not the one that left");
+// });
 
-socket.on("reload chars upon disconnection", () => {
-  socket.emit("reload chars for others except the one that left", {username: username, img: img});
-});
+// socket.on("reload chars upon disconnection", () => {
+//   socket.emit("reload chars for others except the one that left", {username: username, img: img});
+// });
 
-socket.on("get chars for lobby", () => {
-  socket.emit("send chars for lobby", { username: username, img: img });
-});
+// socket.on("get chars for lobby", () => {
+//   socket.emit("send chars for lobby", { username: username, img: img });
+// });
 
 // Whenever the server emits 'new message', update the chat body
 socket.on("new message", (data) => {
