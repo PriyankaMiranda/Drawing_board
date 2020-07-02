@@ -291,7 +291,7 @@ const setUsername = () => {
   // Prevent markup from being injected into the message
   message = cleanInput(message);
   var data = { username: username, message: message };
-  socket.emit("add user", data);
+  socket.emit("add user in game", data);
 };
 
 // const addParticipantsImg = (data) => {
@@ -344,7 +344,7 @@ const sendMessage = () => {
     $inputMessage.val("");
     var dataval = { username: username, message: message };
     addChatMessage(dataval);
-    socket.emit("new message", dataval);
+    socket.emit("new message in game", dataval);
   }
 };
 
@@ -517,44 +517,41 @@ $inputMessage.click(() => {
 // });
 
 // Whenever the server emits 'new message', update the chat body
-socket.on("new message", (data) => {
+socket.on("new message in game", (data) => {
   addChatMessage(data);
 });
 
 // Whenever the server emits 'user joined', log it in the chat body
-socket.on("user joined", (data) => {
+socket.on("user joined in game", (data) => {
   addChatMessage(data);
 });
 
 // Whenever the server emits 'user left', log it in the chat body
-socket.on("user left", (data) => {
+socket.on("user left in game", (data) => {
   removeChatTyping(data);
 });
 
 // Whenever the server emits 'typing', show the typing message
-socket.on("typing", (data) => {
+socket.on("typing in game", (data) => {
   addChatTyping(data);
 });
 
 // Whenever the server emits 'stop typing', kill the typing message
-socket.on("stop typing", (data) => {
+socket.on("stop typing in game", (data) => {
   removeChatTyping(data);
 });
 
-socket.on("disconnect", () => {
+socket.on("disconnect in game", () => {
   log("you have been disconnected");
 });
 
-socket.on("reconnect", () => {
+socket.on("reconnect in game", () => {
   log("you have been reconnected");
   if (username) {
-    socket.emit("add user", username);
+    socket.emit("add user in game", username);
   }
 });
 
-socket.on("reconnect_error", () => {
-  log("attempt to reconnect has failed");
-});
 
 
 
