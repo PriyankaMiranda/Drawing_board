@@ -8,7 +8,6 @@ body{
 }
 
 .header{
-/*  padding-left: 20px;*/
   width:100vw;
   height: 3vh;
   background-color: white;
@@ -16,6 +15,17 @@ body{
   display:flex;
   flex-direction: row;
   justify-content: space-between  
+}
+.timer-parent{
+  padding-top: 1vh;
+  padding-left: 1vh;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+#timer{
+  background-color:white;
+  display: inline-block;
 }
 
 #logo{
@@ -70,17 +80,15 @@ body{
 
 .footer{
   background-color: #cbe6ef;
-  display:flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+/*  align-items: center;*/
+/*  justify-content: space-between;*/
   width:100vw;
-  height: 18vh;
+  height: 12vh;
 }
 
 .row_chars{
   width:100vw;
-  height: 18vh;
+  height: 12vh;
 }
 
 
@@ -103,16 +111,6 @@ body{
     background-color: #cbe6ef;
 }
 
-
-#row_ready {
-  height: 4vh;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-
-
 .info {
     height: 2vh;
     background-color: #cbe6ef;
@@ -123,6 +121,18 @@ body{
 @media only screen and (min-device-width: 500px) {
   .header {
   height: 8vh;
+  }
+
+  .timer-parent{
+    padding-top: 3vh;
+    padding-left: 3vh;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+  }
+  #timer{
+    background-color:white;
+    display: inline-block;
   }
 
   #logo{
@@ -169,15 +179,15 @@ body{
     width:3vw;
   }
   .footer {
-  height: 15vh;
+    height: 15vh;
   }
   .row_char{  
       height: 15vh;
   }
-.info {
-    height: 5vh;
-    background-color: #cbe6ef;
-}
+  .info {
+      height: 5vh;
+      background-color: #cbe6ef;
+  }
 
 }
 

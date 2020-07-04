@@ -36,10 +36,17 @@ var chars = [];//for homepage
 var imgs = [];//for homepage
 var disp_chars = [];//for lobby
 var disp_imgs = [];//for lobby
+var game_chars = [];//for game
+var game_imgs = [];//for game
+
+var number_of_rounds = 1
+var curr_games = [];
 
 io.on("connection", (socket) => {
+// --------------------------------------------------------------------------
+// ---------------------------------HOMEPAGE---------------------------------
+// --------------------------------------------------------------------------
 	var addedUser = false;
-
 	socket.on("load chars", () => {
 		chars = [];
 		imgs = [];
@@ -73,7 +80,13 @@ io.on("connection", (socket) => {
 		socket.imgs = imgs;
 		socket.broadcast.emit("hide chars globally", { imgs: socket.imgs });
 	});
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------
+// -----------------------------------LOBBY----------------------------------
+// --------------------------------------------------------------------------
 	socket.on("reload chars for others not the one that left", () => {
 		disp_chars = [];
 		disp_imgs = [];
@@ -126,14 +139,9 @@ io.on("connection", (socket) => {
 			imgs: socket.disp_imgs,
 		});
 	});
+
 	socket.on("remove old buttons",()=>{
 		socket.broadcast.emit("remove old buttons");
-	});
-
-	socket.on("remove char from lobby",(data)=>{
-		console.log("removing chars from lobby!")
-		console.log(disp_chars)
-		
 	});
 
 	socket.on("enter game", (data) => {
@@ -181,24 +189,60 @@ io.on("connection", (socket) => {
 			username: socket.username,
 		});
 	});
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
-	// when the user disconnects.. perform this
-	socket.on("disconnect", () => {
-		socket.broadcast.emit("get chars for reloading upon disconnection");
 
-		socket.broadcast.emit("user left", {
-			username: socket.username,
-		});
-		
+
+
+
+
+
+// --------------------------------------------------------------------------
+// -----------------------------------GAME-----------------------------------
+// --------------------------------------------------------------------------
+
+	socket.on("start timer", (data) => {
+		var timeleft = 20;
+		var downloadTimer = setInterval(function(){
+			if(timeleft <= 0){
+				clearInterval(downloadTimer);
+			}
+			socket.broadcast.to(data.gameID).emit("update timer",{timeleft : timeleft});
+			timeleft -= 1;
+		}, 1000);
+
 	});
 
 
+	socket.on("show data to other players", (data) => {
+		// socket.broadcast.emit("show data to other players", data);
+		socket.broadcast.to(data.gameID).emit("show data to other players",data);
+	});
 
 
+	socket.on("start game", (data) => {
+		var options = ["pineapple", "book", "vampire", "cook"]
+		var word = options[Math.floor(Math.random()*options.length)];
+		
+		if(!curr_games.includes(data.gameID)){
+			curr_games.push(data.gameID)
+			io.of('/').in(data.gameID).clients((error, clients) => {
+				if (error) throw error;
+				console.log(clients);	
+				var my_clients = clients;
+				var curr_player = my_clients[0];
+				socket.emit('show word',{word:word, gameID:data.gameID, curr_player:curr_player});
+				// io.to(curr_player).emit('show word',{word:word, gameID:data.gameID, curr_player:curr_player});
+				// socket.broadcast.to(data.gameID).emit("start timer",data);
 
-
-
-
+			});
+		
+		}else{
+			console.log("idk")
+		}
+	});
 
 
 
@@ -208,10 +252,12 @@ io.on("connection", (socket) => {
 	socket.on("new message in game", (data) => {
 		socket.username = data.username;
 		socket.message = data.message;
+		socket.gameID = data.gameID;
 		// we tell the client to execute 'new message'
 		socket.broadcast.emit("new message in game", {
 			username: socket.username,
 			message: socket.message,
+			gameID: socket.gameID
 		});
 	});
 	// when the client emits 'add user', this listens and executes
@@ -220,37 +266,121 @@ io.on("connection", (socket) => {
 		// we store the username in the socket session for this client
 		socket.username = data.username;
 		socket.message = data.message;
+		socket.gameID = data.gameID;
 		addedUser = true;
 
 		// echo globally (all clients) that a person has connected
 		socket.broadcast.emit("user joined in game", {
 			username: socket.username,
 			message: socket.message,
+			gameID: socket.gameID
 		});
 	});
 	// when the client emits 'typing', we broadcast it to others
 	socket.on("typing in game", (data) => {
 		socket.broadcast.emit("typing in game", {
 			username: data.username,
+			gameID: data.gameID
 		});
 	});
 	// when the client emits 'stop typing', we broadcast it to others
 	socket.on("stop typing in game", () => {
 		socket.broadcast.emit("stop typing in game", {
 			username: socket.username,
+			gameID: socket.gameID
 		});
 	});
-	// when the user disconnects.. perform this
-	socket.on("disconnect in game", () => {
-		socket.broadcast.emit("user left in game", {
-			username: socket.username,
-		});
-		
-	});
-
-
-
-
 
 	socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
+
+	socket.on("reload chars for others not the one that left in game", () => {
+		game_chars = [];
+		game_imgs = [];
+		socket.emit("reload chars upon disconnection in game");
+	});
+
+	socket.on("reload chars for others except the one that left in game", (data) => {
+		if (!game_chars.includes(data.username) && !game_imgs.includes(data.img)) {
+			game_chars.push(data.username);
+			game_imgs.push(data.img);
+		}
+		socket.game_chars = game_chars;
+		socket.game_imgs = game_imgs;
+		socket.join(data.gameID);
+		
+
+		socket.emit("display chars in game", {
+			chars: socket.game_chars,
+			imgs: socket.game_imgs,
+			gameID: data.gameID
+		});
+		socket.broadcast.emit("display chars in game", {
+			chars: socket.game_chars,
+			imgs: socket.game_imgs,
+			gameID: data.gameID
+		});
+	});
+
+	socket.on("load chars in game", (data) => {		
+		game_chars = [];
+		game_imgs = [];
+		socket.emit("get chars for game",data);
+		socket.broadcast.emit("get chars for game",data);
+	});
+
+
+	socket.on("send chars for game", (data) => {
+		if (
+			!game_chars.includes(data.username) &&
+			!game_imgs.includes(data.img)
+		) {
+			game_chars.push(data.username);
+			game_imgs.push(data.img);
+		}
+		socket.game_chars = game_chars;
+		socket.game_imgs = game_imgs;
+		socket.join(data.gameID);
+		
+		socket.emit("display chars in game", {
+			chars: socket.game_chars,
+			imgs: socket.game_imgs,
+			gameID: data.gameID
+		});
+		socket.broadcast.emit("display chars in game", {
+			chars: socket.game_chars,
+			imgs: socket.game_imgs,
+			gameID: data.gameID
+		});
+	});
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+
+
+// --------------------------------------------------------------------------
+// -------------------------------DISCONNECTION------------------------------
+// --------------------------------------------------------------------------
+	// when the user disconnects.. perform this
+	socket.on("disconnect", () => {
+		if (!socket.gameID){
+			socket.broadcast.emit("get chars for reloading upon disconnection");
+			socket.broadcast.emit("user left", {
+				username: socket.username,
+			});			
+		}else{
+			socket.broadcast.emit("user left game", {
+				username: socket.username,
+				gameID: socket.gameID
+			});
+
+		}
+		
+	});
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+
+
+
+
 });
