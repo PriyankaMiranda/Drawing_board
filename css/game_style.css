@@ -16,15 +16,20 @@ body{
   flex-direction: row;
   justify-content: space-between  
 }
-.timer-parent{
+
+#timer-parent{
   padding-top: 1vh;
   padding-left: 1vh;
   display: table-cell;
   vertical-align: middle;
   text-align: center;
+  width:5vh !important;
 }
+
 #timer{
-  background-color:white;
+  height:1vh;
+  width:3vh !important;
+  color: #005582 !important;
   display: inline-block;
 }
 
@@ -80,8 +85,6 @@ body{
 
 .footer{
   background-color: #cbe6ef;
-/*  align-items: center;*/
-/*  justify-content: space-between;*/
   width:100vw;
   height: 12vh;
 }
@@ -123,16 +126,15 @@ body{
   height: 8vh;
   }
 
-  .timer-parent{
+  #timer-parent{
     padding-top: 3vh;
-    padding-left: 3vh;
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center;
+    padding-left: 1vh;
+    width:10vh !important;
   }
+
   #timer{
-    background-color:white;
-    display: inline-block;
+    height:3vh !important;
+    width:8vh !important;
   }
 
   #logo{
@@ -193,9 +195,26 @@ body{
 
 /* On screens that are 992px wide or less, go from four columns to two columns */
 @media screen and (max-width: 992px) {
+
+  .timer-parent{
+    padding-top: 0.5vh;
+    padding-left: 0.5vh;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  #timer{
+    height:1vh;
+    width:1vh;
+    background-color:white;
+    display: inline-block;
+  }
+
   .char {
     flex: 25%;
   }
+
 }
 
 

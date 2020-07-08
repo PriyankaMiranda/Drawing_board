@@ -5,24 +5,21 @@
     <meta charset="UTF-8">
     <title>Pictionary with Friends</title>
     <link rel="stylesheet" href="/game_style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
 </head>
 
 <body scroll="no">
     <div class="header">
-        <div class="timer-parent">
-            <progress id="timer" value="0" max="20" ></progress>
-        </div>
-
+        <h2 id="timer" value="0" max="80">80</h2>
         <img id="logo" src="/logo2_transparent.png"></img>
         <h2 id="word" style="color: #005582">Get Ready...</h2>
         <h2 id="curr_player" style="color: #005582">(0_0)</h2>
-
     </div>
-
     <div id="flex-container">
         <div class="drawing-board">
             <div class="colors">

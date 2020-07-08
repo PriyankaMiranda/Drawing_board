@@ -5,8 +5,35 @@ body{
   text-align: center;
   background-color: white;
 }
+.overlay{
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f6f6ff;
+  z-index: 2;
+  cursor: pointer;
+}
 
-
+#new-game{
+  margin-top: 35vh;
+  margin-bottom: 2vh;
+}
+#existing-game{
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+}
+.overlay-text{
+  text-align: center;
+}
+.btn.btn-success{
+  background-color: #005582;
+  border: 2px solid #005582; 
+}
 .header{
   padding-left: 20px;
   width:100vw;

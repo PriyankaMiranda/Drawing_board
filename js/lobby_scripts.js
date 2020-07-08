@@ -40,14 +40,22 @@ var typing = false;
 var lastTypingTime;
 var username;
 var img;
+var gameID;
+
 
 const cookie_val = document.cookie;
 username = cookie_val.split("name=")[1].split(";")[0];
 img = cookie_val.split("img=")[1].split(";")[0];
+gameID = cookie_val.split("gameID=")[1].split(";")[0];
 
+if(gameID == "abc"){
+  gameID = Math.random().toString(36).substring(7).substring(5, 1);
+
+  document.cookie = "gameID="+gameID;
+}
+document.getElementById("gameID").innerHTML += gameID;
 
 function start_game(e){
-  let gameID = Math.random().toString(36).substring(7);
   socket.emit("enter game", {gameID:gameID})
 }
 
@@ -90,8 +98,6 @@ socket.on("enter game", (data) => {
   username = cookie_val.split("name=")[1].split(";")[0];
   img = cookie_val.split("img=")[1].split(";")[0];
   socket.emit("remove char from lobby", {username:username, img:img})
-
-  console.log(data.gameID)
   document.cookie = "gameID=" + data.gameID;
   window.location.href = "/game";
 });
@@ -117,35 +123,6 @@ socket.on("remove old buttons", () => {
     parent.removeChild(parent.lastElementChild);
   }
 });
-// socket.on("refresh interval function", () => {
-//   socket.emit("refresh interval function")
-// });
-
-// socket.on("delete ready button", () => {
-//   var parent = document.getElementById("row_ready");
-//   while (parent.childElementCount>1) parent.removeChild(parent.firstChild);
-// });
-
-// socket.on("set ready button", () => {
-// var parent = document.getElementById("row_ready");
-// var btn = document.createElement("BUTTON");
-// console.log("Leader!")
-// btn.innerHTML = "ready";
-// btn.style.backgroundColor = "#cbe6ef";
-// btn.style.height = "4vh"; 
-// btn.style.marginTop= "0px";
-// btn.style.marginLeft= "50px";
-// btn.Id = "ready-button";
-// btn.style.borderRadius = "12px";
-// btn.style.width = "90%";
-// btn.style.textAlign = "center";
-// btn.style.verticalAlign = "middle";
-// parent.appendChild(btn);
-// btn.onclick = function() {
-//   start_game(this);
-// };
-// });
-
 
 // Sets the client's username
 const setUsername = () => {
@@ -353,9 +330,7 @@ $window.keydown((event) => {
   }
 });
 
-$inputMessage.on("input", () => {
-  updateTyping();
-});
+$inputMessage.on("input", () => {updateTyping();}); 
 
 // Click events
 

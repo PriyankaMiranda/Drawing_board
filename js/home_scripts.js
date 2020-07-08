@@ -5,6 +5,19 @@ const cookie_val = document.cookie;
 
 load_data()
 
+document.getElementById("new-game").onclick= function(e) {
+  e.preventDefault()
+  document.cookie = "gameID=abc";
+  window.location.href = "/lobby";
+};
+
+document.getElementById("existing-game").onclick= function(e) {
+  e.preventDefault()  
+  var gameID = document.getElementById("game-id").value
+  document.cookie = "gameID="+gameID;
+  window.location.href = "/lobby";
+};
+
 function load_data(){
   var logo = document.getElementById("logo");
   logo.src = "/logo2_transparent.png";
@@ -95,7 +108,7 @@ function submit_operation(e) {
     var loc_arr = e.parentNode.childNodes[0].src.split("/");
     var arr_len = loc_arr.length;
     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
-    window.location.href = "/lobby";
+    document.getElementsByClassName("overlay")[0].style.display = "block"
   }
   else if(tagName == 'FORM'){
     e.preventDefault();
@@ -103,7 +116,7 @@ function submit_operation(e) {
     var loc_arr = e.target.parentNode.childNodes[0].src.split("/");
     var arr_len = loc_arr.length;
     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
-    window.location.href = "/lobby";
+    document.getElementsByClassName("overlay")[0].style.display = "block"
   }
 
   if (cookie_name == "") {
@@ -112,7 +125,7 @@ function submit_operation(e) {
     document.cookie = document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
     document.cookie = "img=" + cookie_img;
     document.cookie = "name=" + cookie_name;
-    window.location.href = "/lobby";
+    document.getElementsByClassName("overlay")[0].style.display = "block"
   }
   
   }
