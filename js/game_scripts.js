@@ -91,12 +91,11 @@ var lastTypingTime;
 //-----------------------------------------------------------------------------------------
 var socket = io();
 socket.emit("load chars in game", {username: username, img: img , gameID:gameID});
-setTimeout( function(){
 socket.emit("update client list",{gameID:gameID, username: username, img:img});
-socket.emit("start game",{gameID:gameID, username: username, img:img});
-}, 1000);
-// setTimeout( function() {socket.emit("start game", {gameID:gameID, username: username, img:img});
-// }, 10000);
+// socket.emit("start game",{gameID:gameID, username: username, img:img});
+
+
+
 //-----------------------------------------------------------------------------------------  
 //-----------------------------------------------------------------------------------------  
 
@@ -609,13 +608,26 @@ socket.on("get game characters", () => {
   }
 });
 
+socket.on("done updating client list",(data)=>{
+  socket.emit("start game",(data));
+});
+
+socket.on("update client list",(data)=>{
+  socket.emit("update client list",(data))
+});
+
+socket.on("start game",(data)=>{
+  socket.emit("start game",(data))
+});
+
 socket.on("show word",(data)=>{
   document.getElementById("word").innerHTML = data.word;
   console.log("showing word!")
-  socket.emit("show data to other players",{word:data.word, gameID:data.gameID, curr_player:data.curr_player, clients:data.clients, curr_loc:data.curr_loc, username:username})
-})
+  // socket.emit("show data to other players",{word:data.word, gameID:data.gameID, curr_player:data.curr_player, clients:data.clients, curr_loc:data.curr_loc, username:username})
+});
 
 socket.on("show data",(data)=>{
+  console.log(data.word)
   var sent = data.word
   var words = sent.split(" ");
   var dashes;
@@ -625,14 +637,13 @@ socket.on("show data",(data)=>{
     final_dashes = final_dashes+"&nbsp&nbsp"+ dashes  
   });
   document.getElementById("word").innerHTML = final_dashes;
-  document.getElementById("curr_player").innerHTML = data.username;
-
-})
+  // document.getElementById("curr_player").innerHTML = data.username;
+});
 
 socket.on("update timer",(data)=>{
   console.log(data.timeleft)
   document.getElementById("timer").innerHTML = data.timeleft;
-})
+});
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 

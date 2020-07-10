@@ -204,56 +204,77 @@ io.on("connection", (socket) => {
 	var my_client_dict = {};
 	var current_client_dict = {};
 	var current_client_dict_loc = {};
+	var current_word_dict = {}
 	var options = ["pineapple book", "vampire book", "book vampire", "cook bottles"]
-	var word = options[Math.floor(Math.random()*options.length)];
+	
 	
 
-	function timer(gameID){
+
+	function next_round(data){
+    	console.log("Next round!")
+		current_client_dict_loc[data.gameID]+=1
+		console.log(my_client_dict[data.gameID][current_client_dict_loc[data.gameID]])
+		try{
+			var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
+		}catch{
+			current_client_dict_loc[data.gameID] = 0
+			var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
+		}
+	
+		// intitialization of current game and current word
+		var word = options[Math.floor(Math.random()*options.length)];
+		current_word_dict[data.gameID] = word
+		
+		socket.emit('show data', {word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]})
+		io.to(curr_player).emit('show word',{word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]});
+		timer(data)
+	}
+	
+	function timer(data){
 		var timeleft = 60;
 		var inner_loop_done = false;
-
 		var downloadTimer = setInterval(function(){
 			if(timeleft <= 0){
 				clearInterval(downloadTimer);
 			}
 			socket.emit("update timer",{timeleft : timeleft});
-			socket.broadcast.to(gameID).emit("update timer",{timeleft : timeleft});
+			socket.broadcast.to(data.gameID).emit("update timer",{timeleft : timeleft});
 			timeleft -= 1;
-		console.log("done1")
-		inner_loop_done = true
+			inner_loop_done = true
 		}, 1000);
 		if(inner_loop_done == true){
-			console.log("done2")
-		}else{
-			console.log("done3")
+			next_round(data)
 		}
 	}
-
 	socket.on("update client list", (data) => {
-		io.of('/').in(data.gameID).clients((error, clients) => {
-			my_client_dict[data.gameID] = clients
-			current_client_dict_loc[data.gameID] = 0
-			current_client_dict[data.gameID] = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]];
-		});
+			if(!current_client_dict_loc[data.gameID]){
+				// intitialization of location
+				current_client_dict_loc[data.gameID] = 0
+				my_client_dict[data.gameID]=[]
+			}
+			my_client_dict[data.gameID].push(socket.id)
+			current_client_dict[data.gameID] = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]];	
+			socket.emit("done updating client list",data)
 	});
 
 	socket.on("start game", (data) => {
-		if(!curr_games.includes(data.gameID)){
-			var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
-			io.to(curr_player).emit('show word',{word:word, gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]});
-			timer(data.gameID)
-		}else{
-			console.log("other players joinined")
-		}
+		if(!curr_games.includes(data.gameID) && !current_word_dict[data.gameID]){
+			// intitialization of current game and current word
+			var word = options[Math.floor(Math.random()*options.length)];
+			curr_games.push(data.gameID)
+			current_word_dict[data.gameID] = word
+			timer(data)
+		}					
+
+		
+		var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
+		var my_data = {word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]}
+		socket.emit('show data', my_data)
+		socket.broadcast.to(data.gameID).emit("show data",my_data);
+		io.to(curr_player).emit('show word', my_data);
+	
 	});
 
-	socket.on("show data to other players", (data) => {
-		my_client_dict[data.gameID].forEach(function(client){
-			if(data.curr_player!=client){
-				io.to(client).emit('show data',data);
-			}
-		});
-	});
 
 	// when the client emits 'new message', this listens and executes
 	socket.on("new message in game", (data) => {
