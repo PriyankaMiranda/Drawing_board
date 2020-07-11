@@ -609,7 +609,9 @@ socket.on("get game characters", () => {
 });
 
 socket.on("done updating client list",(data)=>{
-  socket.emit("start game",(data));
+  setTimeout(function() {
+    socket.emit("start game",(data));
+  }, 1000);
 });
 
 socket.on("update client list",(data)=>{
