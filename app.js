@@ -266,9 +266,9 @@ io.on("connection", (socket) => {
 			timer(data)
 		}					
 
-		
 		var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
 		var my_data = {word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]}
+		consoel.log(my_data)
 		socket.emit('show data', my_data)
 		socket.broadcast.to(data.gameID).emit("show data",my_data);
 		io.to(curr_player).emit('show word', my_data);
