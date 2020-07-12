@@ -609,6 +609,12 @@ socket.on("get game characters", () => {
 });
 
 
+socket.on("done updating client list",(data)=>{
+    socket.emit("save client list", data);
+});
+
+
+
 socket.on("update timer and data",(data)=>{
   document.getElementById("timer").innerHTML = data.timeleft;
   var sent = data.curr_word

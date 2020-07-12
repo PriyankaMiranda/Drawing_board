@@ -204,38 +204,14 @@ io.on("connection", (socket) => {
 	var client_dict = {};
 	var current_client_dict_loc = {};
 	
-	var current_word_dict = {}
+	var current_word_dict = {};
 	var current_word_dict_loc = {};
 	
-	function update_variables(data){
-    	console.log("Next round!")
-		current_client_dict_loc[data.gameID]+=1
-		current_word_dict_loc[data.gameID]+=1
-		try{
-			var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
-		}catch{
-			current_client_dict_loc[data.gameID] = 0
-			var curr_player = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]]
-		}
-		try{
-			var curr_word = current_word_dict[data.gameID][current_word_dict_loc[data.gameID]]
-		}catch{
-			// end game or get new sets of words
-			console.log("Ending game!!!!")
-			console.log("All words are done!")
-		}	
-		// // intitialization of current game and current word
-		// var word = options[Math.floor(Math.random()*options.length)];
-		// current_word_dict[data.gameID] = word
-		
-		// socket.emit('show data', {word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]})
-		// io.to(curr_player).emit('show word',{word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:curr_player, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]});
-		// timer(data)
-	}
+	var timeleft = {};
+	var user_num_turns = {};
 
-	
 	function update_timer_and_data(data){
-		var timeleft = 60;
+		timeleft[data.gameID] = 60;
 		var downloadTimer = setInterval(function(){
 			if(timeleft <= 0){
 				clearInterval(downloadTimer);
@@ -248,21 +224,28 @@ io.on("connection", (socket) => {
 				curr_client_loc : current_client_dict_loc[data.gameID],
 				curr_player : client_dict[data.gameID][current_client_dict_loc[data.gameID]], 
 				gameID : data.gameID,
-				timeleft : timeleft
+				timeleft : timeleft[data.gameID]
 			}
-
+			console.log(my_data)
 			socket.emit("update timer and data",my_data);
 			socket.broadcast.to(data.gameID).emit("update timer and data",my_data);			
 			io.to(my_data.curr_player).emit('show data to person drawing', my_data);
-			timeleft -= 1;
+			timeleft[data.gameID] -= 1;
+
+			if(timeleft[data.gameID] == -1){
+				console.log("Done")
+				console.log(my_data)
+				current_client_dict_loc[data.gameID] = (current_client_dict_loc[data.gameID] + 1)%(client_dict[data.gameID].length)
+				current_word_dict_loc[data.gameID] = (current_word_dict_loc[data.gameID] + 1)%(current_word_dict[data.gameID].length)
+				console.log(my_data)
+			}
+		
 		}, 1000);
-		console.log("Done_x")
-		console.log(my_data)
-		current_client_dict_loc[data.gameID] = (current_client_dict_loc[data.gameID] + 1)%(client_dict[data.gameID].length)
-		current_word_dict_loc[data.gameID] = (current_word_dict_loc[data.gameID] + 1)%(current_word_dict[data.gameID].length)
-		console.log(my_data)
+
 	}
-	socket.on("update client list", (data) => {
+
+	socket.on("save client list", (data) => {
+		client_dict[data.gameID] = data.clients;
 			if(!curr_games.includes(data.gameID)){
 				curr_games.push(data.gameID)
 				//---------------------------need to change this later----------------------------
@@ -272,27 +255,20 @@ io.on("connection", (socket) => {
 				current_client_dict_loc[data.gameID] = 0
 				current_word_dict_loc[data.gameID] = 0
 				current_word_dict[data.gameID] = chosen_options;
-				update_timer_and_data(data)
+				for(var x = 0; x < client_dict[data.gameID].length; x++){
+					user_num_turns[data.gameID].push(0) 
+				}
+				console.log(user_num_turns[data.gameID])
+				// update_timer_and_data(data)
 			}
-			io.clients((error, clients) => {
-				if (error) throw error;
-				client_dict[data.gameID] = clients			
-			});			
-
 	});
 
-	socket.on("get game data", (data) => {
-		var my_data = {
-			word_list : current_word_dict[data.gameID], 
-			curr_word_loc : current_word_dict_loc[data.gameID],
-			curr_word : current_word_dict[data.gameID][current_word_dict_loc[data.gameID]],
-			clients : my_client_dict[data.gameID], 
-			curr_client_loc : current_client_dict_loc[data.gameID],
-			curr_player : my_client_dict[data.gameID][current_client_dict_loc[data.gameID]], 
-			gameID : data.gameID
-		}
-		socket.emit('show data', my_data);
-		io.to(my_data.curr_player).emit('show data to person drawing', my_data);
+	socket.on("update client list", (data) => {
+		io.clients((error, clients) => {
+			if (error) throw error;
+			client_dict[data.gameID] = clients		
+			socket.emit("done updating client list",{clients:clients, gameID:data.gameID, username: data.username, img:data.img})
+		});	
 	});
 
 
