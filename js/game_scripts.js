@@ -608,18 +608,20 @@ socket.on("get game characters", () => {
   }
 });
 
-socket.on("done updating client list",(data)=>{
-  setTimeout(function() {
-    socket.emit("start game",(data));
-  }, 1000);
-});
-
 socket.on("update client list",(data)=>{
   socket.emit("update client list",(data))
 });
 
+socket.on("done updating client list",(data)=>{
+  setTimeout(function() {
+    socket.emit("set or get word",(data));
+  }, 1000);
+});
+
 socket.on("start game",(data)=>{
-  socket.emit("start game",(data))
+  setTimeout(function() {
+    socket.emit("start game",(data))
+  }, 1000);
 });
 
 socket.on("show word",(data)=>{
