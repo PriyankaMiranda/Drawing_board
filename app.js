@@ -208,8 +208,10 @@ io.on("connection", (socket) => {
 	var current_word_dict_loc = {};
 	
 	var timeleft = {};
-	var user_num_turns = {};
 
+	//this includes, the unique id for the client, the number of turns it has completed and other info if needed
+	var client_data = {};
+	
 	function update_timer_and_data(data){
 		timeleft[data.gameID] = 60;
 		var downloadTimer = setInterval(function(){
@@ -233,6 +235,7 @@ io.on("connection", (socket) => {
 			timeleft[data.gameID] -= 1;
 
 			if(timeleft[data.gameID] == -1){
+				user_num_turns[data.gameID][my_data.curr_player] += 1
 				console.log("Done")
 				console.log(my_data)
 				current_client_dict_loc[data.gameID] = (current_client_dict_loc[data.gameID] + 1)%(client_dict[data.gameID].length)
@@ -246,24 +249,43 @@ io.on("connection", (socket) => {
 
 	socket.on("save client list", (data) => {
 		client_dict[data.gameID] = data.clients;
-			if(!curr_games.includes(data.gameID)){
-				curr_games.push(data.gameID)
-				//---------------------------need to change this later----------------------------
-				var chosen_options = ["eating banana", "tailbone", "vampire", "cookie"]
-				//--------------------------------------------------------------------------------
-				// intitialization of location
-				current_client_dict_loc[data.gameID] = 0
-				current_word_dict_loc[data.gameID] = 0
-				current_word_dict[data.gameID] = chosen_options;
-				for(var x = 0; x < client_dict[data.gameID].length; x++){
-					user_num_turns[data.gameID].push(0) 
-				}
-				console.log(user_num_turns[data.gameID])
-				// update_timer_and_data(data)
-			}
+		// user_num_turns[data.gameID]={}
+		// for(var x = 0; x < client_dict[data.gameID].length; x++){
+			
+		// 	client_data[data.gameID][client_dict[data.gameID][x]]['unique-id'] = 123
+		// 	client_data[data.gameID][client_dict[data.gameID][x]]['score'] = 123
+		// 	client_data[data.gameID][client_dict[data.gameID][x]]['turn'] = 123
+		// 	if(!user_num_turns[data.gameID][client_dict[data.gameID][x]]){
+		// 		user_num_turns[data.gameID][client_dict[data.gameID][x]] = 0
+		// 	}
+		// }
+		console.log(user_num_turns[data.gameID])
+
+		if(!curr_games.includes(data.gameID)){
+			curr_games.push(data.gameID)
+			//---------------------------need to change this later----------------------------
+			var chosen_options = ["eating banana", "tailbone", "vampire", "cookie"]
+			//--------------------------------------------------------------------------------
+			// intitialization of location
+			current_client_dict_loc[data.gameID] = 0
+			current_word_dict_loc[data.gameID] = 0
+			current_word_dict[data.gameID] = chosen_options;
+			// update_timer_and_data(data)
+		}
 	});
 
-	socket.on("update client list", (data) => {
+	socket.on("update client list - old user", (data) => {
+		for(var x=0;x<client_data[data.gameID].length;x++){
+
+		}
+
+	});
+
+	socket.on("update client list - new user", (data) => {
+		client_data[data.gameID][data.id]['unique-id'] = Math.random().toString(36).substring(7)
+		socket.emit("send unique id to the user", {uniqueID : client_data[data.gameID][data.id]['unique-id']})
+		client_data[data.gameID][data.id]['turns'] = 0
+		client_data[data.gameID][data.id]['score'] = 0	
 		io.clients((error, clients) => {
 			if (error) throw error;
 			client_dict[data.gameID] = clients		

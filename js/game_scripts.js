@@ -91,7 +91,13 @@ var lastTypingTime;
 //-----------------------------------------------------------------------------------------
 var socket = io();
 socket.emit("load chars in game", {username: username, img: img , gameID:gameID});
-socket.emit("update client list",{gameID:gameID, username: username, img:img});
+try{
+  uniqueID = cookie_val.split("uniqueID=")[1].split(";")[0];
+  socket.emit("update client list - old user",{id:socket.id, uniqueID:uniqueID, gameID:gameID, username: username, img:img});
+}
+catch{
+  socket.emit("update client list - new user",{id:socket.id, gameID:gameID, username: username, img:img});
+}
 // socket.emit("start game",{gameID:gameID, username: username, img:img});
 
 
@@ -608,12 +614,13 @@ socket.on("get game characters", () => {
   }
 });
 
+socket.on("send unique id to the user", (data) => {
+  document.cookie = "uniqueID=" + data.uniqueID;
+});
 
 socket.on("done updating client list",(data)=>{
     socket.emit("save client list", data);
 });
-
-
 
 socket.on("update timer and data",(data)=>{
   document.getElementById("timer").innerHTML = data.timeleft;
