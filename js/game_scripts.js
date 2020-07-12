@@ -608,31 +608,10 @@ socket.on("get game characters", () => {
   }
 });
 
-socket.on("update client list",(data)=>{
-  socket.emit("update client list",(data))
-});
 
-socket.on("done updating client list",(data)=>{
-  setTimeout(function() {
-    socket.emit("get game data",(data));
-  }, 1000);
-});
-
-socket.on("start game",(data)=>{
-  setTimeout(function() {
-    socket.emit("start game",(data))
-  }, 1000);
-});
-
-socket.on("show word",(data)=>{
-  document.getElementById("word").innerHTML = data.word;
-  console.log("showing word!")
-  // socket.emit("show data to other players",{word:data.word, gameID:data.gameID, curr_player:data.curr_player, clients:data.clients, curr_loc:data.curr_loc, username:username})
-});
-
-socket.on("show data",(data)=>{
-  console.log(data.word)
-  var sent = data.word
+socket.on("update timer and data",(data)=>{
+  document.getElementById("timer").innerHTML = data.timeleft;
+  var sent = data.curr_word
   var words = sent.split(" ");
   var dashes;
   var final_dashes = "";
@@ -641,13 +620,11 @@ socket.on("show data",(data)=>{
     final_dashes = final_dashes+"&nbsp&nbsp"+ dashes  
   });
   document.getElementById("word").innerHTML = final_dashes;
-  // document.getElementById("curr_player").innerHTML = data.username;
 });
 
-socket.on("update timer",(data)=>{
-  console.log(data.timeleft)
-  document.getElementById("timer").innerHTML = data.timeleft;
-});
+socket.on("show data to person drawing",(data)=>{
+  document.getElementById("word").innerHTML = data.curr_word;
+ });
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 

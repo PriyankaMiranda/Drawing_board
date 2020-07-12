@@ -201,15 +201,12 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // -----------------------------------GAME-----------------------------------
 // --------------------------------------------------------------------------
-	var my_client_dict = {};
-	var current_client_dict = {};
+	var client_dict = {};
 	var current_client_dict_loc = {};
+	
 	var current_word_dict = {}
 	var current_word_dict_loc = {};
 	
-	
-
-
 	function update_variables(data){
     	console.log("Next round!")
 		current_client_dict_loc[data.gameID]+=1
@@ -237,22 +234,33 @@ io.on("connection", (socket) => {
 	}
 
 	
-	function timer(data){
+	function update_timer_and_data(data){
 		var timeleft = 60;
-		var inner_loop_done = false;
 		var downloadTimer = setInterval(function(){
 			if(timeleft <= 0){
 				clearInterval(downloadTimer);
 			}
-			socket.emit("update timer",{timeleft : timeleft});
-			socket.broadcast.to(data.gameID).emit("update timer",{timeleft : timeleft});
+			var my_data = {
+				word_list : current_word_dict[data.gameID], 
+				curr_word_loc : current_word_dict_loc[data.gameID],
+				curr_word : current_word_dict[data.gameID][current_word_dict_loc[data.gameID]],
+				clients : client_dict[data.gameID], 
+				curr_client_loc : current_client_dict_loc[data.gameID],
+				curr_player : client_dict[data.gameID][current_client_dict_loc[data.gameID]], 
+				gameID : data.gameID,
+				timeleft : timeleft
+			}
+
+			socket.emit("update timer and data",my_data);
+			socket.broadcast.to(data.gameID).emit("update timer and data",my_data);			
+			io.to(my_data.curr_player).emit('show data to person drawing', my_data);
 			timeleft -= 1;
-			inner_loop_done = true
 		}, 1000);
-		if(inner_loop_done == true){
-			// update_variables(data)
-			// next_round(data)
-		}
+		console.log("Done_x")
+		console.log(my_data)
+		current_client_dict_loc[data.gameID] = (current_client_dict_loc[data.gameID] + 1)%(client_dict[data.gameID].length)
+		current_word_dict_loc[data.gameID] = (current_word_dict_loc[data.gameID] + 1)%(current_word_dict[data.gameID].length)
+		console.log(my_data)
 	}
 	socket.on("update client list", (data) => {
 			if(!curr_games.includes(data.gameID)){
@@ -263,45 +271,29 @@ io.on("connection", (socket) => {
 				// intitialization of location
 				current_client_dict_loc[data.gameID] = 0
 				current_word_dict_loc[data.gameID] = 0
-				current_word_dict[data.gameID] = chosen_options[current_word_dict_loc[data.gameID]];
-				timer(data)
+				current_word_dict[data.gameID] = chosen_options;
+				update_timer_and_data(data)
 			}
-
 			io.clients((error, clients) => {
 				if (error) throw error;
-				console.log(clients)
-				my_client_dict[data.gameID] = clients	
-				current_client_dict[data.gameID] = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]];			
-			});
-
-			socket.emit("done updating client list",data)
+				client_dict[data.gameID] = clients			
+			});			
 
 	});
 
 	socket.on("get game data", (data) => {
-		var my_data = {word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:current_client_dict, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]}
-		console.log(my_data)
+		var my_data = {
+			word_list : current_word_dict[data.gameID], 
+			curr_word_loc : current_word_dict_loc[data.gameID],
+			curr_word : current_word_dict[data.gameID][current_word_dict_loc[data.gameID]],
+			clients : my_client_dict[data.gameID], 
+			curr_client_loc : current_client_dict_loc[data.gameID],
+			curr_player : my_client_dict[data.gameID][current_client_dict_loc[data.gameID]], 
+			gameID : data.gameID
+		}
 		socket.emit('show data', my_data);
-		// socket.broadcast.to(data.gameID).emit("show data",my_data);
-		io.to(curr_player).emit('show data to person drawing', my_data);
-
-		setTimeout(function() {
-		}, 1000);
-	
+		io.to(my_data.curr_player).emit('show data to person drawing', my_data);
 	});
-
-	socket.on("start game", (data) => {
-		console.log(current_word_dict[data.gameID])
-
-		// socket.emit("start game",my_data)
-		// setTimeout(function() {
-		// }, 1000);
-		// socket.emit('show data', data);
-		// socket.broadcast.to(data.gameID).emit("show data",my_data);
-		// io.to(curr_player).emit('show word', data);
-	
-	});
-
 
 
 	// when the client emits 'new message', this listens and executes
