@@ -614,7 +614,7 @@ socket.on("update client list",(data)=>{
 
 socket.on("done updating client list",(data)=>{
   setTimeout(function() {
-    socket.emit("set or get word",(data));
+    socket.emit("get game data",(data));
   }, 1000);
 });
 

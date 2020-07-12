@@ -250,12 +250,12 @@ io.on("connection", (socket) => {
 			inner_loop_done = true
 		}, 1000);
 		if(inner_loop_done == true){
-			update_variables(data)
-			next_round(data)
+			// update_variables(data)
+			// next_round(data)
 		}
 	}
 	socket.on("update client list", (data) => {
-			if(!curr_games[data.gameID]){
+			if(!curr_games.includes(data.gameID)){
 				curr_games.push(data.gameID)
 				//---------------------------need to change this later----------------------------
 				var chosen_options = ["eating banana", "tailbone", "vampire", "cookie"]
@@ -269,25 +269,24 @@ io.on("connection", (socket) => {
 
 			io.clients((error, clients) => {
 				if (error) throw error;
+				console.log(clients)
 				my_client_dict[data.gameID] = clients	
 				current_client_dict[data.gameID] = my_client_dict[data.gameID][current_client_dict_loc[data.gameID]];			
 			});
 
 			socket.emit("done updating client list",data)
+
 	});
 
 	socket.on("get game data", (data) => {
-		
 		var my_data = {word:current_word_dict[data.gameID], gameID:data.gameID, curr_player:current_client_dict, clients:my_client_dict[data.gameID], curr_loc:current_client_dict_loc[data.gameID]}
 		console.log(my_data)
+		socket.emit('show data', my_data);
+		// socket.broadcast.to(data.gameID).emit("show data",my_data);
+		io.to(curr_player).emit('show data to person drawing', my_data);
 
-		// socket.emit("start game",my_data)
-			
-			// socket.emit('show data', my_data);
-			// socket.broadcast.to(data.gameID).emit("show data",my_data);
-			// io.to(curr_player).emit('show word', my_data);
-		// setTimeout(function() {
-		// }, 1000);
+		setTimeout(function() {
+		}, 1000);
 	
 	});
 
