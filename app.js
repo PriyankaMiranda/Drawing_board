@@ -275,21 +275,46 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("update client list - old user", (data) => {
-		for(var x=0;x<client_data[data.gameID].length;x++){
+		console.log("old user")
+		console.log(client_data[data.gameID])
+		
+		// for(var x=0;x<client_data[data.gameID].length;x++){
+		// 	client_data[data.gameID]
 
-		}
+		// }
 
 	});
 
+	socket.on("sent current client data", (data) => {
+		console.log(data)
+		client_data[data.gameID][socket.id] = {id : Math.random().toString(36).substring(7), turns : 0, score : 0}
+		console.log(client_data)
+	});
+
+
 	socket.on("update client list - new user", (data) => {
-		client_data[data.gameID][data.id]['unique-id'] = Math.random().toString(36).substring(7)
-		socket.emit("send unique id to the user", {uniqueID : client_data[data.gameID][data.id]['unique-id']})
-		client_data[data.gameID][data.id]['turns'] = 0
-		client_data[data.gameID][data.id]['score'] = 0	
+		console.log("new user")
+		client_data[data.gameID] = []
+		socket.broadcast.to(data.gameID).emit("get current client data");			
+		// socket.emit("get current client data");			
+			
+		// client_data[data.gameID].push(socket.id)
+		// console.log(client_data[data.gameID])
+
+		// var x = {socket.id : {id : Math.random().toString(36).substring(7), turns : 0, score : 0}}
+		// client_data[data.gameID][socket.id] = {id : Math.random().toString(36).substring(7), turns : 0, score : 0}
+
+
+		// client_data[data.gameID][data.id]['unique-id'] = Math.random().toString(36).substring(7)
+		// socket.emit("send unique id to the user", {uniqueID : client_data[data.gameID][data.id]['unique-id']})
+		// client_data[data.gameID][data.id]['turns'] = 0
+		// client_data[data.gameID][data.id]['score'] = 0	
+
 		io.clients((error, clients) => {
 			if (error) throw error;
-			client_dict[data.gameID] = clients		
-			socket.emit("done updating client list",{clients:clients, gameID:data.gameID, username: data.username, img:data.img})
+			client_dict[data.gameID] = clients	
+			// socket.emit("done updating client list",{clients:clients, gameID:data.gameID, username: data.username, img:data.img})
+		
 		});	
 	});
 

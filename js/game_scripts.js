@@ -93,12 +93,12 @@ var socket = io();
 socket.emit("load chars in game", {username: username, img: img , gameID:gameID});
 try{
   uniqueID = cookie_val.split("uniqueID=")[1].split(";")[0];
-  socket.emit("update client list - old user",{id:socket.id, uniqueID:uniqueID, gameID:gameID, username: username, img:img});
+  socket.emit("update client list - old user",{uniqueID:uniqueID, gameID:gameID, username: username, img:img});
 }
 catch{
-  socket.emit("update client list - new user",{id:socket.id, gameID:gameID, username: username, img:img});
+  socket.emit("update client list - new user",{gameID:gameID, username: username, img:img});
 }
-// socket.emit("start game",{gameID:gameID, username: username, img:img});
+
 
 
 
@@ -613,6 +613,14 @@ socket.on("get game characters", () => {
     socket.emit("send chars for game", {id:socket.id, username: username, img: img, gameID:gameID});
   }
 });
+
+var client_data = {}
+
+socket.on("my client list", (data) => {
+    client_data = data.client_data 
+    // socket.emit("send current client data", {id:socket.id, username: username, img: img, gameID:gameID});
+});
+
 
 socket.on("send unique id to the user", (data) => {
   document.cookie = "uniqueID=" + data.uniqueID;
