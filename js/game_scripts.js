@@ -614,16 +614,18 @@ socket.on("get game characters", () => {
   }
 });
 
-var client_data = {}
+var client_dict = []
 
-socket.on("my client list", (data) => {
-    client_data = data.client_data 
-    // socket.emit("send current client data", {id:socket.id, username: username, img: img, gameID:gameID});
+socket.on("set my client data list", (data) => {
+    client_dict = data.client_dict 
 });
 
+socket.on("update client list", (data) => {
+    socket.emit("check if update is required", {client_dict:client_dict});
+});
 
-socket.on("send unique id to the user", (data) => {
-  document.cookie = "uniqueID=" + data.uniqueID;
+socket.on("send data to the user", (data) => {
+  document.cookie = "uniqueID=" + data.my_data;
 });
 
 socket.on("done updating client list",(data)=>{
