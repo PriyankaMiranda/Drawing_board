@@ -248,11 +248,7 @@ io.on("connection", (socket) => {
 	}
 
 	socket.on("save client list", (data) => {
-
 		if(!curr_games.includes(data.gameID)){
-			console.log("saving client originally!")		
-			console.log(client_dict)
-
 			var my_clients = []
 			data.clients.forEach(function(client) {
 				my_clients.push([client,Math.random().toString(36).substring(7),0, 0])
@@ -261,7 +257,6 @@ io.on("connection", (socket) => {
 
 			socket.emit("set my client data list", {client_dict:client_dict[data.gameID]});
 			socket.broadcast.to(data.gameID).emit("set my client data list", {client_dict:client_dict[data.gameID]});
-
 
 			curr_games.push(data.gameID)
 			//---------------------------need to change this later----------------------------
@@ -273,27 +268,29 @@ io.on("connection", (socket) => {
 			current_word_dict[data.gameID] = chosen_options;
 			// update_timer_and_data(data)
 		}
-		else{
-			// only update client list
-			socket.emit("update client list");
-			// socket.broadcast.to(data.gameID).emit("get client data list");	
-		}
 	});
 
 	socket.on("check if update is required", (data) => {
 		data.client_dict.forEach(function(client) {
-			console.log(client[0])
 			if(socket.id == client[0]){
-				console.log("Match!")
+				socket.emit("send unique id",{id:client[1]});
 			}
 		});
-		console.log(socket.id)
-		console.log(data)
 	});
 
 	socket.on("return client data list", (data) => {
+		if(!client_data[data.gameID]){
+			data.client_dict.forEach(function(client) {
+				if(data.uniqueID == client[1]){
+					//old user data exists!
+					socket.broadcast.to(data.gameID).emit("get existing client data list",{return_address:socket.id,uniqueID:data.uniqueID});
+				}
+			});
+			client_data[data.gameID] = data.client_dict
+
 		console.log("returning client data list")
 		console.log(data.client_data)
+		}
 		// for (var x=0; x<data.client_data.length; x++){
 		// 	console.log(data.client_data[x])
 
@@ -306,7 +303,7 @@ io.on("connection", (socket) => {
 
 	socket.on("update client list - old user", (data) => {
 		console.log("old user")
-		console.log(client_data[data.gameID])
+		socket.broadcast.to(data.gameID).emit("get existing client data list",{return_address:socket.id,uniqueID:data.uniqueID});
 	});
 
 	socket.on("update client list - new user", (data) => {

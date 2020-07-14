@@ -618,14 +618,15 @@ var client_dict = []
 
 socket.on("set my client data list", (data) => {
     client_dict = data.client_dict 
-});
-
-socket.on("update client list", (data) => {
     socket.emit("check if update is required", {client_dict:client_dict});
 });
 
-socket.on("send data to the user", (data) => {
-  document.cookie = "uniqueID=" + data.my_data;
+socket.on("get existing client data list", (data) => {
+    io.to(data.return_address).emit('return client data list',{client_dict:client_dict,id:data.return_address,uniqueID:data.uniqueID});
+});
+
+socket.on("send unique id", (data) => {
+  document.cookie = "uniqueID=" + data.id;
 });
 
 socket.on("done updating client list",(data)=>{
