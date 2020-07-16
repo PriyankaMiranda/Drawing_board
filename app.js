@@ -279,26 +279,20 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("return client data list", (data) => {
+		console.log("---------")
+		console.log(client_dict)
+		console.log("---------")
 		if(!client_data[data.gameID]){
-			data.client_dict.forEach(function(client) {
-				if(data.uniqueID == client[1]){
-					//old user data exists!
-					socket.broadcast.to(data.gameID).emit("get existing client data list",{return_address:socket.id,uniqueID:data.uniqueID});
+			for(var x=0;x<data.client_dict.length;x++){
+				if(data.uniqueID == data.client_dict[x][1]){
+					//update socket id 
+					data.client_dict[x][0] = socket.id
 				}
-			});
-			client_data[data.gameID] = data.client_dict
-
-		console.log("returning client data list")
-		console.log(data.client_data)
+			}
+			client_data[data.gameID] = data.client_dict;
+			socket.emit("update client data list",{client_dict:client_data[data.gameID]});
+			socket.broadcast.to(data.gameID).emit("update client data list",{client_dict:client_data[data.gameID]});
 		}
-		// for (var x=0; x<data.client_data.length; x++){
-		// 	console.log(data.client_data[x])
-
-		// 	console.log(data.client_data[x])
-		// 	client_data[data.gameID][data.clients[x]] = {id : Math.random().toString(36).substring(7), turns : 0, score : 0}
-		// }
-		// client_data[data.gameID][socket.id] = {id : Math.random().toString(36).substring(7), turns : 0, score : 0}
-		// console.log(client_data)
 	});
 
 	socket.on("update client list - old user", (data) => {
