@@ -211,7 +211,13 @@ io.on("connection", (socket) => {
 
 	//this includes, the unique id for the client, the number of turns it has completed and other info if needed
 	var client_data = {};
-	
+
+
+    socket.on("check", (data) => {
+		console.log("Basic check function!")
+		console.log(data)
+	});
+
 	function update_timer_and_data(data){
 		timeleft[data.gameID] = 60;
 		var downloadTimer = setInterval(function(){
@@ -278,21 +284,24 @@ io.on("connection", (socket) => {
 		});
 	});
 
-	socket.on("return client data list", (data) => {
-		console.log("---------")
-		console.log(client_dict)
-		console.log("---------")
-		if(!client_data[data.gameID]){
-			for(var x=0;x<data.client_dict.length;x++){
+    socket.on("return client data list", (data) => {
+    	if(data.client_dict.length>0){
+	    	var updated_client_list = []
+	    	for(var x=0; x<data.client_dict.length; x++){
 				if(data.uniqueID == data.client_dict[x][1]){
 					//update socket id 
-					data.client_dict[x][0] = socket.id
+					updated_client_list[x] = [0,0,0,0]
+					updated_client_list[x][0] = data.id
+		    		updated_client_list[x][1] = data.client_dict[x][1]
+		    		updated_client_list[x][2] = data.client_dict[x][2]
+		    		updated_client_list[x][3] = data.client_dict[x][3]
+				}else{
+		    		updated_client_list[x] = data.client_dict[x]
 				}
 			}
-			client_data[data.gameID] = data.client_dict;
-			socket.emit("update client data list",{client_dict:client_data[data.gameID]});
-			socket.broadcast.to(data.gameID).emit("update client data list",{client_dict:client_data[data.gameID]});
-		}
+			socket.emit("update client data list",{client_dict:updated_client_list});
+			socket.broadcast.to(data.gameID).emit("update client data list",{client_dict:updated_client_list});
+    	}
 	});
 
 	socket.on("update client list - old user", (data) => {
@@ -303,7 +312,6 @@ io.on("connection", (socket) => {
 	socket.on("update client list - new user", (data) => {
 		console.log("new user")
 		client_data[data.gameID] = []
-
 		io.clients((error, clients) => {
 			if (error) throw error;
 			client_dict[data.gameID] = clients	
@@ -364,7 +372,7 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("reload chars for others except the one that left in game", (data) => {
-		if (!game_chars.includes(data.username) && !game_imgs.includes(data.img)) {
+		if (!game_chars.includes(data.username) || !game_imgs.includes(data.img)) {
 			game_chars.push(data.username);
 			game_imgs.push(data.img);
 		}
@@ -394,10 +402,8 @@ io.on("connection", (socket) => {
 
 
 	socket.on("send chars for game", (data) => {
-		if (
-			!game_chars.includes(data.username) &&
-			!game_imgs.includes(data.img)
-		) {
+		if (!game_chars.includes(data.username) || !game_imgs.includes(data.img)) 
+		{
 			game_chars.push(data.username);
 			game_imgs.push(data.img);
 		}

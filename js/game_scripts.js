@@ -617,12 +617,21 @@ socket.on("get game characters", () => {
 var client_dict = []
 
 socket.on("set my client data list", (data) => {
-    client_dict = data.client_dict 
+    client_dict = data.client_dict; 
     socket.emit("check if update is required", {client_dict:client_dict});
+    socket.emit("check",data)
+});
+
+socket.on("update client data list", (data) => {
+    client_dict = data.client_dict;
 });
 
 socket.on("get existing client data list", (data) => {
-    io.to(data.return_address).emit('return client data list',{client_dict:client_dict,id:data.return_address,uniqueID:data.uniqueID});
+    socket.emit("return client data list", {client_dict:client_dict,id:data.return_address,uniqueID:data.uniqueID});
+});
+
+socket.on("return client data list", (data) => {
+    socket.emit("return client data list", data);
 });
 
 socket.on("send unique id", (data) => {
