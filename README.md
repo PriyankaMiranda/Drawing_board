@@ -3,16 +3,14 @@
 
 <p align="center">
 
-![header6](assets/logo2_transparent.png)
+<img src="assets/logo2_transparent.png" width="200">
 
 </p>
 
 <p align="center">
 	<strong>
 		•
-		•
 		<a href="aqueous-ravine-28405.herokuapp.com">Website</a>
-		•
 		•
 	</strong>
 </p>
@@ -50,6 +48,14 @@ The project currently has the following features:
 * Chat box in game to provide answers
 * Canvas
 * Local cookie allows user to save and access the character selected, score and other data
+
+## In-progress
+
+The features I am currently working on:
+
+* User turns
+* Allowing user to select time, number of rounds
+* Leader board, change position accordning to points
 
 ## Future-goals
 
