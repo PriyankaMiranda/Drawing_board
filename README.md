@@ -10,7 +10,7 @@
 <p align="center">
 	<strong>
 		•
-		<a href="aqueous-ravine-28405.herokuapp.com">Website</a>
+		<a href="https://aqueous-ravine-28405.herokuapp.com/">Website</a>
 		•
 	</strong>
 </p>
@@ -18,23 +18,17 @@
 
 ## Table of Contents
 
-- [About](#About)
-- [Features](#Features)
-- [In progress](#In-progress)
-- [Future goals](#Future-goals)
+- [About](#about)
+- [Features](#features)
+- [In progress](#in-progress)
+- [Future goals](#future-goals)
 - [Resources](#resources)
-- [What makes Countly unique?](#what-makes-countly-unique)
-- [Differences between Community Edition & Enterprise Edition](#differences-between-community-edition--enterprise-edition)
-- [Installing and upgrading Countly server](#installing-and-upgrading-countly-server)
-- [API and Frontend](#api-and-frontend)
-- [Extensibility and plugins](#extensibility-and-plugins)
-- [How can I help you with your efforts?](#how-can-i-help-you-with-your-efforts)
-- [Badges](#badges)
-- [Links](#links)
+- [Demo Images](#demo-images)
+- [How can I help?](#how-can-i-help)
 
 
 ## About?
-[Pictionary with Friends](aqueous-ravine-28405.herokuapp.com) is an passion project built by a curious yet lonely programer over quarantine. The project is hosted on [heroku](https://heroku.com/). The site allows for a maximum of 20 users to actively play, currently, due to constraints of the free version of heroku.
+[Pictionary with Friends](https://aqueous-ravine-28405.herokuapp.com/) is an passion project built by a curious yet lonely programer over quarantine. The project is hosted on [heroku](https://heroku.com/). The site allows for a maximum of 20 users to actively play, currently, due to constraints of the free version of heroku.
 
 ## Features
 
