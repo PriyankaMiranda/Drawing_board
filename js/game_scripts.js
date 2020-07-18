@@ -67,20 +67,6 @@ var $window = $(window);
 var $messages = $(".messages"); // Messages area
 var $inputMessage = $(".inputMessage"); // Input message input boxvar $var $inputMessage = $(".inputMessage"); // Input message input boxvar $var $inputMessage = $(".inputMessage"); // Input message input boxvar $inputMessage = $(".inputMessage"); // Input message input box
 var $chatPage = $(".chat.page"); // The chatroom page
-
-var $chatPage = $(".chat.page"); // The chatroom page
-inputMessage = $(".inputMessage"); // Input message input box
-var $chatPage = $(".chat.page"); // The chatroom page
-
-var $chatPage = $(".chat.page"); // The chatroom page
-var $inputMessage = $(".inputMessage"); // Input message input boxvar $inputMessage = $(".inputMessage"); // Input message input box
-var $chatPage = $(".chat.page"); // The chatroom page
-
-var $chatPage = $(".chat.page"); // The chatroom page
-inputMessage = $(".inputMessage"); // Input message input box
-var $chatPage = $(".chat.page"); // The chatroom page
-
-var $chatPage = $(".chat.page"); // The chatroom page
 var typing = false;
 var lastTypingTime;
 //-----------------------------------------------------------------------------------------
@@ -325,6 +311,8 @@ const sendMessage = () => {
     var dataval = { username: username, message: message, gameID:gameID };
     addChatMessage(dataval);
     socket.emit("new message in game", dataval);
+    console.log("checking ans")
+    socket.emit("check answer", dataval);
   }
 };
 
@@ -616,6 +604,10 @@ socket.on("get game characters", () => {
 
 var client_data = []
 
+socket.on("update my data for everyone", (data) => {
+    socket.emit("update my data for everyone", data);
+});
+
 socket.on("set my client data list", (data) => {
     client_data = data.client_data; 
     socket.emit("check if update is required", {client_data:client_data});
@@ -642,22 +634,20 @@ socket.on("done updating client list",(data)=>{
     socket.emit("save client list", data);
 });
 
-socket.on("update timer and data",(data)=>{
+socket.on("update timer",(data)=>{
+  if(data.timeleft <=  5){
+    document.getElementById("timer").style.color = "#BE2625";
+  }
+  else{
+    document.getElementById("timer").style.color = "#005582";
+  }
   document.getElementById("timer").innerHTML = data.timeleft;
-  var sent = data.curr_word
-  var words = sent.split(" ");
-  var dashes;
-  var final_dashes = "";
-  words.forEach(function(word) {
-    dashes = word.replace(/./g, '_&nbsp');
-    final_dashes = final_dashes+"&nbsp&nbsp"+ dashes  
-  });
-  document.getElementById("word").innerHTML = final_dashes;
 });
 
-socket.on("show data to person drawing",(data)=>{
-  document.getElementById("word").innerHTML = data.curr_word;
+socket.on("show word data",(data)=>{
+  document.getElementById("word").innerHTML = data.word;
  });
+
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
