@@ -208,7 +208,7 @@ io.on("connection", (socket) => {
 	var current_blanks_dict = {};
 	var current_word_dict_loc = {};
 	
-	var total_time = 20
+	var total_time = 10
 	var timeleft = {};
 	var num_of_turns = 2
 
@@ -254,18 +254,17 @@ io.on("connection", (socket) => {
 		socket.emit('show word data', data_to_send);
 	});
 	socket.on("check answer", (data) => {
-		console.log("checking answer")		
-		console.log(my_data_current)
 		if(data.message != last_curr_word && data.message == my_data_current.word_list[my_data_current.curr_word_loc]){
-			console.log("word match")
 			last_curr_word = data.message
 			points = (data.time_val)*100/total_time;
 			my_data_current.client_data.forEach(function(client) {
 				if(client[0] == socket.id){
-					client[3] = client[3]+points
+					client[3] = client[3] + points
+				}
+				else if(client[0] == my_data_current.clients[my_data_current.curr_client_loc]){
+					client[3] = client[3] + parseInt(points/my_data_current.clients.length) 	
 				}
 			});
-			console.log(my_data_current)
 			socket.emit("update my data for everyone",{my_data_current:my_data_current});
 			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});
 		}
@@ -273,32 +272,13 @@ io.on("connection", (socket) => {
 		
 
 	function game_complete(data){
+		// show scoreboard
 		console.log("the game has ended!!!!")
 		console.log(data)
 	}
 
-	function update_scores_and_turns(data, curr_player){
-		var sum = 0
-		// get total scores
-		data.forEach(function(client) {
-			if(client[0] != curr_player){
-				sum = sum + client[3]
-			}
-		});
-
-		// update score of person drawing based on how others fared
-		//update the turn by this user
-		data.forEach(function(client) {
-			if(client[0] == curr_player){
-				client[2] = client[2] + 1
-				client[3] = (sum + 100)/data.length
-			}
-		});
-
-		return data
-	}
-
 	function update_timer_and_data(data){
+		console.log("timer started")
 		timeleft[data.gameID] = total_time
 		var downloadTimer = setInterval(function(){
 			if(timeleft[data.gameID] <= 0){
@@ -324,11 +304,16 @@ io.on("connection", (socket) => {
 			timeleft[data.gameID] -= 1;
 
 			if(timeleft[data.gameID] == -1){
-				updated_client_data = update_scores_and_turns(client_data[data.gameID], client_dict[data.gameID][current_client_dict_loc[data.gameID]])
-				console.log(updated_client_data)
-				my_data_current.client_data = updated_client_data
+				// updating user turn and the score for the person who drew
+				my_data_current.client_data.forEach(function(client) {
+					if(client[0] == my_data_current.clients[my_data_current.curr_client_loc]){
+						client[2] = client[2] + 1
+						client[3] = client[3] + parseInt(100/my_data_current.clients.length)
+					}
+				});
+				console.log(my_data_current)
 
-				//finding the next player
+				// finding the next player
 				var min = 1000;
 				var next_player=-1;
 				for(var x = 0; x < my_data_current.client_data.length; x++){
@@ -337,14 +322,21 @@ io.on("connection", (socket) => {
 						next_player = next_player +1
 					}
 				}
-				my_data_current.curr_client_loc = next_player
-				my_data_current.curr_word_loc = (my_data_current.curr_word_loc + 1)%(my_data_current.word_list.length)
-				
-				socket.emit("update my data for everyone",{my_data_current:my_data_current});		
-				socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});		
-				
+
 				if(min!=num_of_turns){
-					update_timer_and_data({gameID:data.gameID})
+					// show the correct answer for 1s
+					socket.emit("show correct answer",{ans:my_data_current.word_list[my_data_current.curr_word_loc]});		
+					socket.broadcast.to(data.gameID).emit("show correct answer",{ans:my_data_current.word_list[my_data_current.curr_word_loc]});
+	
+					my_data_current.curr_client_loc = next_player
+					my_data_current.curr_word_loc = (my_data_current.curr_word_loc + 1)%(my_data_current.word_list.length)
+					my_data_current.timeleft = total_time
+
+					socket.emit("update my data for everyone",{my_data_current:my_data_current});		
+					socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});
+					
+					setTimeout(function(){ update_timer_and_data({gameID:data.gameID}); }, 1000);
+
 				}
 				else{
 					game_complete({my_data_current:my_data_current})
@@ -367,7 +359,7 @@ io.on("connection", (socket) => {
 			curr_games.push(data.gameID)
 
 			//---------------------------need to change this later----------------------------
-			var chosen_options_qn = ["cookie","eating banana", "tailbone", "vampire"]
+			var chosen_options_qn = ["cookie","vampire", "bubble gum", "space bar", "toothbrush", "toenail"]
 			var chosen_options_ans = []
 			chosen_options_qn.forEach(function(option) {
 				var words = option.split(" ");

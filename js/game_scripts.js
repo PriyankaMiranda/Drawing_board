@@ -654,6 +654,19 @@ socket.on("show word data",(data)=>{
   document.getElementById("word").innerHTML = data.word;
  });
 
+
+socket.on("show correct answer",(data)=>{
+  var overlay = document.getElementsByClassName("overlay")[0]
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  overlay.style.display = "block";
+  var para = document.createElement("p");
+  para.style.fontSize = "30px";
+  para.innerHTML = "Answer: "+data.ans;
+  overlay.appendChild(para);
+  setTimeout(function(){ overlay.style.display = "none"; }, 2000);
+
+});
+
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
