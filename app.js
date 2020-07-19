@@ -208,21 +208,17 @@ io.on("connection", (socket) => {
 	var current_blanks_dict = {};
 	var current_word_dict_loc = {};
 	
-	var total_time = 30
+	var total_time = 100
 	var timeleft = {};
+
+	var last_curr_word = '';
 
 	//this includes, the unique id for the client, the number of turns it has completed and other info if needed
 	var client_data = {};
 
 	var my_data_current = {};
 
-    socket.on("check", (data) => {
-		console.log("Basic check function!")
-		console.log(data)
-	});
-
 	socket.on("update my data for everyone", (data) => {
-		console.log(data)
 		current_word_dict[data.gameID] = data.word_list	
 		current_blanks_dict[data.gameID] = data.blanks_list
 		current_word_dict_loc[data.gameID] = data.curr_word_loc
@@ -243,9 +239,7 @@ io.on("connection", (socket) => {
 			gameID : data.gameID,
 			timeleft : timeleft[data.gameID]
 		}
-
 		socket.emit("operations", {my_data_current:my_data_current})
-		
 	});
 
 	socket.on("operations", (data) => {
@@ -256,26 +250,27 @@ io.on("connection", (socket) => {
 			data_to_send = {word : data.word_list[data.curr_word_loc]}
 		}
 		socket.emit('show word data', data_to_send);
-		console.log("updating my data for everyone")
 	});
 	socket.on("check answer", (data) => {
 		console.log("--------------------------------------")
 		console.log("--------------------------------------")
 		console.log("checking answer")
-		// console.log(data)
+		console.log(data)
 		console.log(my_data_current)
-
-		if(data.massage == my_data_current.curr_word){
+		console.log(data.message)
+		console.log(last_curr_word)
+		if(data.message != last_curr_word && data.message == my_data_current.word_list[my_data_current.curr_word_loc]){
 			console.log("word match")
-			base_points = (total_time - data.timeleft)*100/total_time;
-			
+			last_curr_word = data.message
+			base_points = (data.time_val)*100/total_time;
 			my_data_current.client_data.forEach(function(client) {
 				if(client[0] == socket.id){
 					client[3] = client[3]+base_points
 				}
 			});
-			socket.emit("update my data for everyone",{my_data_current:client_data[data.gameID]});
-			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:client_data[data.gameID]});
+			console.log(my_data_current)
+			socket.emit("update my data for everyone",{my_data_current:my_data_current});
+			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});
 		}
 
 
@@ -366,7 +361,6 @@ io.on("connection", (socket) => {
 
 	socket.on("save client list", (data) => {
 		if(!curr_games.includes(data.gameID)){
-			console.log("should happen once only")
 			var my_client_data = []
 			data.clients.forEach(function(client) {
 				my_client_data.push([client,Math.random().toString(36).substring(7),0, 0])
@@ -377,7 +371,7 @@ io.on("connection", (socket) => {
 			curr_games.push(data.gameID)
 
 			//---------------------------need to change this later----------------------------
-			var chosen_options_qn = ["eating banana", "tailbone", "vampire", "cookie"]
+			var chosen_options_qn = ["cookie","eating banana", "tailbone", "vampire"]
 			var chosen_options_ans = []
 			chosen_options_qn.forEach(function(option) {
 				var words = option.split(" ");

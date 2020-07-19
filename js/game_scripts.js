@@ -314,7 +314,7 @@ const sendMessage = () => {
     
     console.log("checking ans")
 
-    socket.emit("check answer", {message: message, time_val:time_val});
+    socket.emit("check answer", {message: message, time_val:time_val, gameID:gameID});
   }
 };
 
@@ -617,7 +617,6 @@ socket.on("operations",(data)=>{
 socket.on("set my client data list", (data) => {
     client_data = data.client_data; 
     socket.emit("check if update is required", {client_data:client_data});
-    socket.emit("check",data)
 });
 
 socket.on("update client data list", (data) => {
