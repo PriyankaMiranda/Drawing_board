@@ -208,8 +208,10 @@ io.on("connection", (socket) => {
 	var current_blanks_dict = {};
 	var current_word_dict_loc = {};
 	
-	var total_time = 100
+	var total_time = 20
 	var timeleft = {};
+	var num_of_turns = 2
+
 
 	var last_curr_word = '';
 
@@ -252,50 +254,42 @@ io.on("connection", (socket) => {
 		socket.emit('show word data', data_to_send);
 	});
 	socket.on("check answer", (data) => {
-		console.log("--------------------------------------")
-		console.log("--------------------------------------")
-		console.log("checking answer")
-		console.log(data)
+		console.log("checking answer")		
 		console.log(my_data_current)
-		console.log(data.message)
-		console.log(last_curr_word)
 		if(data.message != last_curr_word && data.message == my_data_current.word_list[my_data_current.curr_word_loc]){
 			console.log("word match")
 			last_curr_word = data.message
-			base_points = (data.time_val)*100/total_time;
+			points = (data.time_val)*100/total_time;
 			my_data_current.client_data.forEach(function(client) {
 				if(client[0] == socket.id){
-					client[3] = client[3]+base_points
+					client[3] = client[3]+points
 				}
 			});
 			console.log(my_data_current)
 			socket.emit("update my data for everyone",{my_data_current:my_data_current});
 			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});
 		}
-
-
-
 	});
 		
-	function scale_scores_and_turns(data, curr_player){
-		var max = 0
+
+	function game_complete(data){
+		console.log("the game has ended!!!!")
+		console.log(data)
+	}
+
+	function update_scores_and_turns(data, curr_player){
 		var sum = 0
-		// get data
+		// get total scores
 		data.forEach(function(client) {
 			if(client[0] != curr_player){
 				sum = sum + client[3]
-				if(client[3] >= max){
-					max = client[3]
-				}
 			}
 		});
 
-		// update data 
+		// update score of person drawing based on how others fared
+		//update the turn by this user
 		data.forEach(function(client) {
-			if(client[0] != curr_player){
-				client[3] = client[3]*100/max
-			}
-			else{
+			if(client[0] == curr_player){
 				client[2] = client[2] + 1
 				client[3] = (sum + 100)/data.length
 			}
@@ -330,29 +324,31 @@ io.on("connection", (socket) => {
 			timeleft[data.gameID] -= 1;
 
 			if(timeleft[data.gameID] == -1){
-				updated_client_data = scale_scores_and_turns(client_data[data.gameID], client_dict[data.gameID][current_client_dict_loc[data.gameID]])
-				console.log("arg")
-				console.log(client_data[data.gameID])
-				client_data[data.gameID] = updated_client_data
-				console.log(client_data[data.gameID])
-				console.log("arg")
+				updated_client_data = update_scores_and_turns(client_data[data.gameID], client_dict[data.gameID][current_client_dict_loc[data.gameID]])
+				console.log(updated_client_data)
+				my_data_current.client_data = updated_client_data
 
-				my_data_current.curr_client_loc = (my_data_current.curr_client_loc + 1)%(my_data_current.clients.length)
-
-				current_client_dict_loc[data.gameID] = (current_client_dict_loc[data.gameID] + 1)%(clients.length)
-				current_word_dict_loc[data.gameID] = (current_word_dict_loc[data.gameID] + 1)%(word_list.length)
-
-
-				// console.log("Updating")
-				// console.log(my_data_current)
-				// my_data_current.client_data = updated_client_data
-				// console.log(my_data_current)
-				// console.log("Done")
-
-				// socket.emit("update my data for everyone",{my_data_current:my_data_current});		
-				// socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});		
-
-				// update_timer_and_data({gameID:data.gameID})
+				//finding the next player
+				var min = 1000;
+				var next_player=-1;
+				for(var x = 0; x < my_data_current.client_data.length; x++){
+					if(my_data_current.client_data[x][2] < min){
+						min = my_data_current.client_data[x][2]
+						next_player = next_player +1
+					}
+				}
+				my_data_current.curr_client_loc = next_player
+				my_data_current.curr_word_loc = (my_data_current.curr_word_loc + 1)%(my_data_current.word_list.length)
+				
+				socket.emit("update my data for everyone",{my_data_current:my_data_current});		
+				socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});		
+				
+				if(min!=num_of_turns){
+					update_timer_and_data({gameID:data.gameID})
+				}
+				else{
+					game_complete({my_data_current:my_data_current})
+				}
 			}
 		
 		}, 1000);
