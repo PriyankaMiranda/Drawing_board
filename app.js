@@ -249,7 +249,7 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("operations", (data) => {
-		socket.emit("update timer",{timeleft:data.gameID});
+		socket.emit("update timer",{timeleft:data.timeleft});
 		var data_to_send;	
 		data_to_send = {word : data.blanks_list[data.curr_word_loc]}
 		if(socket.id == data.clients[data.curr_client_loc]){
@@ -264,8 +264,6 @@ io.on("connection", (socket) => {
 		console.log("checking answer")
 		// console.log(data)
 		console.log(my_data_current)
-
-
 
 		if(data.massage == my_data_current.curr_word){
 			console.log("word match")
