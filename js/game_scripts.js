@@ -85,7 +85,7 @@ catch{
   socket.emit("update client list - new user",{gameID:gameID, username: username, img:img});
 }
 
-
+var time_val;
 
 
 //-----------------------------------------------------------------------------------------  
@@ -311,8 +311,10 @@ const sendMessage = () => {
     var dataval = { username: username, message: message, gameID:gameID };
     addChatMessage(dataval);
     socket.emit("new message in game", dataval);
+    
     console.log("checking ans")
-    socket.emit("check answer", dataval);
+
+    socket.emit("check answer", {message: message, time_val:time_val});
   }
 };
 
@@ -605,7 +607,11 @@ socket.on("get game characters", () => {
 var client_data = []
 
 socket.on("update my data for everyone", (data) => {
-    socket.emit("update my data for everyone", data);
+    socket.emit("update my data for everyone", data.my_data_current);
+});
+
+socket.on("operations",(data)=>{
+    socket.emit("operations",data.my_data_current);
 });
 
 socket.on("set my client data list", (data) => {
@@ -641,6 +647,7 @@ socket.on("update timer",(data)=>{
   else{
     document.getElementById("timer").style.color = "#005582";
   }
+  time_val = data.timeleft;
   document.getElementById("timer").innerHTML = data.timeleft;
 });
 

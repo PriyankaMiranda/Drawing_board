@@ -222,33 +222,66 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("update my data for everyone", (data) => {
-		my_data_current = data.my_data_current
-		console.log("updating my data for everyone")
 		console.log(data)
+		current_word_dict[data.gameID] = data.word_list	
+		current_blanks_dict[data.gameID] = data.blanks_list
+		current_word_dict_loc[data.gameID] = data.curr_word_loc
+		client_dict[data.gameID] = data.clients
+		current_client_dict_loc[data.gameID] = data.curr_client_loc
+		client_data[data.gameID] = data.client_data
+		timeleft[data.gameID] = data.timeleft
+
+		my_data_current = {
+			word_list : current_word_dict[data.gameID], 
+			blanks_list : current_blanks_dict[data.gameID],
+			curr_word_loc : current_word_dict_loc[data.gameID],
+			
+			clients : client_dict[data.gameID], 
+			curr_client_loc : current_client_dict_loc[data.gameID],
+
+			client_data : client_data[data.gameID],
+			gameID : data.gameID,
+			timeleft : timeleft[data.gameID]
+		}
+
+		socket.emit("operations", {my_data_current:my_data_current})
+		
 	});
 
+	socket.on("operations", (data) => {
+		socket.emit("update timer",{timeleft:data.gameID});
+		var data_to_send;	
+		data_to_send = {word : data.blanks_list[data.curr_word_loc]}
+		if(socket.id == data.clients[data.curr_client_loc]){
+			data_to_send = {word : data.word_list[data.curr_word_loc]}
+		}
+		socket.emit('show word data', data_to_send);
+		console.log("updating my data for everyone")
+	});
 	socket.on("check answer", (data) => {
 		console.log("--------------------------------------")
 		console.log("--------------------------------------")
-		console.log("--------------------------------------")
 		console.log("checking answer")
-		console.log(data)
+		// console.log(data)
 		console.log(my_data_current)
+
+
+
 		if(data.massage == my_data_current.curr_word){
 			console.log("word match")
 			base_points = (total_time - data.timeleft)*100/total_time;
 			
-			var updated_client_data = []
-			client_data[data.gameID].forEach(function(client) {
+			my_data_current.client_data.forEach(function(client) {
 				if(client[0] == socket.id){
-					updated_client_data.push([client[0],client[1],client[2],client[3]+base_points])
-				}else{
-					updated_client_data.push(client)
+					client[3] = client[3]+base_points
 				}
 			});
-			socket.emit("update my data for everyone",{my_data_current:updated_client_data});
-			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:updated_client_data});
+			socket.emit("update my data for everyone",{my_data_current:client_data[data.gameID]});
+			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:client_data[data.gameID]});
 		}
+
+
+
 	});
 		
 	function scale_scores_and_turns(data, curr_player){
@@ -264,7 +297,6 @@ io.on("connection", (socket) => {
 			}
 		});
 
-		var updated_client_data= [];
 		// update data 
 		data.forEach(function(client) {
 			if(client[0] != curr_player){
@@ -274,14 +306,12 @@ io.on("connection", (socket) => {
 				client[2] = client[2] + 1
 				client[3] = (sum + 100)/data.length
 			}
-			updated_client_data.push([client[0],client[1],client[2],client[3]])
 		});
 
-		return updated_client_data
+		return data
 	}
 
 	function update_timer_and_data(data){
-		
 		timeleft[data.gameID] = total_time
 		var downloadTimer = setInterval(function(){
 			if(timeleft[data.gameID] <= 0){
@@ -290,48 +320,35 @@ io.on("connection", (socket) => {
 
 			my_data_current = {
 				word_list : current_word_dict[data.gameID], 
+				blanks_list : current_blanks_dict[data.gameID],
 				curr_word_loc : current_word_dict_loc[data.gameID],
-				curr_word : current_word_dict[data.gameID][current_word_dict_loc[data.gameID]],
-				curr_blanks : current_blanks_dict[data.gameID][current_word_dict_loc[data.gameID]],
+				
 				clients : client_dict[data.gameID], 
 				curr_client_loc : current_client_dict_loc[data.gameID],
-				curr_player : client_dict[data.gameID][current_client_dict_loc[data.gameID]], 
+
 				client_data : client_data[data.gameID],
 				gameID : data.gameID,
 				timeleft : timeleft[data.gameID]
-			}	
-			
+			}
 			// socket.emit("update my data for everyone",{my_data_current:my_data_current});
-			// socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});		
-
-			socket.emit("update timer",{timeleft:my_data_current.timeleft});
-			socket.broadcast.to(data.gameID).emit("update timer",{timeleft:my_data_current.timeleft});			
-
-			var data_to_send;	
-
-			my_data_current.clients.forEach(function(client) {
-				data_to_send = {word:my_data_current.curr_blanks}
-				if(my_data_current.curr_player == client){
-					data_to_send = {word:my_data_current.curr_word}
-				}
-				io.to(client).emit('show word data', data_to_send);
-			});
+			socket.emit("operations", {my_data_current:my_data_current})
+			socket.broadcast.to(data.gameID).emit("update my data for everyone",{my_data_current:my_data_current});		
 			
 			timeleft[data.gameID] -= 1;
 
 			if(timeleft[data.gameID] == -1){
-				// updated_client_data = scale_scores_and_turns(my_data_current.client_data, my_data_current.curr_player)
+				updated_client_data = scale_scores_and_turns(client_data[data.gameID], client_dict[data.gameID][current_client_dict_loc[data.gameID]])
+				console.log("arg")
+				console.log(client_data[data.gameID])
+				client_data[data.gameID] = updated_client_data
+				console.log(client_data[data.gameID])
+				console.log("arg")
 
-				console.log("arg")
-				console.log(client_data[data.gameID])
-				client_data[data.gameID].forEach(function(client) {
-					client[0] = 0
-					
-				});
-				console.log(client_data[data.gameID])
-				console.log("arg")
+				my_data_current.curr_client_loc = (my_data_current.curr_client_loc + 1)%(my_data_current.clients.length)
+
 				current_client_dict_loc[data.gameID] = (current_client_dict_loc[data.gameID] + 1)%(clients.length)
 				current_word_dict_loc[data.gameID] = (current_word_dict_loc[data.gameID] + 1)%(word_list.length)
+
 
 				// console.log("Updating")
 				// console.log(my_data_current)
