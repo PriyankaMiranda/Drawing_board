@@ -639,6 +639,7 @@ socket.on("done updating client list",(data)=>{
     socket.emit("save client list", data);
 });
 
+
 socket.on("update timer",(data)=>{
   if(data.timeleft <=  5){
     document.getElementById("timer").style.color = "#BE2625";
@@ -666,6 +667,41 @@ socket.on("show correct answer",(data)=>{
   setTimeout(function(){ overlay.style.display = "none"; }, 2000);
 
 });
+
+socket.on("match score with username and img", (data) => {
+    socket.emit("sending score", {id:data.id,username:username,img:img});
+});
+
+socket.on("match score with username and img 2", (data) => {
+    socket.emit("sending score", {id:data.id,username:data.username,img:data.img});
+});
+
+socket.on("get score with username and img", (data) => {
+    socket.emit("sending score 2", {return_id : data.return_id, id : socket.id, username : username, img : img});
+});
+
+socket.on("send score", (data) => {
+    socket.emit("send score", data);
+});
+
+socket.on("leader board", (data) => {
+  var overlay = document.getElementsByClassName("overlay")[0]
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  overlay.style.display = "block";
+
+  var para = document.createElement("p");
+  para.style.fontSize = "30px";
+  para.innerHTML = "Leaderboard ";
+  overlay.appendChild(para);
+
+  var content = document.createElement("p");
+  content.style.fontSize = "30px";
+  content.innerHTML = data;
+  overlay.appendChild(content);
+
+  // setTimeout(function(){ overlay.style.display = "none"; }, 2000);
+});
+
 
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
