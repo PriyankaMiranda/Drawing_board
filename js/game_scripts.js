@@ -665,7 +665,6 @@ socket.on("show correct answer",(data)=>{
   para.innerHTML = "Answer: "+data.ans;
   overlay.appendChild(para);
   setTimeout(function(){ overlay.style.display = "none"; }, 2000);
-
 });
 
 socket.on("match score with username and img", (data) => {
@@ -685,21 +684,21 @@ socket.on("send score", (data) => {
 });
 
 socket.on("leader board", (data) => {
-  var overlay = document.getElementsByClassName("overlay")[0]
-  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
-  overlay.style.display = "block";
+  console.log("fgrg")
 
-  var para = document.createElement("p");
-  para.style.fontSize = "30px";
+  setTimeout(function(){ 
+
+  var para = document.createElement("h1");
   para.innerHTML = "Leaderboard ";
-  overlay.appendChild(para);
-
-  var content = document.createElement("p");
-  content.style.fontSize = "30px";
+  document.getElementsByClassName("login-form")[0].appendChild(para);
+  var content = document.createElement("a");
   content.innerHTML = data;
-  overlay.appendChild(content);
+  document.getElementsByClassName("login-form")[0].appendChild(content);
 
-  // setTimeout(function(){ overlay.style.display = "none"; }, 2000);
+  document.getElementsByClassName("leaderboard-overlay")[0].style.width = "100%";
+
+  }, 2000);
+
 });
 
 

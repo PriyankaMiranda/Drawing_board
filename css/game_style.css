@@ -27,6 +27,75 @@ body{
   text-align: center;
 }
 
+.leaderboard-overlay {  
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #f6f6ff;
+  opacity : 0.5;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.leaderboard-overlay > a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.leaderboard-overlay a:hover, .leaderboard-overlay a:focus {
+  color: #f1f1f1;
+}
+
+@media screen and (max-height: 450px) {
+  .leaderboard-overlay a {font-size: 20px}
+}
+
+.btn {
+  padding: 8px 20px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.login-form {
+  margin-top:10vh;
+  margin-left:10vw;
+  margin-right:10vw;
+
+  height:80vh;
+  width:80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 40px;
+  color: white;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 0.4px 0.4px rgba(128, 128, 128, 0.109),
+    0 1px 1px rgba(128, 128, 128, 0.155),
+    0 2.1px 2.1px rgba(128, 128, 128, 0.195),
+    0 4.4px 4.4px rgba(128, 128, 128, 0.241),
+    0 12px 12px rgba(128, 128, 128, 0.35);
+
+  h1 {
+    margin: 0 0 24px 0;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 18px 0 9px 0;
+  }
+}
+
+
+
+
 
 .header{
   width:100vw;
