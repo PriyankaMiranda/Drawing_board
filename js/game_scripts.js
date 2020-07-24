@@ -76,14 +76,14 @@ var lastTypingTime;
 //---------------------------------------Socket emit---------------------------------------
 //-----------------------------------------------------------------------------------------
 var socket = io();
-socket.emit("load chars in game", {username: username, img: img , gameID:gameID});
-try{
-  uniqueID = cookie_val.split("uniqueID=")[1].split(";")[0];
-  socket.emit("update client list - old user",{uniqueID:uniqueID, gameID:gameID, username: username, img:img});
-}
-catch{
-  socket.emit("update client list - new user",{gameID:gameID, username: username, img:img});
-}
+// socket.emit("load chars in game", {username: username, img: img , gameID:gameID});
+// try{
+//   uniqueID = cookie_val.split("uniqueID=")[1].split(";")[0];
+//   socket.emit("update client list - old user",{uniqueID:uniqueID, gameID:gameID, username: username, img:img});
+// }
+// catch{
+//   socket.emit("update client list - new user",{gameID:gameID, username: username, img:img});
+// }
 
 var time_val;
 
