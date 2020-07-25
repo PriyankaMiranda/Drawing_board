@@ -212,7 +212,7 @@ io.on("connection", (socket) => {
 	
 	var total_time = 10
 	var timeleft = {};
-	var num_of_turns = 0
+	var num_of_turns = 1
 
 
 	var last_curr_word = '';
@@ -292,7 +292,6 @@ io.on("connection", (socket) => {
 	function game_complete(data){
 		console.log("game_complete")
 		// show scoreboard - will have to match scores to the users 
-
 		socket.emit("leader board",data.client_data);
 		socket.broadcast.to(data.gameID).emit("leader board",data.client_data);
 	}
@@ -309,8 +308,10 @@ io.on("connection", (socket) => {
 				word_list : current_word_dict[data.gameID], 
 				blanks_list : current_blanks_dict[data.gameID],
 				curr_word_loc : current_word_dict_loc[data.gameID],
+				
 				clients : client_dict[data.gameID], 
 				curr_client_loc : current_client_dict_loc[data.gameID],
+
 				client_data : client_data[data.gameID],
 				gameID : data.gameID,
 				timeleft : timeleft[data.gameID]
