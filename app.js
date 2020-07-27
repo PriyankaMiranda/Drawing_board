@@ -377,6 +377,7 @@ io.on("connection", (socket) => {
 	}
 
 	socket.on("save client list", (data) => {
+		console.log("hey")
 		if(!curr_games.includes(data.gameID)){
 			var my_client_data = []
 			console.log(user_data)
@@ -468,6 +469,7 @@ io.on("connection", (socket) => {
 		io.clients((error, clients) => {
 			if (error) throw error;
 			client_dict[data.gameID] = clients	
+			socket.emit("check")
 			socket.emit("done updating client list",{clients:clients, gameID:data.gameID})
 		});	
 	});

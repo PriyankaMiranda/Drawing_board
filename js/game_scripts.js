@@ -131,7 +131,7 @@ function onColorUpdate(e){
     current.lineWidth = 45;
   }
   context.beginPath();
-}
+};
 //-----------------------------------------------------------------------------------------  
 //----------------------------------------------------------------------------------------- 
 
@@ -266,7 +266,7 @@ function drawLine(x0, y0, x1, y1, lineWidth, color, emit){
     color: color,
     gameID: gameID
   });
-}
+};
 
 //to limit the number of events per second
 function throttle(callback, delay) {
@@ -568,7 +568,7 @@ socket.on("reconnect in game", () => {
     socket.emit("add user in game", {username:username, gameID:gameID});
   }
 });
-
+  
 socket.on("get chars for game", (data) => {
   if(data.gameID == gameID){
     socket.emit("send chars for game", { username: username, img: img, gameID:gameID});
@@ -596,7 +596,8 @@ socket.on("display chars in game", (data) => {
       addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
     }   
   }
-  
+});
+
 socket.on("get game characters", () => {
   socket.emit("send game character")
   if(data.gameID == gameID){
@@ -635,7 +636,13 @@ socket.on("send unique id", (data) => {
   document.cookie = "uniqueID=" + data.id;
 });
 
+socket.on("check",()=>{
+    console.log("checking")
+});
+
+
 socket.on("done updating client list",(data)=>{
+    console.log("done updating client list")
     socket.emit("save client list", data);
 });
 
@@ -665,7 +672,6 @@ socket.on("show correct answer",(data)=>{
   para.innerHTML = "Answer: "+data.ans;
   overlay.appendChild(para);
   setTimeout(function(){ overlay.style.display = "none"; }, 2000);
-
 });
 
 socket.on("match score with username and img", (data) => {
@@ -698,33 +704,4 @@ socket.on("leader board", (data) => {
   content.style.fontSize = "30px";
   content.innerHTML = data;
   overlay.appendChild(content);
-
-  // setTimeout(function(){ overlay.style.display = "none"; }, 2000);
-});
-
-
-//-----------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  });
