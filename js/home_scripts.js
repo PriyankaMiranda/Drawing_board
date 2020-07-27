@@ -5,26 +5,48 @@ const cookie_val = document.cookie;
 
 load_data()
 
-document.getElementById("new-game").onclick= function(e) {
-  e.preventDefault()
-  document.cookie = "gameID=abc";
-  window.location.href = "/lobby";
+// document.getElementById("new-game").onclick= function(e) {
+//   e.preventDefault()
+//   document.cookie = "gameID=abc";
+//   window.location.href = "/lobby";
+// };
+
+
+document.getElementById('game-username').onkeydown = function(e){
+  if(e.keyCode == 13){
+    e.preventDefault()
+
+    var gameID = document.getElementById("game-id").value  
+    var gamePWD = document.getElementById("game-pwd").value
+    //check if the gameID and password is a match
+    socket.emit("",{gameID:gameID,gamePWD:gamePWD})
+
+    document.getElementsByClassName("overlay")[0].style.display = "none";
+  }
 };
 
 document.getElementById("existing-game").onclick= function(e) {
   e.preventDefault()  
-  var gameID = document.getElementById("game-id").value
-  document.cookie = "gameID="+gameID;
-  window.location.href = "/lobby";
+  
+  var gameID = document.getElementById("game-id").value  
+  var gamePWD = document.getElementById("game-pwd").value
+  //check if the gameID and password is a match
+  socket.emit("",{gameID:gameID,gamePWD:gamePWD})
+
+  document.getElementsByClassName("overlay")[0].style.display = "none";
+
+  // document.cookie = "gameID="+gameID;
+  // window.location.href = "/lobby";
 };
 
 function load_data(){
-  var logo = document.getElementById("logo");
+  var logo = document.getElementById("logo-internal");
   logo.src = "/logo2_transparent.png";
   var instruction = document.getElementById("instruction");
   instruction.innerHTML = "Choose your character";
   socket.emit("load chars");
 }
+
 // for old users load their previous character
 function get_prev_char(){
     const name = cookie_val.split("name=")[1].split(";")[0];
@@ -50,16 +72,6 @@ function get_prev_char(){
       };
       my_div.appendChild(image);
 
-      var div_form = document.createElement("FORM");
-      div_form.id = img_path;
-      div_form.addEventListener("submit", submit_operation, false);
-      my_div.appendChild(div_form);
-
-      var div_ip = document.createElement("INPUT");
-      div_ip.style.border = "4px solid black";
-      div_ip.style.borderRadius = "4px";
-      div_ip.value = name;
-      div_form.appendChild(div_ip);
     }
 } 
 
@@ -71,12 +83,10 @@ function img_hover(div) {
     var prev_child = prev.node.childNodes;
     prev_child[0].style.opacity = 1;
     prev_child[0].style.transform = "scale(1)";
-    prev_child[1].style.display = "none";
   }
   var children = div.childNodes;
   children[0].style.opacity = 0.3;
   children[0].style.transform = "scale(1.25)";
-  children[1].style.display = "block";
   prev.node = div;
 }
 
@@ -126,8 +136,7 @@ function submit_operation(e) {
     document.cookie = "img=" + cookie_img;
     document.cookie = "name=" + cookie_name;
     document.getElementsByClassName("overlay")[0].style.display = "block"
-  }
-  
+  } 
   }
 
 function removePrevChars() {
@@ -231,25 +240,6 @@ socket.on("hide chars globally", (data) => {
         image.style.position = "absolute";
         image.style.top = "10px";
         char_div.appendChild(image);
-
-        var div_form = document.createElement("FORM");
-        div_form.className = "characters_form";
-        div_form.id = Path + i;
-        div_form.style.display = "none";
-        div_form.addEventListener("submit", submit_operation, false);
-        div_form.style.position = "absolute";
-        div_form.style.bottom = "20px";
-        char_div.appendChild(div_form);
-
-        var div_inner = document.createElement("INPUT");
-        div_inner.style.border = "4px solid black";
-        div_inner.style.borderRadius = "4px";
-        if (window.screen.width > 500) {
-          div_inner.style.width = "10vw";
-        } else {
-          div_inner.style.width = "20vw";
-        }
-        div_form.appendChild(div_inner);
 
         char_div.onmouseover = function() {
           img_hover(this);

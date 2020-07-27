@@ -212,7 +212,7 @@ io.on("connection", (socket) => {
 	
 	var total_time = 10
 	var timeleft = {};
-	var num_of_turns = 1
+	var num_of_turns = 0
 
 
 	var last_curr_word = '';
@@ -292,6 +292,7 @@ io.on("connection", (socket) => {
 	function game_complete(data){
 		console.log("game_complete")
 		// show scoreboard - will have to match scores to the users 
+
 		socket.emit("leader board",data.client_data);
 		socket.broadcast.to(data.gameID).emit("leader board",data.client_data);
 	}
@@ -308,10 +309,8 @@ io.on("connection", (socket) => {
 				word_list : current_word_dict[data.gameID], 
 				blanks_list : current_blanks_dict[data.gameID],
 				curr_word_loc : current_word_dict_loc[data.gameID],
-				
 				clients : client_dict[data.gameID], 
 				curr_client_loc : current_client_dict_loc[data.gameID],
-
 				client_data : client_data[data.gameID],
 				gameID : data.gameID,
 				timeleft : timeleft[data.gameID]
@@ -377,7 +376,6 @@ io.on("connection", (socket) => {
 	}
 
 	socket.on("save client list", (data) => {
-		console.log("hey")
 		if(!curr_games.includes(data.gameID)){
 			var my_client_data = []
 			console.log(user_data)
@@ -385,6 +383,7 @@ io.on("connection", (socket) => {
 				//socket-id, unique-id, turn, score, username, image 
 				my_client_data.push([client,Math.random().toString(36).substring(7),0, 0,"",""])
 			});
+
 			client_data[data.gameID] = my_client_data;
 			socket.emit("set my client data list", {client_data:client_data[data.gameID]});
 			socket.broadcast.to(data.gameID).emit("set my client data list", {client_data:client_data[data.gameID]});
@@ -469,10 +468,22 @@ io.on("connection", (socket) => {
 		io.clients((error, clients) => {
 			if (error) throw error;
 			client_dict[data.gameID] = clients	
-			socket.emit("check")
+			console.log(socket.id)
+			
+			io.to(socket.id).emit('update client list contents',{gameID:data.gameID});
+
+			// socket.emit("update client list contents",{clients:clients, gameID:data.gameID})
+
 			socket.emit("done updating client list",{clients:clients, gameID:data.gameID})
 		});	
 	});
+
+	socket.on("update client list contents", (data) => {
+
+		socket.broadcast.to(data.gameID).emit("get existing client data list",{return_address:socket.id,uniqueID:data.uniqueID});
+	
+	});
+
 
 	// when the client emits 'new message', this listens and executes
 	socket.on("new message in game", (data) => {

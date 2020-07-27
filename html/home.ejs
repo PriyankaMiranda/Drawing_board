@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Pictionary with Friends</title>
-    <link rel="stylesheet" type="text/css" href="/start_page_style.css">
+    <link rel="stylesheet" type="text/css" href="/home_style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 
@@ -14,19 +14,22 @@
 </head>
 
 <body scroll="no">
+
     <div class = "overlay">
         <form id="myForm1" class="overlay-text">
-            <button type="submit" class="btn btn-success" id="new-game">Create new game</button>
+            <img class="overlay-logo" id="logo"></img>
+            GAME ID : <input type="text" class="user-data" id="game-id"><br>
+            PASSWORD : <input type="text" class="user-data" id="game-pwd"><br>
+            USERNAME : <input type="text" class="user-data" id="game-username"><br>            
+            <input type="button" value="Enter Game / Create Game" class="btn btn-success" id="existing-game">
         </form>
-        <p class="overlay-text"> OR <p>
-        <form id="myForm2" class="overlay-text">
-            GAME ID : <input type="text" name="gameID" id="game-id"><br>
-            <input type="button" value="Enter existing game" class="btn btn-success" id="existing-game">
-        </form>
+
     </div>
+
     <div class="header">
-        <img class="header-contents" id="logo"></img>
+        <img class="header-contents" id="logo-internal"></img>
     </div>
+
     <div class="header-text">
         <p id="instruction" ></p>
     </div>

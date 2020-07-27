@@ -131,7 +131,7 @@ function onColorUpdate(e){
     current.lineWidth = 45;
   }
   context.beginPath();
-};
+}
 //-----------------------------------------------------------------------------------------  
 //----------------------------------------------------------------------------------------- 
 
@@ -266,7 +266,7 @@ function drawLine(x0, y0, x1, y1, lineWidth, color, emit){
     color: color,
     gameID: gameID
   });
-};
+}
 
 //to limit the number of events per second
 function throttle(callback, delay) {
@@ -568,7 +568,7 @@ socket.on("reconnect in game", () => {
     socket.emit("add user in game", {username:username, gameID:gameID});
   }
 });
-  
+
 socket.on("get chars for game", (data) => {
   if(data.gameID == gameID){
     socket.emit("send chars for game", { username: username, img: img, gameID:gameID});
@@ -596,7 +596,9 @@ socket.on("display chars in game", (data) => {
       addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
     }   
   }
+
 });
+
 
 socket.on("get game characters", () => {
   socket.emit("send game character")
@@ -636,14 +638,18 @@ socket.on("send unique id", (data) => {
   document.cookie = "uniqueID=" + data.id;
 });
 
-socket.on("check",()=>{
-    console.log("checking")
+
+socket.on("update client list contents",(data)=>{
+  socket.emit("update client list contents", {id:socket.id, username: username, img: img, gameID:gameID})
 });
 
 
 socket.on("done updating client list",(data)=>{
-    console.log("done updating client list")
-    socket.emit("save client list", data);
+    //------------------------------------------ 
+    //------------------------------------------
+    // socket.emit("save client list", data);
+    //------------------------------------------
+    //------------------------------------------
 });
 
 
@@ -691,17 +697,43 @@ socket.on("send score", (data) => {
 });
 
 socket.on("leader board", (data) => {
-  var overlay = document.getElementsByClassName("overlay")[0]
-  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
-  overlay.style.display = "block";
+  console.log("fgrg")
 
-  var para = document.createElement("p");
-  para.style.fontSize = "30px";
+  setTimeout(function(){ 
+
+  var para = document.createElement("h1");
   para.innerHTML = "Leaderboard ";
-  overlay.appendChild(para);
-
-  var content = document.createElement("p");
-  content.style.fontSize = "30px";
+  document.getElementsByClassName("login-form")[0].appendChild(para);
+  var content = document.createElement("a");
   content.innerHTML = data;
-  overlay.appendChild(content);
-  });
+  document.getElementsByClassName("login-form")[0].appendChild(content);
+
+  document.getElementsByClassName("leaderboard-overlay")[0].style.width = "100%";
+
+  }, 2000);
+
+});
+
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -5,8 +5,9 @@ body{
   text-align: center;
   background-color: white;
 }
+
 .overlay{
-  display: none;
+  display: block;
   position: fixed;
   width: 100%;
   height: 100%;
@@ -17,23 +18,33 @@ body{
   background-color: #f6f6ff;
   z-index: 2;
   cursor: pointer;
+  padding-top: 20vh;
+
 }
 
-#new-game{
-  margin-top: 35vh;
-  margin-bottom: 2vh;
-}
-#existing-game{
-  margin-top: 2vh;
-  margin-bottom: 2vh;
-}
 .overlay-text{
+  color: #005582;
   text-align: center;
+
 }
+
+.overlay-logo{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.user-data{
+  margin-top: 3vh;
+}
+
 .btn.btn-success{
+  margin-top: 2vh;
   background-color: #005582;
   border: 2px solid #005582; 
 }
+
 .header{
   padding-left: 20px;
   width:100vw;
