@@ -48,12 +48,6 @@ socket.on("password error",(data)=>{
 });
 
 
-// document.getElementById("new-game").onclick= function(e) {
-//   e.preventDefault()
-//   document.cookie = "gameID=abc";
-//   window.location.href = "/lobby";
-// };
-
 
 socket.on("update data",(data)=>{
   document.cookie = "name=" + data.username;
@@ -95,32 +89,62 @@ document.getElementById("existing-game").onclick= function(e) {
 
 
 // for old users load their previous character
-function get_prev_char(){
-    const name = cookie_val.split("name=")[1].split(";")[0];
-    const img = cookie_val.split("img=")[1].split(";")[0];
-    const img_path = cookie_val.split("img=")[1].split(".")[0];
-    if (!(name === undefined) && !(img === undefined)) {
-      var my_div = document.createElement("DIV");
-      my_div.className = "my character";
-      my_div.style.width = "100%";
-      my_div.style.padding = "60px";
-      my_div.style.opacity = 1;
-      my_div.style.textAlign = "center";
-      my_div.style.verticalAlign = "middle";
-      parent.appendChild(my_div);
+// function get_prev_char(){
+//     const name = cookie_val.split("name=")[1].split(";")[0];
+//     const img = cookie_val.split("img=")[1].split(";")[0];
+//     const img_path = cookie_val.split("img=")[1].split(".")[0];
+//     if (!(name === undefined) && !(img === undefined)) {
+//       var my_div = document.createElement("DIV");
+//       my_div.className = "my character";
+//       my_div.style.width = "100%";
+//       my_div.style.padding = "60px";
+//       my_div.style.opacity = 1;
+//       my_div.style.textAlign = "center";
+//       my_div.style.verticalAlign = "middle";
+//       parent.appendChild(my_div);
 
-      var image = document.createElement("IMG");
-      image.id = "my character img";
-      image.src = img;
-      image.style.width = "15vh";
-      image.style.height = "15vh";
-      image.onclick = function() {
-        submit_operation(this);
-      };
-      my_div.appendChild(image);
+//       var image = document.createElement("IMG");
+//       image.id = "my character img";
+//       image.src = img;
+//       image.style.width = "15vh";
+//       image.style.height = "15vh";
+//       image.onclick = function() {
+//         submit_operation(this);
+//       };
+//       my_div.appendChild(image);
 
-    }
-} 
+//     }
+// } 
+
+
+
+// function submit_operation(e) {
+//   var tagName = e.tagName || e.target.tagName;
+//   if(tagName == 'IMG'){
+//     var cookie_name = e.parentNode.childNodes[1].childNodes[0].value;
+//     var loc_arr = e.parentNode.childNodes[0].src.split("/");
+//     var arr_len = loc_arr.length;
+//     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
+//     document.getElementsByClassName("overlay")[0].style.display = "block"
+//   }
+//   else if(tagName == 'FORM'){
+//     e.preventDefault();
+//     var cookie_name = e.target.childNodes[0].value;
+//     var loc_arr = e.target.parentNode.childNodes[0].src.split("/");
+//     var arr_len = loc_arr.length;
+//     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
+//     document.getElementsByClassName("overlay")[0].style.display = "block"
+//   }
+
+//   if (cookie_name == "") {
+//       children.style.borderColor = "red";
+//   } else{   
+//     document.cookie = document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
+//     document.cookie = "img=" + cookie_img;
+//     document.cookie = "name=" + cookie_name;
+//     document.getElementsByClassName("overlay")[0].style.display = "block"
+//   } 
+//   }
 
 
 function img_hover(div) {
@@ -158,33 +182,14 @@ function img_swap(div) {
   my_img.src = src;
 }
 
-function submit_operation(e) {
-  var tagName = e.tagName || e.target.tagName;
-  if(tagName == 'IMG'){
-    var cookie_name = e.parentNode.childNodes[1].childNodes[0].value;
-    var loc_arr = e.parentNode.childNodes[0].src.split("/");
-    var arr_len = loc_arr.length;
-    var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
-    document.getElementsByClassName("overlay")[0].style.display = "block"
-  }
-  else if(tagName == 'FORM'){
-    e.preventDefault();
-    var cookie_name = e.target.childNodes[0].value;
-    var loc_arr = e.target.parentNode.childNodes[0].src.split("/");
-    var arr_len = loc_arr.length;
-    var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
-    document.getElementsByClassName("overlay")[0].style.display = "block"
-  }
+function img_select(div){
+  var loc_arr = div.firstChild.src.split("/");
+  var arr_len = loc_arr.length;
+  var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
+  document.cookie = "img=" + cookie_img;
+  window.location.href = "/lobby";
+}
 
-  if (cookie_name == "") {
-      children.style.borderColor = "red";
-  } else{   
-    document.cookie = document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
-    document.cookie = "img=" + cookie_img;
-    document.cookie = "name=" + cookie_name;
-    document.getElementsByClassName("overlay")[0].style.display = "block"
-  } 
-  }
 
 function removePrevChars() {
   var elements = document.getElementsByClassName("characters");
@@ -193,8 +198,8 @@ function removePrevChars() {
   }
 }
 
-socket.on("in case no one is in lobby", () => {
-  socket.emit("send chars", { username: "", img: "" });
+socket.on("in case no one is in lobby", (data) => {
+  socket.emit("send chars", { username: "", img: "", return_id:data.return_id,chars:data.chars,imgs:data.imgs});
 });
 
 socket.on("hide chars globally", (data) => {
@@ -291,6 +296,10 @@ socket.on("hide chars globally", (data) => {
 
         char_div.onmouseover = function() {
           img_hover(this);
+        };
+
+        char_div.onclick = function() {
+          img_select(this);
         };
       }
     }

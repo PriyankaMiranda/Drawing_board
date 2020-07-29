@@ -70,8 +70,6 @@ io.on("connection", (socket) => {
 	socket.on("update data", (data) => {
 		if(Object.keys(existing_games).length === 0) {
 			existing_games[data.gameID] = data.gamePWD
-			chars[data.gameID] = [];
-			imgs[data.gameID] = [];
 			socket.broadcast.emit("update existing game list for all", existing_games);
 			socket.join(data.gameID);
 			socket.emit("update data", data);
@@ -91,8 +89,6 @@ io.on("connection", (socket) => {
 		else{
 			// update gameID
 			existing_games[data.gameID] = data.gamePWD
-			chars[data.gameID] = [];
-			imgs[data.gameID] = [];
 			socket.broadcast.emit("update existing game list for all", existing_games);
 		}
 	});
@@ -111,27 +107,31 @@ io.on("connection", (socket) => {
 
 
 	socket.on("load chars", (data) => {
-		socket.broadcast.to(data.gameID).emit("get chars", {return_id:socket.id});
-		socket.emit("in case no one is in lobby");
-		// socket.broadcast.emit("get chars");
+		chars[data.gameID] = [];
+		imgs[data.gameID] = [];
+		socket.broadcast.to(data.gameID).emit("get chars", {return_id:socket.id,chars:chars[data.gameID],imgs:imgs[data.gameID]});
+		socket.emit("in case no one is in lobby", {return_id:socket.id,chars:chars[data.gameID],imgs:imgs[data.gameID]});
 	});
 
 	socket.on("send chars", (data) => {
-		io.to(data.return_id).emit('send chars', { username: data.username, img: data.img });
+		console.log(data)
+		io.to(data.return_id).emit('send chars', { username: data.username, img: data.img ,chars:data.chars, imgs:data.imgs});
 	});
 
 	socket.on("update chars", (data) => {
+		chars[data.gameID] = data.chars;
+		imgs[data.gameID] = data.imgs;
+
 		// we only load the chars that are 
-		// if (data.username == "" && data.img == "") {
-		// 	// nothing happens
-		// } else 
-		// socket.imgs = imgs;
-		console.log('sdfs')
-		if (!chars[data.gameID].includes(data.username) && !imgs.includes(data.img)) {
+		// else 
+		// socket.imgs = imgs; 
+
+		if (!chars[data.gameID].includes(data.username) && !imgs[data.gameID].includes(data.img)) {
 			chars[data.gameID].push(data.username);
 			imgs[data.gameID].push(data.img);
 		}
-		socket.emit("hide chars globally", { imgs: socket.imgs });
+		console.log(chars[data.gameID])
+		socket.emit("hide chars globally", { imgs: imgs[data.gameID] });
 
 		// socket.broadcast.to(data.gameID).emit("update char and list", {return_id:socket.id});
 		// socket.emit("update char and img list", { imgs: socket.imgs });

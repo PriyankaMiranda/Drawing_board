@@ -343,7 +343,7 @@ $inputMessage.click(() => {
 
 //when new user on front page requests for the characters to be loaded
 socket.on("get chars", (data) => {
-  socket.emit("send chars", { username: username, img: img , return_id: data.return_id});
+  socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
 });
 
 socket.on("get chars for reloading", () => {
