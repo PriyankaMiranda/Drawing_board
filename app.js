@@ -59,19 +59,24 @@ io.on("connection", (socket) => {
 	});
 	
 	socket.on("send existing game list", (data) =>{
-		if(data.existing_games){
+		console.log("send existing game list")
+		console.log(data.existing_games)
+		if(Object.keys(data.existing_games).length != 0){
 			existing_games = data.existing_games
-			// if(!existing_games){
-			// }
-			// else{
-			// 	existing_games = Object.assign({}, existing_games, data.existing_games);
-			// }
 			socket.broadcast.emit("update existing game list for all", {existing_games:existing_games})
 		}
 	});
 
 	socket.on("update data", (data) => {
-		if(data.gameID in existing_games) {
+		if(Object.keys(existing_games).length === 0) {
+			existing_games[data.gameID] = data.gamePWD
+			chars[data.gameID] = [];
+			imgs[data.gameID] = [];
+			socket.broadcast.emit("update existing game list for all", existing_games);
+			socket.join(data.gameID);
+			socket.emit("update data", data);
+		}
+		else if(data.gameID in existing_games) {
 		    // remove chars selected from existing game
 		    if(existing_games[data.gameID] == data.gamePWD){
 				// match ! if there is a match, we allow the user to enter 
@@ -93,18 +98,22 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("update existing game list for all", (data) =>{
+		if(data.existing_games){
+			existing_games = data.existing_games
+		}
+		else{
+			existing_games = data
+		}
 		console.log("-----------------------------")
-		console.log(socket.id)
-		console.log(data)
+		console.log(existing_games)
 		console.log("-----------------------------")
-		existing_games = data.existing_games
 	});
 
 
 	socket.on("load chars", (data) => {
 		socket.broadcast.to(data.gameID).emit("get chars", {return_id:socket.id});
+		socket.emit("in case no one is in lobby");
 		// socket.broadcast.emit("get chars");
-		// socket.emit("in case no one is in lobby");
 	});
 
 	socket.on("send chars", (data) => {
@@ -117,7 +126,7 @@ io.on("connection", (socket) => {
 		// 	// nothing happens
 		// } else 
 		// socket.imgs = imgs;
-		
+		console.log('sdfs')
 		if (!chars[data.gameID].includes(data.username) && !imgs.includes(data.img)) {
 			chars[data.gameID].push(data.username);
 			imgs[data.gameID].push(data.img);

@@ -8,14 +8,25 @@ instruction.innerHTML = "Choose your character";
 
 const cookie_val = document.cookie;
 try{
-  username = cookie_val.split("username=")[1].split(";")[0];
+  username = cookie_val.split("name=")[1].split(";")[0];
   document.getElementById("game-username").value = username
-  
+}
+catch{
+  console.log("No old username")
+}
+try{
   gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
   document.getElementById("game-pwd").value = gamePWD
-  
+}
+catch{
+  console.log("No old game password")
+}
+try {
   gameID = cookie_val.split("gameID=")[1].split(";")[0];
   document.getElementById("game-id").value = gameID  
+}
+catch{
+  console.log("No old game ID")
 }
 
 socket.emit("update existing game list")
@@ -45,13 +56,16 @@ socket.on("password error",(data)=>{
 
 
 socket.on("update data",(data)=>{
-  document.cookie = "username=" + data.username;
+  document.cookie = "name=" + data.username;
   document.cookie = "gameID=" + data.gameID;
   document.getElementsByClassName("overlay")[0].style.display = "none";
   socket.emit("load chars", {gameID:data.gameID});
   // document.cookie = "img=" + data.img;
 });
 
+socket.on("send chars",(data)=>{
+  socket.emit("update chars",data)
+});
 
 
 document.getElementById('game-username').onkeydown = function(e){
@@ -79,9 +93,6 @@ document.getElementById("existing-game").onclick= function(e) {
   // window.location.href = "/lobby";
 };
 
-socket.on("send chars",(data)=>{
-  socket.emit("update chars",data)
-});
 
 // for old users load their previous character
 function get_prev_char(){
@@ -182,11 +193,12 @@ function removePrevChars() {
   }
 }
 
-// socket.on("in case no one is in lobby", () => {
-//   socket.emit("send chars", { username: "", img: "" });
-// });
+socket.on("in case no one is in lobby", () => {
+  socket.emit("send chars", { username: "", img: "" });
+});
 
 socket.on("hide chars globally", (data) => {
+  console.log("hide chars globally")
   removePrevChars();
   var Path = "/characters/"; //Folder where we will search for files
   var i = 0;
