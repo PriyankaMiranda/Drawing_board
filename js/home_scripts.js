@@ -1,9 +1,41 @@
 var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
-const cookie_val = document.cookie;
+var logo = document.getElementById("logo-internal");
+logo.src = "/logo2_transparent.png";
+var instruction = document.getElementById("instruction");
+instruction.innerHTML = "Choose your character";
 
-load_data()
+const cookie_val = document.cookie;
+try{
+  username = cookie_val.split("username=")[1].split(";")[0];
+  document.getElementById("game-username").value = username
+  
+  gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
+  document.getElementById("game-pwd").value = gamePWD
+  
+  gameID = cookie_val.split("gameID=")[1].split(";")[0];
+  document.getElementById("game-id").value = gameID  
+}
+
+socket.emit("update existing game list")
+
+socket.on("get existing game list", (data) =>{
+  socket.emit("get existing game list",data)
+});
+
+socket.on("send existing game list", (data) =>{
+  socket.emit("send existing game list", data)
+});
+
+socket.on("update existing game list for all", (data) =>{
+  socket.emit("update existing game list for all", data)
+});
+
+socket.on("password error",(data)=>{
+  document.getElementById("game-pwd").style.borderColor = "red"
+});
+
 
 // document.getElementById("new-game").onclick= function(e) {
 //   e.preventDefault()
@@ -12,40 +44,44 @@ load_data()
 // };
 
 
+socket.on("update data",(data)=>{
+  document.cookie = "username=" + data.username;
+  document.cookie = "img=" + data.img;
+  document.cookie = "gameID=" + data.gameID;
+  document.getElementsByClassName("overlay")[0].style.display = "none";
+  socket.emit("load chars", {gameID:data.gameID});
+});
+
+
+
 document.getElementById('game-username').onkeydown = function(e){
   if(e.keyCode == 13){
     e.preventDefault()
-
     var gameID = document.getElementById("game-id").value  
     var gamePWD = document.getElementById("game-pwd").value
-    //check if the gameID and password is a match
-    socket.emit("",{gameID:gameID,gamePWD:gamePWD})
+    var username = document.getElementById("game-username").value 
 
-    document.getElementsByClassName("overlay")[0].style.display = "none";
+    //check if the gameID and password is a match
+    socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
+
   }
 };
 
 document.getElementById("existing-game").onclick= function(e) {
   e.preventDefault()  
-  
   var gameID = document.getElementById("game-id").value  
   var gamePWD = document.getElementById("game-pwd").value
+  var username = document.getElementById("game-username").value 
   //check if the gameID and password is a match
-  socket.emit("",{gameID:gameID,gamePWD:gamePWD})
-
-  document.getElementsByClassName("overlay")[0].style.display = "none";
+  socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
 
   // document.cookie = "gameID="+gameID;
   // window.location.href = "/lobby";
 };
 
-function load_data(){
-  var logo = document.getElementById("logo-internal");
-  logo.src = "/logo2_transparent.png";
-  var instruction = document.getElementById("instruction");
-  instruction.innerHTML = "Choose your character";
-  socket.emit("load chars");
-}
+socket.on("send chars",(data)=>{
+  socket.emit("update chars",data)
+});
 
 // for old users load their previous character
 function get_prev_char(){

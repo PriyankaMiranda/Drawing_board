@@ -32,8 +32,9 @@ const server = app.listen(port, () => {
 var io = require("socket.io")(server);
 var ejs = require("ejs");
 
-var chars = [];//for homepage
-var imgs = [];//for homepage
+var chars = {};//for homepage
+var imgs = {};//for homepage
+
 var disp_chars = [];//for lobby
 var disp_imgs = [];//for lobby
 var game_chars = [];//for game
@@ -42,14 +43,67 @@ var game_imgs = [];//for game
 var curr_loc = []
 var curr_games = [];
 
+var existing_games = {}
+
 io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // ---------------------------------HOMEPAGE---------------------------------
 // --------------------------------------------------------------------------
-	var addedUser = false;
-	socket.on("load chars", () => {
-		chars = [];
-		imgs = [];
+	
+	socket.on("update existing game list", () =>{
+		socket.broadcast.emit("get existing game list", {return_id:socket.id})
+	});
+
+	socket.on("get existing game list", (data) =>{
+		io.to(data.return_id).emit('send existing game list', {existing_games:existing_games});
+	});
+	
+	socket.on("send existing game list", (data) =>{
+		if(data.existing_games){
+			existing_games = data.existing_games
+			// if(!existing_games){
+			// }
+			// else{
+			// 	existing_games = Object.assign({}, existing_games, data.existing_games);
+			// }
+			socket.broadcast.emit("update existing game list for all", {existing_games:existing_games})
+		}
+	});
+
+	socket.on("update data", (data) => {
+		if(data.gameID in existing_games) {
+		    // remove chars selected from existing game
+		    if(existing_games[data.gameID] == data.gamePWD){
+				// match !
+				socket.broadcast.emit("send existing game list", data);
+		    } 
+		    else{
+		    	// password mismatch !
+				socket.emit("password error");
+		    }
+		}
+		else{
+			// update gameID
+			existing_games[data.gameID] = data.gamePWD
+			socket.broadcast.emit("update existing game list for all", existing_games);
+		}
+	});
+
+	socket.on("update existing game list for all", (data) =>{
+		console.log("-----------------------------")
+		console.log(socket.id)
+		console.log(data)
+		console.log("-----------------------------")
+		existing_games = data.existing_games
+	});
+
+
+
+
+	socket.on("load chars", (data) => {
+		chars[data.gameID] = [];
+		imgs[data.gameID] = [];
+
 		socket.broadcast.emit("get chars");
 		socket.emit("in case no one is in lobby");
 	});
@@ -160,6 +214,7 @@ io.on("connection", (socket) => {
 		});
 	});
 
+	var addedUser = false;
 	// when the client emits 'add user', this listens and executes
 	socket.on("add user", (data) => {
 		if (addedUser) return;
