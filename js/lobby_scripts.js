@@ -342,8 +342,8 @@ $inputMessage.click(() => {
 // Socket events
 
 //when new user on front page requests for the characters to be loaded
-socket.on("get chars", () => {
-  socket.emit("send chars", { username: username, img: img });
+socket.on("get chars", (data) => {
+  socket.emit("send chars", { username: username, img: img , return_id: data.return_id});
 });
 
 socket.on("get chars for reloading", () => {

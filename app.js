@@ -74,8 +74,9 @@ io.on("connection", (socket) => {
 		if(data.gameID in existing_games) {
 		    // remove chars selected from existing game
 		    if(existing_games[data.gameID] == data.gamePWD){
-				// match !
-				socket.broadcast.emit("send existing game list", data);
+				// match ! if there is a match, we allow the user to enter 
+				socket.join(data.gameID);
+				socket.emit("update data", data);
 		    } 
 		    else{
 		    	// password mismatch !
@@ -85,6 +86,8 @@ io.on("connection", (socket) => {
 		else{
 			// update gameID
 			existing_games[data.gameID] = data.gamePWD
+			chars[data.gameID] = [];
+			imgs[data.gameID] = [];
 			socket.broadcast.emit("update existing game list for all", existing_games);
 		}
 	});
@@ -98,42 +101,48 @@ io.on("connection", (socket) => {
 	});
 
 
-
-
 	socket.on("load chars", (data) => {
-		chars[data.gameID] = [];
-		imgs[data.gameID] = [];
-
-		socket.broadcast.emit("get chars");
-		socket.emit("in case no one is in lobby");
+		socket.broadcast.to(data.gameID).emit("get chars", {return_id:socket.id});
+		// socket.broadcast.emit("get chars");
+		// socket.emit("in case no one is in lobby");
 	});
 
 	socket.on("send chars", (data) => {
-		if (data.username == "" && data.img == "") {
-			// nothing happens
-		} else if (!chars.includes(data.username) && !imgs.includes(data.img)) {
-			chars.push(data.username);
-			imgs.push(data.img);
+		io.to(data.return_id).emit('send chars', { username: data.username, img: data.img });
+	});
+
+	socket.on("update chars", (data) => {
+		// we only load the chars that are 
+		// if (data.username == "" && data.img == "") {
+		// 	// nothing happens
+		// } else 
+		// socket.imgs = imgs;
+		
+		if (!chars[data.gameID].includes(data.username) && !imgs.includes(data.img)) {
+			chars[data.gameID].push(data.username);
+			imgs[data.gameID].push(data.img);
 		}
-		socket.imgs = imgs;
 		socket.emit("hide chars globally", { imgs: socket.imgs });
+
+		// socket.broadcast.to(data.gameID).emit("update char and list", {return_id:socket.id});
+		// socket.emit("update char and img list", { imgs: socket.imgs });
 	});
 
-	socket.on("reload chars for others on homepage", () => {
-		chars = [];
-		imgs = [];
-		socket.emit("get chars for reloading");
-		socket.broadcast.emit("get chars for reloading");
-	});
+	// socket.on("reload chars for others on homepage", () => {
+	// 	chars = [];
+	// 	imgs = [];
+	// 	socket.emit("get chars for reloading");
+	// 	socket.broadcast.emit("get chars for reloading");
+	// });
 
-	socket.on("send chars for homepage", (data) => {
-		if (!chars.includes(data.username) && !imgs.includes(data.img)) {
-			chars.push(data.username);
-			imgs.push(data.img);
-		}
-		socket.imgs = imgs;
-		socket.broadcast.emit("hide chars globally", { imgs: socket.imgs });
-	});
+	// socket.on("send chars for homepage", (data) => {
+	// 	if (!chars.includes(data.username) && !imgs.includes(data.img)) {
+	// 		chars.push(data.username);
+	// 		imgs.push(data.img);
+	// 	}
+	// 	socket.imgs = imgs;
+	// 	socket.broadcast.emit("hide chars globally", { imgs: socket.imgs });
+	// });
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------

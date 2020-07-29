@@ -46,10 +46,10 @@ socket.on("password error",(data)=>{
 
 socket.on("update data",(data)=>{
   document.cookie = "username=" + data.username;
-  document.cookie = "img=" + data.img;
   document.cookie = "gameID=" + data.gameID;
   document.getElementsByClassName("overlay")[0].style.display = "none";
   socket.emit("load chars", {gameID:data.gameID});
+  // document.cookie = "img=" + data.img;
 });
 
 
@@ -182,9 +182,9 @@ function removePrevChars() {
   }
 }
 
-socket.on("in case no one is in lobby", () => {
-  socket.emit("send chars", { username: "", img: "" });
-});
+// socket.on("in case no one is in lobby", () => {
+//   socket.emit("send chars", { username: "", img: "" });
+// });
 
 socket.on("hide chars globally", (data) => {
   removePrevChars();
