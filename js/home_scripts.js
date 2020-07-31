@@ -198,10 +198,10 @@ function removePrevChars() {
   }
 }
 
-socket.on("get chars 2", (data) => {
-  console.log(username, img , data.return_id,data.chars,data.imgs)
-  socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
-});
+// socket.on("get chars 2", (data) => {
+//   console.log(username, img , data.return_id,data.chars,data.imgs)
+//   socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+// });
 
 socket.on("in case no one is in lobby", (data) => {
   socket.emit("send chars", { username: "", img: "", return_id:data.return_id,chars:data.chars,imgs:data.imgs});

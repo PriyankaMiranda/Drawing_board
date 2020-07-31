@@ -343,8 +343,9 @@ $inputMessage.click(() => {
 
 //when new user on front page requests for the characters to be loaded
 socket.on("get chars", (data) => {
-  console.log(username, img , data.return_id,data.chars,data.imgs)
-  socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+  if(gameID == data.gameID){
+    socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+  }
 });
 
 socket.on("get chars for reloading", () => {
