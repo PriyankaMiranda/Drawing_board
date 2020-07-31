@@ -90,6 +90,8 @@ io.on("connection", (socket) => {
 			// update gameID
 			existing_games[data.gameID] = data.gamePWD
 			socket.broadcast.emit("update existing game list for all", existing_games);
+			socket.join(data.gameID);
+			socket.emit("update data", data);
 		}
 	});
 
@@ -100,16 +102,16 @@ io.on("connection", (socket) => {
 		else{
 			existing_games = data
 		}
-		console.log("-----------------------------")
-		console.log(existing_games)
-		console.log("-----------------------------")
 	});
 
 
 	socket.on("load chars", (data) => {
+		socket.join(data.gameID);
 		chars[data.gameID] = [];
 		imgs[data.gameID] = [];
-		socket.broadcast.to(data.gameID).emit("get chars", {return_id:socket.id,chars:chars[data.gameID],imgs:imgs[data.gameID]});
+		console.log(data)
+		// socket.broadcast.to(data.gameID).emit("get chars", {return_id:socket.id,chars:chars[data.gameID],imgs:imgs[data.gameID]});
+		socket.broadcast.emit("get chars 2", {return_id:socket.id,chars:chars[data.gameID],imgs:imgs[data.gameID]});
 		socket.emit("in case no one is in lobby", {return_id:socket.id,chars:chars[data.gameID],imgs:imgs[data.gameID]});
 	});
 
@@ -130,7 +132,7 @@ io.on("connection", (socket) => {
 			chars[data.gameID].push(data.username);
 			imgs[data.gameID].push(data.img);
 		}
-		console.log(chars[data.gameID])
+		// console.log(chars[data.gameID])
 		socket.emit("hide chars globally", { imgs: imgs[data.gameID] });
 
 		// socket.broadcast.to(data.gameID).emit("update char and list", {return_id:socket.id});
