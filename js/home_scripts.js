@@ -43,11 +43,14 @@ socket.on("update existing game list for all", (data) =>{
   socket.emit("update existing game list for all", data)
 });
 
+// ------------------------------------------------------------------------------------
+// ------------------------------if password doesn't match-----------------------------
+// ------------------------------------------------------------------------------------
 socket.on("password error",(data)=>{
   document.getElementById("game-pwd").style.borderColor = "red"
 });
-
-
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 socket.on("update data",(data)=>{
   document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
@@ -59,7 +62,6 @@ socket.on("update data",(data)=>{
   gamePWD =data.gamePWD;
   document.getElementsByClassName("overlay")[0].style.display = "none";
   socket.emit("load chars", {gameID:data.gameID,gamePWD:data.gamePWD,return_id:"-"});
-  // document.cookie = "img=" + data.img;
 });
 
 socket.on("reload chars",(data)=>{
@@ -94,37 +96,6 @@ document.getElementById("existing-game").onclick= function(e) {
   socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
 };
 
-
-// for old users load their previous character
-// function get_prev_char(){
-//     const name = cookie_val.split("name=")[1].split(";")[0];
-//     const img = cookie_val.split("img=")[1].split(";")[0];
-//     const img_path = cookie_val.split("img=")[1].split(".")[0];
-//     if (!(name === undefined) && !(img === undefined)) {
-//       var my_div = document.createElement("DIV");
-//       my_div.className = "my character";
-//       my_div.style.width = "100%";
-//       my_div.style.padding = "60px";
-//       my_div.style.opacity = 1;
-//       my_div.style.textAlign = "center";
-//       my_div.style.verticalAlign = "middle";
-//       parent.appendChild(my_div);
-
-//       var image = document.createElement("IMG");
-//       image.id = "my character img";
-//       image.src = img;
-//       image.style.width = "15vh";
-//       image.style.height = "15vh";
-//       image.onclick = function() {
-//         submit_operation(this);
-//       };
-//       my_div.appendChild(image);
-
-//     }
-// } 
-
-
-
 function img_hover(div) {
   if (prev.node === null) {
     console.log("Previous node is null");
@@ -139,27 +110,9 @@ function img_hover(div) {
   prev.node = div;
 }
 
-function img_hover2(div) {
-  if (prev.node === null) {
-    console.log("Previous node is null");
-  } else {
-    var prev_child = prev.node.childNodes;
-    prev_child[0].style.opacity = 1;
-    prev_child[0].style.transform = "scale(1)";
-  }
-  var children = div.childNodes;
-  children[0].style.opacity = 0.3;
-  children[0].style.transform = "scale(1.25)";
-  prev.node = div;
-}
-
-function img_swap(div) {
-  var my_img = document.getElementById("my character img");
-  var src = div.firstChild.src;
-  div.firstChild.src = my_img.src;
-  my_img.src = src;
-}
-
+// ------------------------------------------------------------------------------------
+// ---------------------------load lobby upon char selection--------------------------
+// ------------------------------------------------------------------------------------
 function img_select(div){
   var loc_arr = div.firstChild.src.split("/");
   var arr_len = loc_arr.length;
@@ -167,21 +120,28 @@ function img_select(div){
   document.cookie = "img=" + cookie_img;
   window.location.href = "/lobby";
 }
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
-
-
+// ------------------------------------------------------------------------------------
+// ------------------------clear characters before loading page------------------------
+// ------------------------------------------------------------------------------------
 function removePrevChars() {
   var elements = document.getElementsByClassName("characters");
   while (elements.length > 0) {
     elements[0].parentNode.removeChild(elements[0]);
   }
 }
-
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 socket.on("in case no one is in lobby", (data) => {
   socket.emit("send chars", { username: "", img: "", return_id:data.return_id,chars:data.chars,imgs:data.imgs});
 });
 
+// ------------------------------------------------------------------------------------
+// ---------------socket function for hiding already selected characters---------------
+// ------------------------------------------------------------------------------------ 
 socket.on("hide chars globally", (data) => {
   console.log("hide chars globally")
   removePrevChars();
@@ -240,5 +200,6 @@ socket.on("hide chars globally", (data) => {
       };
     }
   }
-  
 });
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
