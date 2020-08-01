@@ -47,12 +47,10 @@ const cookie_val = document.cookie;
 username = cookie_val.split("name=")[1].split(";")[0];
 img = cookie_val.split("img=")[1].split(";")[0];
 gameID = cookie_val.split("gameID=")[1].split(";")[0];
+gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
 
-if(gameID == "abc"){
-  gameID = Math.random().toString(36).substring(7).substring(5, 1);
 
-  document.cookie = "gameID="+gameID;
-}
+
 document.getElementById("gameID").innerHTML += gameID;
 
 function start_game(e){
@@ -90,7 +88,7 @@ function remove_ready_button(){
 }
 
 var socket = io();
-socket.emit("reload chars for others on homepage");
+socket.emit("hide chars reloading", {gameID:gameID,gamePWD:gamePWD});
 socket.emit("load chars on lobby");
 
 
@@ -343,7 +341,10 @@ $inputMessage.click(() => {
 
 //when new user on front page requests for the characters to be loaded
 socket.on("get chars", (data) => {
-  if(gameID == data.gameID){
+
+  console.log( {username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs})
+  console.log(gameID , data.gameID , gamePWD , data.gamePWD)
+  if(gameID == data.gameID && gamePWD == data.gamePWD){
     socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
   }
 });

@@ -50,17 +50,27 @@ socket.on("password error",(data)=>{
 
 
 socket.on("update data",(data)=>{
+  document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
   document.cookie = "name=" + data.username;
   document.cookie = "gameID=" + data.gameID;
+  document.cookie = "game-pwd=" + data.gamePWD;
+  username = data.username;
+  gameID = data.gameID;
+  gamePWD =data.gamePWD;
   document.getElementsByClassName("overlay")[0].style.display = "none";
-  socket.emit("load chars", {gameID:data.gameID});
+  socket.emit("load chars", {gameID:data.gameID,gamePWD:data.gamePWD,return_id:"-"});
   // document.cookie = "img=" + data.img;
+});
+
+socket.on("reload chars",(data)=>{
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    socket.emit("load chars",{gameID:data.gameID,gamePWD:data.gamePWD,return_id:socket.id})
+  }
 });
 
 socket.on("send chars",(data)=>{
   socket.emit("update chars",data)
 });
-
 
 document.getElementById('game-username').onkeydown = function(e){
   if(e.keyCode == 13){
@@ -82,9 +92,6 @@ document.getElementById("existing-game").onclick= function(e) {
   var username = document.getElementById("game-username").value 
   //check if the gameID and password is a match
   socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
-
-  // document.cookie = "gameID="+gameID;
-  // window.location.href = "/lobby";
 };
 
 
@@ -116,35 +123,6 @@ document.getElementById("existing-game").onclick= function(e) {
 //     }
 // } 
 
-
-
-// function submit_operation(e) {
-//   var tagName = e.tagName || e.target.tagName;
-//   if(tagName == 'IMG'){
-//     var cookie_name = e.parentNode.childNodes[1].childNodes[0].value;
-//     var loc_arr = e.parentNode.childNodes[0].src.split("/");
-//     var arr_len = loc_arr.length;
-//     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
-//     document.getElementsByClassName("overlay")[0].style.display = "block"
-//   }
-//   else if(tagName == 'FORM'){
-//     e.preventDefault();
-//     var cookie_name = e.target.childNodes[0].value;
-//     var loc_arr = e.target.parentNode.childNodes[0].src.split("/");
-//     var arr_len = loc_arr.length;
-//     var cookie_img = "/"+ loc_arr[arr_len-2]+"/"+loc_arr[arr_len-1]
-//     document.getElementsByClassName("overlay")[0].style.display = "block"
-//   }
-
-//   if (cookie_name == "") {
-//       children.style.borderColor = "red";
-//   } else{   
-//     document.cookie = document.cookie + "; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
-//     document.cookie = "img=" + cookie_img;
-//     document.cookie = "name=" + cookie_name;
-//     document.getElementsByClassName("overlay")[0].style.display = "block"
-//   } 
-//   }
 
 
 function img_hover(div) {
@@ -191,6 +169,7 @@ function img_select(div){
 }
 
 
+
 function removePrevChars() {
   var elements = document.getElementsByClassName("characters");
   while (elements.length > 0) {
@@ -198,10 +177,6 @@ function removePrevChars() {
   }
 }
 
-// socket.on("get chars 2", (data) => {
-//   console.log(username, img , data.return_id,data.chars,data.imgs)
-//   socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
-// });
 
 socket.on("in case no one is in lobby", (data) => {
   socket.emit("send chars", { username: "", img: "", return_id:data.return_id,chars:data.chars,imgs:data.imgs});
@@ -222,91 +197,48 @@ socket.on("hide chars globally", (data) => {
     console.log("Exception(e) - Cookie not available");
   }
 
-  if (document.getElementsByClassName("my character").length != 0) {
-    for (i = 1; i < 53; i++) {
-      if (
-        blocked_list.includes(Path + i + ".png") ||
-        img == Path + i + ".png"
-      ) {
-        console.log(Path + i + ".png - Avatar taken");
+  for (i = 1; i < 53; i++) {
+    if (
+      blocked_list.includes(Path + i + ".png") ||
+      img == Path + i + ".png"
+    ) {
+      console.log(Path + i + ".png - Avatar taken");
+    } 
+    else {
+      var char_div = document.createElement("DIV");
+      char_div.className = "characters";
+      if (window.screen.width > 500) {
+        char_div.style.width = "15vw";
+        char_div.style.height = "15vw";
       } else {
-        var char_div = document.createElement("DIV");
-        char_div.className = "characters";
-        if (window.screen.width > 500) {
-          char_div.style.width = "15vw";
-          char_div.style.height = "15vw";
-        } else {
-          char_div.style.width = "30vw";
-          char_div.style.height = "30vw";
-        }
-        char_div.style.flex = "25%";
-        char_div.style.padding = "30px";
-        char_div.style.position = "relative";
-        parent.appendChild(char_div);
-
-        var image = document.createElement("IMG");
-        image.className = "characters_img";
-        image.src = Path + i + ".png";
-        if (window.screen.width > 500) {
-          image.style.width = "10vw";
-        } else {
-          image.style.width = "20vw";
-        }
-        image.style.position = "absolute";
-        image.style.top = "10px";
-        char_div.appendChild(image);
-
-        char_div.onmouseover = function() {
-          img_hover2(this);
-        };
-
-        char_div.onclick = function() {
-          img_swap(this);
-        };
+        char_div.style.width = "30vw";
+        char_div.style.height = "30vw";
       }
-    }
-  } else {
-    for (i = 1; i < 53; i++) {
-      if (
-        blocked_list.includes(Path + i + ".png") ||
-        img == Path + i + ".png"
-      ) {
-        console.log(Path + i + ".png - Avatar taken");
+      char_div.style.flex = "25%";
+      char_div.style.padding = "30px";
+      char_div.style.position = "relative";
+      parent.appendChild(char_div);
+
+      var image = document.createElement("IMG");
+      image.className = "characters_img";
+      image.src = Path + i + ".png";
+      if (window.screen.width > 500) {
+        image.style.width = "10vw";
       } else {
-        var char_div = document.createElement("DIV");
-        char_div.className = "characters";
-        if (window.screen.width > 500) {
-          char_div.style.width = "15vw";
-          char_div.style.height = "15vw";
-        } else {
-          char_div.style.width = "30vw";
-          char_div.style.height = "30vw";
-        }
-        char_div.style.flex = "25%";
-        char_div.style.padding = "30px";
-        char_div.style.position = "relative";
-        parent.appendChild(char_div);
-
-        var image = document.createElement("IMG");
-        image.className = "characters_img";
-        image.src = Path + i + ".png";
-        if (window.screen.width > 500) {
-          image.style.width = "10vw";
-        } else {
-          image.style.width = "20vw";
-        }
-        image.style.position = "absolute";
-        image.style.top = "10px";
-        char_div.appendChild(image);
-
-        char_div.onmouseover = function() {
-          img_hover(this);
-        };
-
-        char_div.onclick = function() {
-          img_select(this);
-        };
+        image.style.width = "20vw";
       }
+      image.style.position = "absolute";
+      image.style.top = "10px";
+      char_div.appendChild(image);
+
+      char_div.onmouseover = function() {
+        img_hover(this);
+      };
+
+      char_div.onclick = function() {
+        img_select(this);
+      };
     }
   }
+  
 });

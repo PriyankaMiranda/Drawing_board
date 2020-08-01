@@ -22,6 +22,17 @@ body{
 
 }
 
+.overlay-header {
+    width: 100%;
+    height: 15vh;
+    text-align: center;
+}
+
+.overlay-header-contents {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 100%;
+}
 .overlay-text{
   color: #005582;
   text-align: center;
