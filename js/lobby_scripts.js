@@ -62,6 +62,111 @@ socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
+socket.on("display chars lobby", (data) => {
+  removeParticipantsImg();
+  var i;
+  username = cookie_val.split("name=")[1].split(";")[0];
+  img = cookie_val.split("img=")[1].split(";")[0];
+  remove_ready_button()
+  if (username == data.chars[0] && img == data.imgs[0]){
+    // socket.emit("remove old buttons")
+    set_ready_button()
+  }
+  for (i = 0; i < data.chars.length; i++) {
+    addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
+  }
+});
+
+socket.on("enter game", (data) => {
+  username = cookie_val.split("name=")[1].split(";")[0];
+  img = cookie_val.split("img=")[1].split(";")[0];
+  socket.emit("remove char from lobby", {username:username, img:img})
+  document.cookie = "gameID=" + data.gameID;
+  window.location.href = "/game";
+});
+
+
+
+socket.on("remove old buttons", () => {
+  var parent = document.getElementById("row_ready");
+  while (parent.lastElementChild) {
+    parent.removeChild(parent.lastElementChild);
+  }
+});
+
+
+// Socket events
+
+//when new user on front page requests for the characters to be loaded
+socket.on("get chars", (data) => {
+  if(gameID == data.gameID && gamePWD == data.gamePWD){
+    socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+  }
+});
+
+socket.on("get chars for reloading", () => {
+  socket.emit("send chars for homepage", {username: username, img: img });
+});
+
+socket.on("get chars for reloading upon disconnection", () => {
+  socket.emit("reload chars for others not the one that left");
+});
+
+socket.on("reload chars upon disconnection", () => {
+  socket.emit("reload chars for others except the one that left", {username: username, img: img});  
+});
+
+socket.on("get chars for lobby", () => {
+  if(data.gameID == gameID &&data.gamePWD == gamePWD){
+    socket.emit("send chars for lobby", { username: username, img: img});
+  }
+});
+
+// Whenever the server emits 'new message', update the chat body
+socket.on("new message", (data) => {
+  addChatMessage(data);
+});
+
+// Whenever the server emits 'user joined', log it in the chat body
+socket.on("user joined", (data) => {
+  addChatMessage(data);
+});
+
+// Whenever the server emits 'user left', log it in the chat body
+socket.on("user left", (data) => {
+  removeChatTyping(data);
+});
+
+// Whenever the server emits 'typing', show the typing message
+socket.on("typing", (data) => {
+  addChatTyping(data);
+});
+
+// Whenever the server emits 'stop typing', kill the typing message
+socket.on("stop typing", (data) => {
+  removeChatTyping(data);
+});
+
+socket.on("disconnect", () => {
+  log("you have been disconnected");
+});
+
+socket.on("reconnect", () => {
+  log("you have been reconnected");
+  if (username) {
+    socket.emit("add user", username);
+  }
+});
+
+socket.on("reconnect_error", () => {
+  log("attempt to reconnect has failed");
+});
+
+const removeParticipantsImg = (data) => {
+  var parent = document.getElementById("row_chars");
+  while (parent.firstChild) parent.removeChild(parent.firstChild);
+};
+
 function start_game(e){
   socket.emit("enter game", {gameID:gameID})
 }
@@ -96,35 +201,6 @@ function remove_ready_button(){
   } 
 }
 
-socket.on("enter game", (data) => {
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1].split(";")[0];
-  socket.emit("remove char from lobby", {username:username, img:img})
-  document.cookie = "gameID=" + data.gameID;
-  window.location.href = "/game";
-});
-
-socket.on("display chars lobby", (data) => {
-  removeParticipantsImg();
-  var i;
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1].split(";")[0];
-  remove_ready_button()
-  if (username == data.chars[0] && img == data.imgs[0]){
-    // socket.emit("remove old buttons")
-    set_ready_button()
-  }
-  for (i = 0; i < data.chars.length; i++) {
-    addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
-  }
-});
-
-socket.on("remove old buttons", () => {
-  var parent = document.getElementById("row_ready");
-  while (parent.lastElementChild) {
-    parent.removeChild(parent.lastElementChild);
-  }
-});
 
 // Sets the client's username
 const setUsername = () => {
@@ -175,10 +251,7 @@ const addParticipantsImg = (data) => {
   div_form.appendChild(div_label);
 };
 
-const removeParticipantsImg = (data) => {
-  var parent = document.getElementById("row_chars");
-  while (parent.firstChild) parent.removeChild(parent.firstChild);
-};
+
 
 // Sends a chat message
 const sendMessage = () => {
@@ -341,69 +414,3 @@ $inputMessage.click(() => {
   $inputMessage.focus();
 });
 
-// Socket events
-
-//when new user on front page requests for the characters to be loaded
-socket.on("get chars", (data) => {
-  if(gameID == data.gameID && gamePWD == data.gamePWD){
-    socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
-  }
-});
-
-socket.on("get chars for reloading", () => {
-  socket.emit("send chars for homepage", {username: username, img: img });
-});
-
-socket.on("get chars for reloading upon disconnection", () => {
-  socket.emit("reload chars for others not the one that left");
-});
-
-socket.on("reload chars upon disconnection", () => {
-  socket.emit("reload chars for others except the one that left", {username: username, img: img});  
-});
-
-socket.on("get chars for lobby", () => {
-  if(data.gameID == gameID &&data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", { username: username, img: img});
-  }
-});
-
-// Whenever the server emits 'new message', update the chat body
-socket.on("new message", (data) => {
-  addChatMessage(data);
-});
-
-// Whenever the server emits 'user joined', log it in the chat body
-socket.on("user joined", (data) => {
-  addChatMessage(data);
-});
-
-// Whenever the server emits 'user left', log it in the chat body
-socket.on("user left", (data) => {
-  removeChatTyping(data);
-});
-
-// Whenever the server emits 'typing', show the typing message
-socket.on("typing", (data) => {
-  addChatTyping(data);
-});
-
-// Whenever the server emits 'stop typing', kill the typing message
-socket.on("stop typing", (data) => {
-  removeChatTyping(data);
-});
-
-socket.on("disconnect", () => {
-  log("you have been disconnected");
-});
-
-socket.on("reconnect", () => {
-  log("you have been reconnected");
-  if (username) {
-    socket.emit("add user", username);
-  }
-});
-
-socket.on("reconnect_error", () => {
-  log("attempt to reconnect has failed");
-});
