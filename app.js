@@ -168,7 +168,6 @@ io.on("connection", (socket) => {
 
 
 	socket.on("send chars for lobby", (data) => {
-		
 		if(disp_chars[data.gameID] == undefined){
 			disp_chars[data.gameID] = []
 			disp_imgs[data.gameID] = []
@@ -186,10 +185,14 @@ io.on("connection", (socket) => {
 		socket.emit("display chars lobby", {
 			chars: socket.disp_chars,
 			imgs: socket.disp_imgs,
+			gameID : data.gameID,
+			gamePWD : data.gamePWD
 		});
 		socket.broadcast.emit("display chars lobby", {
 			chars: socket.disp_chars,
 			imgs: socket.disp_imgs,
+			gameID : data.gameID,
+			gamePWD : data.gamePWD
 		});
 	});
 
@@ -227,10 +230,14 @@ io.on("connection", (socket) => {
 	socket.on("new message", (data) => {
 		socket.username = data.username;
 		socket.message = data.message;
+		socket.gameID = data.gameID;
+		socket.gamePWD = data.gamePWD;
 		// we tell the client to execute 'new message'
 		socket.broadcast.emit("new message", {
 			username: socket.username,
 			message: socket.message,
+			gameID: socket.gameID,
+			gamePWD: socket.gamePWD
 		});
 	});
 

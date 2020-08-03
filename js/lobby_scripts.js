@@ -76,19 +76,21 @@ socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby
 socket.on("get chars for lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", { username: username, img: img});
+    socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD});
   }
 });
 // display all the details of the users present in lobby
 socket.on("display chars lobby", (data) => {
-  removeParticipantsImg();
-  removeReadyButton();
-  if (username == data.chars[0] && img == data.imgs[0]){
-    //first user gets the ready button!
-    setReadyButton()
-  }
-  for (var i = 0; i < data.chars.length; i++) {
-    addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    removeParticipantsImg();
+    removeReadyButton();
+    if (username == data.chars[0] && img == data.imgs[0]){
+      //first user gets the ready button!
+      setReadyButton()
+    }
+    for (var i = 0; i < data.chars.length; i++) {
+      addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
+    }
   }
 });
 // ------------------------------------------------------------------------------------
@@ -166,22 +168,24 @@ $window.keydown((event) => {
   // When the client hits ENTER on their keyboard, update message for everyone
   if (event.which === 13) {
     sendMessage();
-    socket.emit("stop typing");
+    socket.emit("stop typing", {gameID:gameID,gamePWD:gamePWD});
     typing = false;
   }
 });
 
 $inputMessage.on("input", () => {updateTyping();}); 
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ------------------------------------Click Events------------------------------------
 // ------------------------------------------------------------------------------------
-
 // Focus input when clicking on the message input's border
 $inputMessage.click(() => {
   $inputMessage.focus();
 });
-
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 
 // ------------------------------------------------------------------------------------
@@ -276,8 +280,7 @@ const sendMessage = () => {
   message = cleanInput(message);
   if (message) {
     $inputMessage.val("");
-    var dataval = { username: username, message: message , gameID:gameID, gamePWD:gamePWD};
-    console.log(dataval)
+    var dataval = { username: username, message: message , gameID: gameID, gamePWD: gamePWD};
     addChatMessage(dataval);
     socket.emit("new message", dataval);
   }
