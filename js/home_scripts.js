@@ -46,13 +46,17 @@ catch{
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
+// request for list of current games 
 socket.emit("update existing game list")
+// for the users using the application, send the existing game list
 socket.on("get existing game list", (data) =>{
   socket.emit("get existing game list",data)
 });
+// the user requesting the list receives the game list
 socket.on("send existing game list", (data) =>{
   socket.emit("send existing game list", data)
 });
+// user updates the current game list for everyone 
 socket.on("update existing game list for all", (data) =>{
   socket.emit("update existing game list for all", data)
 });
@@ -60,17 +64,15 @@ socket.on("update existing game list for all", (data) =>{
 // ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
-// ------------------------------if password doesn't match-----------------------------
+// -----------------------------------Socket Events------------------------------------
 // ------------------------------------------------------------------------------------
+
+// if password doesn't match
 socket.on("password error",(data)=>{
   document.getElementById("game-pwd").style.borderColor = "red"
 });
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------------
-// -----------------load char page when user enters correct id and pwd-----------------
-// ------------------------------------------------------------------------------------
+// load char page when user enters correct id and pwd
 socket.on("update data",(data)=>{
   document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
   document.cookie = "name=" + data.username;
@@ -82,35 +84,23 @@ socket.on("update data",(data)=>{
   document.getElementsByClassName("overlay")[0].style.display = "none";
   socket.emit("load chars", {gameID:data.gameID,gamePWD:data.gamePWD,return_id:"-"});
 });
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------------
-// ----------------------reload chars when other user enters lobby---------------------
-// ------------------------------------------------------------------------------------
+// reload chars when other user enters lobby
 socket.on("reload chars",(data)=>{
   if(data.gameID == gameID && data.gamePWD == gamePWD){
     socket.emit("load chars",{gameID:data.gameID,gamePWD:data.gamePWD,return_id:socket.id})
   }
 });
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------------
-// -------------------socket functions for when no one is in the game------------------
-// ------------------------------------------------------------------------------------
+// socket functions for when no one is in the game
 socket.on("in case no one is in lobby", (data) => {
   socket.emit("send chars", { username: "", img: "", return_id:data.return_id,chars:data.chars,imgs:data.imgs});
 });
 socket.on("send chars",(data)=>{
   socket.emit("update chars",data)
 });
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------------
-// ---------------socket function for hiding already selected characters---------------
-// ------------------------------------------------------------------------------------ 
+// socket function for hiding already selected characters
 socket.on("hide chars globally", (data) => {
   console.log("hide chars globally")
   removePrevChars();
@@ -184,8 +174,6 @@ function update_data() {
     socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
 }
 
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ----------scale image when mouse hovevrs on top(only for desktop versions)----------
@@ -203,8 +191,6 @@ function img_hover(div) {
   children[0].style.transform = "scale(1.25)";
   prev.node = div;
 }
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ----------------------------load lobby upon char selection--------------------------
@@ -216,8 +202,6 @@ function img_select(div){
   document.cookie = "img=" + cookie_img;
   window.location.href = "/lobby";
 }
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ------------------------clear characters before loading page------------------------

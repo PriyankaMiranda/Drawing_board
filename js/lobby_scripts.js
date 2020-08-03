@@ -44,8 +44,9 @@ var username;
 var img;
 var gameID;
 
+const cookie_val = document.cookie;
+
 try{
-  const cookie_val = document.cookie;
   username = cookie_val.split("name=")[1].split(";")[0];
   img = cookie_val.split("img=")[1].split(";")[0];
   gameID = cookie_val.split("gameID=")[1].split(";")[0];
@@ -62,47 +63,44 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
+// hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
+// get chars from all users present in lobby to hide in homempage
+socket.on("get chars", (data) => {
+  if(gameID == data.gameID && gamePWD == data.gamePWD){
+    socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+  }
+});
+// load chars in lobby
 socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
-
+// get chars from all users present in lobby
+socket.on("get chars for lobby", (data) => {
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    socket.emit("send chars for lobby", { username: username, img: img});
+  }
+});
+// display all the details of the users present in lobby
 socket.on("display chars lobby", (data) => {
   removeParticipantsImg();
   removeReadyButton();
   if (username == data.chars[0] && img == data.imgs[0]){
     //first user gets the ready button!
-    set_ready_button()
+    setReadyButton()
   }
   for (var i = 0; i < data.chars.length; i++) {
-    addParticipantsImg({ char: data.chars[i], img: data.imgs[i]});
+    addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
   }
 });
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------
+// -----------------------------------Socket Events------------------------------------
+// ------------------------------------------------------------------------------------
 
 socket.on("enter game", (data) => {
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1].split(";")[0];
-  socket.emit("remove char from lobby", {username:username, img:img})
-  document.cookie = "gameID=" + data.gameID;
-  window.location.href = "/game";
-});
-
-
-
-socket.on("remove old buttons", () => {
-  var parent = document.getElementById("row_ready");
-  while (parent.lastElementChild) {
-    parent.removeChild(parent.lastElementChild);
-  }
-});
-
-
-// Socket events
-
-//when new user on front page requests for the characters to be loaded
-socket.on("get chars", (data) => {
-  if(gameID == data.gameID && gamePWD == data.gamePWD){
-    socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+  if(data.gameID == gameID &&data.gamePWD == gamePWD){
+    window.location.href = "/game";
   }
 });
 
@@ -118,11 +116,7 @@ socket.on("reload chars upon disconnection", () => {
   socket.emit("reload chars for others except the one that left", {username: username, img: img});  
 });
 
-socket.on("get chars for lobby", () => {
-  if(data.gameID == gameID &&data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", { username: username, img: img});
-  }
-});
+
 
 // Whenever the server emits 'new message', update the chat body
 socket.on("new message", (data) => {
@@ -165,14 +159,38 @@ socket.on("reconnect_error", () => {
 });
 
 // ------------------------------------------------------------------------------------
+// ----------------------------------Keyboard Events-----------------------------------
+// ------------------------------------------------------------------------------------
+
+$window.keydown((event) => {
+  // When the client hits ENTER on their keyboard, update message for everyone
+  if (event.which === 13) {
+    sendMessage();
+    socket.emit("stop typing");
+    typing = false;
+  }
+});
+
+$inputMessage.on("input", () => {updateTyping();}); 
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------Click Events------------------------------------
+// ------------------------------------------------------------------------------------
+
+// Focus input when clicking on the message input's border
+$inputMessage.click(() => {
+  $inputMessage.focus();
+});
+
+
+
+// ------------------------------------------------------------------------------------
 // ---------------------------removes old participant images---------------------------
 // ------------------------------------------------------------------------------------
 const removeParticipantsImg = (data) => {
   var parent = document.getElementById("row_chars");
   while (parent.firstChild) parent.removeChild(parent.firstChild);
 };
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ------------------------------removes old ready button------------------------------
@@ -183,13 +201,11 @@ function removeReadyButton(){
    parent.removeChild(parent.lastElementChild);
   } 
 }
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ----------------------------------sets ready button---------------------------------
 // ------------------------------------------------------------------------------------
-function set_ready_button(){  
+function setReadyButton(){  
   var parent = document.getElementById("row_ready");
   if (parent.lastElementChild){
     console.log("Button already exists")
@@ -212,23 +228,10 @@ function set_ready_button(){
   };
   }
 }
+
 // ------------------------------------------------------------------------------------
+// ----------------------------shows all current partiipants---------------------------
 // ------------------------------------------------------------------------------------
-
-
-// Sets the client's username
-const setUsername = () => {
-  // If the username is valid
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1];
-  // Tell the server your username
-  var message = $inputMessage.val();
-  // Prevent markup from being injected into the message
-  message = cleanInput(message);
-  var data = { username: username, message: message };
-  socket.emit("add user", data);
-};
-
 const addParticipantsImg = (data) => {
   var parent = document.getElementById("row_chars");
 
@@ -260,70 +263,56 @@ const addParticipantsImg = (data) => {
   div_label.className = "characters_label";
 
   div_label.style.fontSize = "30px";
-  // div_label.style.width = "100%";
   div_label.innerHTML = data.char;
   div_form.appendChild(div_label);
 };
 
-
-
-// Sends a chat message
+// ------------------------------------------------------------------------------------
+// --------------------------------sends a chat message--------------------------------
+// ------------------------------------------------------------------------------------
 const sendMessage = () => {
   var message = $inputMessage.val();
   // Prevent markup from being injected into the message
   message = cleanInput(message);
   if (message) {
     $inputMessage.val("");
-    var dataval = { username: username, message: message };
+    var dataval = { username: username, message: message , gameID:gameID, gamePWD:gamePWD};
+    console.log(dataval)
     addChatMessage(dataval);
     socket.emit("new message", dataval);
   }
 };
 
-// Log a message
-const log = (message, options) => {
-  var $el = $("<p>")
-    .addClass("log")
-    .text(message);
-  addMessageElement($el, options);
-};
-
 // Adds the visual chat message to the message list
-const addChatMessage = (data, options) => {
-  // Don't fade the message in if there is an 'X was typing'
-  var $typingMessages = getTypingMessages(data);
-  options = options || {};
+const addChatMessage = (data) => {
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    // Don't fade the message in if there is an 'X was typing'
+    var $typingMessages = getTypingMessages(data);
 
-  if ($typingMessages.length !== 0) {
-    options.fade = false;
-    $typingMessages.remove();
-  }
+    if ($typingMessages.length !== 0) {
+      $typingMessages.remove();
+    }
 
-  var $usernameDiv = $('<span class="username"/>')
+    var $usernameDiv = $('<span class="username"/>')
     .text(data.username)
     .css("color", getUsernameColor(data.username));
-  var $messageBodyDiv = $('<span class="messageBody">').text(data.message);
+    var $messageBodyDiv = $('<span class="messageBody">').text(data.message);
 
-  var typingClass = data.typing ? "typing" : "";
-  var $messageDiv = $('<p class="message"/>')
+    var typingClass = data.typing ? "typing" : "";
+    var $messageDiv = $('<p class="message"/>')
     .data("username", data.username)
     .addClass(typingClass)
     .append($usernameDiv, $messageBodyDiv);
 
-  addMessageElement($messageDiv, options);
+    addMessageElement($messageDiv);
+
+  }
 };
 
-// Adds the visual chat typing message
-const addChatTyping = (data) => {
-  data.typing = true;
-  data.message = "is typing....";
-  addChatMessage(data);
-};
-
-// Removes the visual chat typing message
-const removeChatTyping = (data) => {
-  getTypingMessages(data).fadeOut(function() {
-    $(this).remove();
+// Gets the 'X is typing...' messages of a user
+const getTypingMessages = (data) => {
+  return $(".typing.message").filter(function(i) {
+    return data.username;
   });
 };
 
@@ -358,6 +347,30 @@ const addMessageElement = (el, options) => {
   $messages[0].scrollTop = $messages[0].scrollHeight;
 };
 
+// Log a message
+const log = (message, options) => {
+  var $el = $("<p>")
+    .addClass("log")
+    .text(message);
+  addMessageElement($el, options);
+};
+
+
+// Adds the visual chat typing message
+const addChatTyping = (data) => {
+  data.typing = true;
+  data.message = "is typing....";
+  addChatMessage(data);
+};
+
+// Removes the visual chat typing message
+const removeChatTyping = (data) => {
+  getTypingMessages(data).fadeOut(function() {
+    $(this).remove();
+  });
+};
+
+
 // Prevents input from having injected markup
 const cleanInput = (input) => {
   return $("<div/>")
@@ -367,10 +380,10 @@ const cleanInput = (input) => {
 
 // Updates the typing event
 const updateTyping = () => {
+  console.log(username,gameID,gamePWD)
   if (!typing) {
     typing = true;
-    username = cookie_val.split("name=")[1].split(";")[0];
-    socket.emit("typing", { username: username });
+    socket.emit("typing", { username: username ,gameID:gameID, gamePWD:gamePWD});
   }
 
   lastTypingTime = new Date().getTime();
@@ -384,12 +397,6 @@ const updateTyping = () => {
   }, TYPING_TIMER_LENGTH);
 };
 
-// Gets the 'X is typing' messages of a user
-const getTypingMessages = (data) => {
-  return $(".typing.message").filter(function(i) {
-    return data.username;
-  });
-};
 
 // Gets the color of a username through our hash function
 const getUsernameColor = (username) => {
@@ -402,29 +409,4 @@ const getUsernameColor = (username) => {
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
 };
-
-// Keyboard events
-
-$window.keydown((event) => {
-  // When the client hits ENTER on their keyboard
-  if (event.which === 13) {
-    if (username) {
-      sendMessage();
-      socket.emit("stop typing");
-      typing = false;
-    } else {
-      setUsername();
-      sendMessage();
-    }
-  }
-});
-
-$inputMessage.on("input", () => {updateTyping();}); 
-
-// Click events
-
-// Focus input when clicking on the message input's border
-$inputMessage.click(() => {
-  $inputMessage.focus();
-});
 

@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
 		socket.join(data.gameID);
 		chars[data.gameID] = [];
 		imgs[data.gameID] = [];
-		
+
 		if(data.return_id == "-"){
 			data.return_id = socket.id
 		}	
@@ -167,6 +167,11 @@ io.on("connection", (socket) => {
 
 
 	socket.on("send chars for lobby", (data) => {
+		
+		if(disp_chars[data.gameID] == undefined){
+			disp_chars[data.gameID] = []
+			disp_imgs[data.gameID] = []
+		}
 		if (
 			!disp_chars[data.gameID].includes(data.username) &&
 			!disp_imgs[data.gameID].includes(data.img)
@@ -211,13 +216,10 @@ io.on("connection", (socket) => {
 		});
 	});
 
-	socket.on("remove old buttons",()=>{
-		socket.broadcast.emit("remove old buttons");
-	});
 
 	socket.on("enter game", (data) => {
-		socket.emit("enter game", {gameID:data.gameID});
-		socket.broadcast.emit("enter game", {gameID:data.gameID});
+		socket.emit("enter game", data);
+		socket.broadcast.emit("enter game", data);
 	});
 
 	// when the client emits 'new message', this listens and executes
