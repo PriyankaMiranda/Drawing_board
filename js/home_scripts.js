@@ -1,3 +1,6 @@
+// ------------------------------------------------------------------------------------
+// --------------------------------initialize variables--------------------------------
+// ------------------------------------------------------------------------------------
 var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
@@ -5,6 +8,15 @@ var logo = document.getElementById("logo-internal");
 logo.src = "/logo2_transparent.png";
 var instruction = document.getElementById("instruction");
 instruction.innerHTML = "Choose your character";
+
+document.getElementById('game-username').onkeydown = function(e) {
+  e.preventDefault()  
+  update_data()
+};
+document.getElementById("existing-game").onclick= function(e) {
+  e.preventDefault()  
+  update_data()
+};
 
 const cookie_val = document.cookie;
 try{
@@ -28,6 +40,8 @@ try {
 catch{
   console.log("No old game ID")
 }
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events based on entry for every user------------------
@@ -169,14 +183,7 @@ function update_data() {
     //check if the gameID and password is a match
     socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
 }
-document.getElementById('game-username').onkeydown = function(e) {
-  e.preventDefault()  
-  update_data()
-};
-document.getElementById("existing-game").onclick= function(e) {
-  e.preventDefault()  
-  update_data()
-};
+
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 

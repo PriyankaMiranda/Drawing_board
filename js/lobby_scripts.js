@@ -1,7 +1,10 @@
 if (!document.cookie) {
   window.location.href = "/";
 }
-
+// ------------------------------------------------------------------------------------
+// --------------------------------initialize variables--------------------------------
+// ------------------------------------------------------------------------------------
+var socket = io();
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var COLORS = [
@@ -31,7 +34,6 @@ var COLORS = [
   "#db0a5b",
 ];
 
-// Initialize variables
 var $window = $(window);
 var $messages = $(".messages"); // Messages area
 var $inputMessage = $(".inputMessage"); // Input message input box
@@ -42,16 +44,23 @@ var username;
 var img;
 var gameID;
 
-
 const cookie_val = document.cookie;
 username = cookie_val.split("name=")[1].split(";")[0];
 img = cookie_val.split("img=")[1].split(";")[0];
 gameID = cookie_val.split("gameID=")[1].split(";")[0];
 gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
 
-
-
 document.getElementById("gameID").innerHTML += gameID;
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------
+// -------------------cascade of events based on entry for every user------------------
+// ------------------------------------------------------------------------------------
+socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 function start_game(e){
   socket.emit("enter game", {gameID:gameID})
@@ -86,11 +95,6 @@ function remove_ready_button(){
    parent.removeChild(parent.lastElementChild);
   } 
 }
-
-var socket = io();
-socket.emit("hide chars reloading", {gameID:gameID,gamePWD:gamePWD});
-socket.emit("load chars on lobby");
-
 
 socket.on("enter game", (data) => {
   username = cookie_val.split("name=")[1].split(";")[0];
@@ -341,9 +345,6 @@ $inputMessage.click(() => {
 
 //when new user on front page requests for the characters to be loaded
 socket.on("get chars", (data) => {
-
-  console.log( {username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs})
-  console.log(gameID , data.gameID , gamePWD , data.gamePWD)
   if(gameID == data.gameID && gamePWD == data.gamePWD){
     socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
   }

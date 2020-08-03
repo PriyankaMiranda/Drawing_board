@@ -35,8 +35,9 @@ var ejs = require("ejs");
 var chars = {};//for homepage
 var imgs = {};//for homepage
 
-var disp_chars = [];//for lobby
-var disp_imgs = [];//for lobby
+var disp_chars = {};//for lobby
+var disp_imgs = {};//for lobby
+
 var game_chars = [];//for game
 var game_imgs = [];//for game
 
@@ -179,11 +180,12 @@ io.on("connection", (socket) => {
 		});
 	});
 
-	socket.on("load chars on lobby", () => {		
-		disp_chars = [];
-		disp_imgs = [];
-		socket.emit("get chars for lobby");
-		socket.broadcast.emit("get chars for lobby");		
+	socket.on("load chars on lobby", (data) => {				
+		disp_chars[data.gameID] = [];
+		disp_imgs[data.gameID] = [];
+
+		socket.emit("get chars for lobby",data);
+		socket.broadcast.emit("get chars for lobby",data);		
 	});
 
 
