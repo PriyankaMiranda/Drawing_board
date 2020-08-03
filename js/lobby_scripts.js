@@ -365,9 +365,11 @@ const addChatTyping = (data) => {
 
 // Removes the visual chat typing message
 const removeChatTyping = (data) => {
-  getTypingMessages(data).fadeOut(function() {
-    $(this).remove();
-  });
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    getTypingMessages(data).fadeOut(function() {
+      $(this).remove();
+    });
+  }
 };
 
 
@@ -380,7 +382,6 @@ const cleanInput = (input) => {
 
 // Updates the typing event
 const updateTyping = () => {
-  console.log(username,gameID,gamePWD)
   if (!typing) {
     typing = true;
     socket.emit("typing", { username: username ,gameID:gameID, gamePWD:gamePWD});
@@ -391,7 +392,7 @@ const updateTyping = () => {
     var typingTimer = new Date().getTime();
     var timeDiff = typingTimer - lastTypingTime;
     if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-      socket.emit("stop typing");
+      socket.emit("stop typing", {username: username ,gameID:gameID, gamePWD:gamePWD});
       typing = false;
     }
   }, TYPING_TIMER_LENGTH);

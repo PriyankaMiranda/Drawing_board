@@ -160,7 +160,8 @@ io.on("connection", (socket) => {
 	socket.on("load chars on lobby", (data) => {				
 		disp_chars[data.gameID] = [];
 		disp_imgs[data.gameID] = [];
-
+		socket.gameID = data.gameID
+		socket.gamePWD = data.gamePWD
 		socket.emit("get chars for lobby",data);
 		socket.broadcast.emit("get chars for lobby",data);		
 	});
@@ -251,16 +252,12 @@ io.on("connection", (socket) => {
 
 	// when the client emits 'typing', we broadcast it to others
 	socket.on("typing", (data) => {
-		socket.broadcast.emit("typing", {
-			username: data.username,
-		});
+		socket.broadcast.emit("typing", data);
 	});
 
 	// when the client emits 'stop typing', we broadcast it to others
-	socket.on("stop typing", () => {
-		socket.broadcast.emit("stop typing", {
-			username: socket.username,
-		});
+	socket.on("stop typing", (data) => {
+		socket.broadcast.emit("stop typing", data);
 	});
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
