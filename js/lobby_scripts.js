@@ -44,11 +44,16 @@ var username;
 var img;
 var gameID;
 
-const cookie_val = document.cookie;
-username = cookie_val.split("name=")[1].split(";")[0];
-img = cookie_val.split("img=")[1].split(";")[0];
-gameID = cookie_val.split("gameID=")[1].split(";")[0];
-gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
+try{
+  const cookie_val = document.cookie;
+  username = cookie_val.split("name=")[1].split(";")[0];
+  img = cookie_val.split("img=")[1].split(";")[0];
+  gameID = cookie_val.split("gameID=")[1].split(";")[0];
+  gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
+}
+catch{
+  window.location.href = "/";
+}
 
 document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
@@ -64,16 +69,13 @@ socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
 
 socket.on("display chars lobby", (data) => {
   removeParticipantsImg();
-  var i;
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1].split(";")[0];
-  remove_ready_button()
+  removeReadyButton();
   if (username == data.chars[0] && img == data.imgs[0]){
-    // socket.emit("remove old buttons")
+    //first user gets the ready button!
     set_ready_button()
   }
-  for (i = 0; i < data.chars.length; i++) {
-    addParticipantsImg({ char: data.chars[i], img: data.imgs[i] });
+  for (var i = 0; i < data.chars.length; i++) {
+    addParticipantsImg({ char: data.chars[i], img: data.imgs[i]});
   }
 });
 
@@ -162,15 +164,31 @@ socket.on("reconnect_error", () => {
   log("attempt to reconnect has failed");
 });
 
+// ------------------------------------------------------------------------------------
+// ---------------------------removes old participant images---------------------------
+// ------------------------------------------------------------------------------------
 const removeParticipantsImg = (data) => {
   var parent = document.getElementById("row_chars");
   while (parent.firstChild) parent.removeChild(parent.firstChild);
 };
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
-function start_game(e){
-  socket.emit("enter game", {gameID:gameID})
+// ------------------------------------------------------------------------------------
+// ------------------------------removes old ready button------------------------------
+// ------------------------------------------------------------------------------------
+function removeReadyButton(){
+  var parent = document.getElementById("row_ready");
+  while (parent.lastElementChild) {
+   parent.removeChild(parent.lastElementChild);
+  } 
 }
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
+// ------------------------------------------------------------------------------------
+// ----------------------------------sets ready button---------------------------------
+// ------------------------------------------------------------------------------------
 function set_ready_button(){  
   var parent = document.getElementById("row_ready");
   if (parent.lastElementChild){
@@ -190,16 +208,12 @@ function set_ready_button(){
   btn.style.verticalAlign = "middle";
   parent.appendChild(btn);
   btn.onclick = function() {
-    start_game(this);
+    socket.emit("enter game", {gameID:gameID,gamePWD:gamePWD});
   };
   }
 }
-function remove_ready_button(){
-  var parent = document.getElementById("row_ready");
-  while (parent.lastElementChild) {
-   parent.removeChild(parent.lastElementChild);
-  } 
-}
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 
 // Sets the client's username
