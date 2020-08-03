@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
 		socket.join(data.gameID);
 		chars[data.gameID] = [];
 		imgs[data.gameID] = [];
-
+		
 		if(data.return_id == "-"){
 			data.return_id = socket.id
 		}	
@@ -156,29 +156,6 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // -----------------------------------LOBBY----------------------------------
 // --------------------------------------------------------------------------
-	socket.on("reload chars for others not the one that left", () => {
-		disp_chars = [];
-		disp_imgs = [];
-		socket.emit("reload chars upon disconnection");
-	});
-
-	socket.on("reload chars for others except the one that left", (data) => {
-		if (!disp_chars.includes(data.username) && !disp_imgs.includes(data.img)) {
-			disp_chars.push(data.username);
-			disp_imgs.push(data.img);
-		}
-		socket.disp_chars = disp_chars;
-		socket.disp_imgs = disp_imgs;
-
-		socket.emit("display chars lobby", {
-			chars: socket.disp_chars,
-			imgs: socket.disp_imgs,
-		});
-		socket.broadcast.emit("display chars lobby", {
-			chars: socket.disp_chars,
-			imgs: socket.disp_imgs,
-		});
-	});
 
 	socket.on("load chars on lobby", (data) => {				
 		disp_chars[data.gameID] = [];
@@ -191,9 +168,33 @@ io.on("connection", (socket) => {
 
 	socket.on("send chars for lobby", (data) => {
 		if (
-			!disp_chars.includes(data.username) &&
-			!disp_imgs.includes(data.img)
+			!disp_chars[data.gameID].includes(data.username) &&
+			!disp_imgs[data.gameID].includes(data.img)
 		) {
+			disp_chars[data.gameID].push(data.username);
+			disp_imgs[data.gameID].push(data.img);
+		}
+		socket.disp_chars = disp_chars[data.gameID];
+		socket.disp_imgs = disp_imgs[data.gameID];
+
+		socket.emit("display chars lobby", {
+			chars: socket.disp_chars,
+			imgs: socket.disp_imgs,
+		});
+		socket.broadcast.emit("display chars lobby", {
+			chars: socket.disp_chars,
+			imgs: socket.disp_imgs,
+		});
+	});
+
+	socket.on("reload chars for others not the one that left", () => {
+		disp_chars = [];
+		disp_imgs = [];
+		socket.emit("reload chars upon disconnection");
+	});
+
+	socket.on("reload chars for others except the one that left", (data) => {
+		if (!disp_chars.includes(data.username) && !disp_imgs.includes(data.img)) {
 			disp_chars.push(data.username);
 			disp_imgs.push(data.img);
 		}
