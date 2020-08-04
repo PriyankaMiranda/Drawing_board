@@ -6,7 +6,7 @@ if (!document.cookie) {
 // ------------------------------------------------------------------------------------
 var socket = io();
 var FADE_TIME = 150; // ms
-var TYPING_TIMER_LENGTH = 400; // ms
+var TYPING_TIMER_LENGTH = 10; // ms
 var COLORS = [
   "#008b8b",
   "#006060",
@@ -99,11 +99,58 @@ socket.on("display chars lobby", (data) => {
 // ------------------------------------------------------------------------------------
 // -----------------------------------Socket Events------------------------------------
 // ------------------------------------------------------------------------------------
-
+// if user clicks ready button, all current users enter the game through this emit 
 socket.on("enter game", (data) => {
   if(data.gameID == gameID &&data.gamePWD == gamePWD){
     window.location.href = "/game";
   }
+});
+
+// Whenever the server emits 'new message', update the chat body
+socket.on("new message", (data) => {
+  addChatMessage(data);
+});
+
+// Whenever the server emits 'typing', show the typing message
+socket.on("typing", (data) => {
+  addChatTyping(data);
+});
+
+// Whenever the server emits 'stop typing', kill the typing message
+socket.on("stop typing", (data) => {
+  removeChatTyping(data);
+});
+
+
+
+
+// Whenever the server emits 'user joined', log it in the chat body
+socket.on("user joined", (data) => {
+  addChatMessage(data);
+});
+
+// Whenever the server emits 'user left', log it in the chat body
+socket.on("user left", (data) => {
+  removeChatTyping(data);
+});
+
+socket.on("disconnect", () => {
+  log("you have been disconnected");
+});
+
+socket.on("reconnect", () => {
+  console.log("aloooooooooooooooooooooooooooooo")
+  console.log("aloooooooooooooooooooooooooooooo")
+  console.log("aloooooooooooooooooooooooooooooo")
+  console.log("aloooooooooooooooooooooooooooooo")
+  log("you have been reconnected");
+  if (username) {
+    socket.emit("add user", username);
+  }
+});
+
+socket.on("reconnect_error", () => {
+  log("attempt to reconnect has failed");
 });
 
 socket.on("get chars for reloading", () => {
@@ -118,68 +165,22 @@ socket.on("reload chars upon disconnection", () => {
   socket.emit("reload chars for others except the one that left", {username: username, img: img});  
 });
 
-
-
-// Whenever the server emits 'new message', update the chat body
-socket.on("new message", (data) => {
-  addChatMessage(data);
-});
-
-// Whenever the server emits 'user joined', log it in the chat body
-socket.on("user joined", (data) => {
-  addChatMessage(data);
-});
-
-// Whenever the server emits 'user left', log it in the chat body
-socket.on("user left", (data) => {
-  removeChatTyping(data);
-});
-
-// Whenever the server emits 'typing', show the typing message
-socket.on("typing", (data) => {
-  addChatTyping(data);
-});
-
-// Whenever the server emits 'stop typing', kill the typing message
-socket.on("stop typing", (data) => {
-  removeChatTyping(data);
-});
-
-socket.on("disconnect", () => {
-  log("you have been disconnected");
-});
-
-socket.on("reconnect", () => {
-  log("you have been reconnected");
-  if (username) {
-    socket.emit("add user", username);
-  }
-});
-
-socket.on("reconnect_error", () => {
-  log("attempt to reconnect has failed");
-});
-
 // ------------------------------------------------------------------------------------
-// ----------------------------------Keyboard Events-----------------------------------
+// -----------------------------Keyboard and Click Events------------------------------
 // ------------------------------------------------------------------------------------
-
 $window.keydown((event) => {
   // When the client hits ENTER on their keyboard, update message for everyone
   if (event.which === 13) {
     sendMessage();
-    socket.emit("stop typing", {gameID:gameID,gamePWD:gamePWD});
+    socket.emit("stop typing ", {gameID:gameID,gamePWD:gamePWD});
     typing = false;
   }
 });
 
-$inputMessage.on("input", () => {updateTyping();}); 
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
+$inputMessage.on("input", () => {
+  updateTyping();
+}); 
 
-// ------------------------------------------------------------------------------------
-// ------------------------------------Click Events------------------------------------
-// ------------------------------------------------------------------------------------
 // Focus input when clicking on the message input's border
 $inputMessage.click(() => {
   $inputMessage.focus();
@@ -286,6 +287,9 @@ const sendMessage = () => {
   }
 };
 
+// ------------------------------------------------------------------------------------
+// --------------------------------structures chat message--------------------------------
+// ------------------------------------------------------------------------------------
 // Adds the visual chat message to the message list
 const addChatMessage = (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
@@ -308,7 +312,7 @@ const addChatMessage = (data) => {
     .append($usernameDiv, $messageBodyDiv);
 
     addMessageElement($messageDiv);
-
+    return $messageDiv
   }
 };
 
@@ -350,37 +354,24 @@ const addMessageElement = (el, options) => {
   $messages[0].scrollTop = $messages[0].scrollHeight;
 };
 
-// Log a message
-const log = (message, options) => {
-  var $el = $("<p>")
-    .addClass("log")
-    .text(message);
-  addMessageElement($el, options);
-};
-
 
 // Adds the visual chat typing message
 const addChatTyping = (data) => {
-  data.typing = true;
-  data.message = "is typing....";
-  addChatMessage(data);
-};
-
-// Removes the visual chat typing message
-const removeChatTyping = (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    getTypingMessages(data).fadeOut(function() {
+    data.typing = true;
+    data.message = "is typing....";
+    addChatMessage(data).fadeOut(function() {
       $(this).remove();
     });
   }
 };
 
-
-// Prevents input from having injected markup
-const cleanInput = (input) => {
-  return $("<div/>")
-    .text(input)
-    .html();
+// Removes the visual chat typing message
+const removeChatTyping = (data) => {
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    console.log("removing chat typing")
+    getTypingMessages(data);
+  }
 };
 
 // Updates the typing event
@@ -395,12 +386,25 @@ const updateTyping = () => {
     var typingTimer = new Date().getTime();
     var timeDiff = typingTimer - lastTypingTime;
     if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-      socket.emit("stop typing", {username: username ,gameID:gameID, gamePWD:gamePWD});
+      socket.emit("stop typing", {gameID:gameID, gamePWD:gamePWD});
       typing = false;
     }
   }, TYPING_TIMER_LENGTH);
 };
 
+// ------------------------------------------------------------------------------------
+// ----------------------------------Utility functions---------------------------------
+// ------------------------------------------------------------------------------------
+// Log a message
+const log = (message, options) => {
+  var $el = $("<p>").addClass("log").text(message);
+  addMessageElement($el, options);
+};
+
+// Prevents input from having injected markup
+const cleanInput = (input) => {
+  return $("<div/>").text(input).html();
+};
 
 // Gets the color of a username through our hash function
 const getUsernameColor = (username) => {

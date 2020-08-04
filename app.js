@@ -196,6 +196,31 @@ io.on("connection", (socket) => {
 		});
 	});
 
+	socket.on("enter game", (data) => {
+		socket.emit("enter game", data);
+		socket.broadcast.emit("enter game", data);
+	});
+
+	// when the client emits 'new message', this listens and executes
+	socket.on("new message", (data) => {
+		socket.username = data.username;
+		socket.message = data.message;
+		socket.gameID = data.gameID;
+		socket.gamePWD = data.gamePWD;
+		// we tell the client to execute 'new message'
+		socket.broadcast.emit("new message", {
+			username: socket.username,
+			message: socket.message,
+			gameID: socket.gameID,
+			gamePWD: socket.gamePWD
+		});
+	});
+
+	// when the client emits 'stop typing', we broadcast it to others
+	socket.on("stop typing", (data) => {
+		socket.broadcast.emit("stop typing", data);
+	});
+
 	socket.on("reload chars for others not the one that left", () => {
 		disp_chars = [];
 		disp_imgs = [];
@@ -220,27 +245,6 @@ io.on("connection", (socket) => {
 		});
 	});
 
-
-	socket.on("enter game", (data) => {
-		socket.emit("enter game", data);
-		socket.broadcast.emit("enter game", data);
-	});
-
-	// when the client emits 'new message', this listens and executes
-	socket.on("new message", (data) => {
-		socket.username = data.username;
-		socket.message = data.message;
-		socket.gameID = data.gameID;
-		socket.gamePWD = data.gamePWD;
-		// we tell the client to execute 'new message'
-		socket.broadcast.emit("new message", {
-			username: socket.username,
-			message: socket.message,
-			gameID: socket.gameID,
-			gamePWD: socket.gamePWD
-		});
-	});
-
 	var addedUser = false;
 	// when the client emits 'add user', this listens and executes
 	socket.on("add user", (data) => {
@@ -262,10 +266,7 @@ io.on("connection", (socket) => {
 		socket.broadcast.emit("typing", data);
 	});
 
-	// when the client emits 'stop typing', we broadcast it to others
-	socket.on("stop typing", (data) => {
-		socket.broadcast.emit("stop typing", data);
-	});
+
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
