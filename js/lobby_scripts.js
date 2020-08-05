@@ -64,7 +64,8 @@ document.getElementById("gameID").innerHTML += gameID;
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
 // load chars in lobby
-updateChars() 
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
+// updateChars() 
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -88,6 +89,8 @@ socket.on("display chars lobby", (data) => {
     if (username == data.chars[0] && img == data.imgs[0]){
       //first user gets the ready button!
       setReadyButton()
+      // socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
+      updateChars()   
     }
     for (var i = 0; i < data.chars.length; i++) {
       addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
@@ -192,13 +195,9 @@ $inputMessage.click(() => {
 // --------------------------load chars in lobby every 3 secs--------------------------
 // ------------------------------------------------------------------------------------
 function updateChars() {         
-  setTimeout(function() {   
-    console.log('hello');                   
-    if (true) {
-      socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
-      updateChars()   
-    }                      
-  }, 5000)
+  setTimeout(function() {
+      socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});                  
+  }, 3000)
 }
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
