@@ -216,10 +216,33 @@ io.on("connection", (socket) => {
 		});
 	});
 
+	// when the client emits 'typing', we broadcast it to others
+	socket.on("typing", (data) => {
+		socket.broadcast.emit("typing", data);
+	});
+
 	// when the client emits 'stop typing', we broadcast it to others
 	socket.on("stop typing", (data) => {
 		socket.broadcast.emit("stop typing", data);
 	});
+
+
+	var addedUser = false;
+	// when the client emits 'add user', this listens and executes
+	socket.on("add user", (data) => {
+		if (addedUser) return;
+		// we store the username in the socket session for this client
+		socket.username = data.username;
+		socket.message = data.message;
+		addedUser = true;
+
+		// echo globally (all clients) that a person has connected
+		socket.broadcast.emit("user joined", {
+			username: socket.username,
+			message: socket.message,
+		});
+	});
+
 
 	socket.on("reload chars for others not the one that left", () => {
 		disp_chars = [];
@@ -243,27 +266,6 @@ io.on("connection", (socket) => {
 			chars: socket.disp_chars,
 			imgs: socket.disp_imgs,
 		});
-	});
-
-	var addedUser = false;
-	// when the client emits 'add user', this listens and executes
-	socket.on("add user", (data) => {
-		if (addedUser) return;
-		// we store the username in the socket session for this client
-		socket.username = data.username;
-		socket.message = data.message;
-		addedUser = true;
-
-		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit("user joined", {
-			username: socket.username,
-			message: socket.message,
-		});
-	});
-
-	// when the client emits 'typing', we broadcast it to others
-	socket.on("typing", (data) => {
-		socket.broadcast.emit("typing", data);
 	});
 
 
@@ -676,6 +678,7 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 	// when the user disconnects.. perform this
 	socket.on("disconnect", () => {
+		  console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
 		if (!socket.gameID){
 			socket.broadcast.emit("get chars for reloading upon disconnection");
 			socket.broadcast.emit("user left", {

@@ -63,6 +63,8 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
+// load chars in lobby
+updateChars() 
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -71,8 +73,7 @@ socket.on("get chars", (data) => {
     socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
   }
 });
-// load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});
+
 // get chars from all users present in lobby
 socket.on("get chars for lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
@@ -121,28 +122,26 @@ socket.on("stop typing", (data) => {
   removeChatTyping(data);
 });
 
-
-
-
 // Whenever the server emits 'user joined', log it in the chat body
-socket.on("user joined", (data) => {
-  addChatMessage(data);
-});
+// socket.on("user joined", (data) => {
+//   addChatMessage(data);
+// });
 
 // Whenever the server emits 'user left', log it in the chat body
-socket.on("user left", (data) => {
-  removeChatTyping(data);
-});
+// socket.on("user left", (data) => {
+//   removeChatTyping(data);
+// });
 
 socket.on("disconnect", () => {
-  log("you have been disconnected");
+  console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
+  log("you have been disconnected");  
 });
 
 socket.on("reconnect", () => {
-  console.log("aloooooooooooooooooooooooooooooo")
-  console.log("aloooooooooooooooooooooooooooooo")
-  console.log("aloooooooooooooooooooooooooooooo")
-  console.log("aloooooooooooooooooooooooooooooo")
+  console.log("oooooooooooooooooooooooooooooo")
+  console.log("oooooooooooooooooooooooooooooo") 
+  console.log("oooooooooooooooooooooooooooooo")
+  console.log("oooooooooooooooooooooooooooooo")
   log("you have been reconnected");
   if (username) {
     socket.emit("add user", username);
@@ -188,6 +187,21 @@ $inputMessage.click(() => {
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
+
+// ------------------------------------------------------------------------------------
+// --------------------------load chars in lobby every 3 secs--------------------------
+// ------------------------------------------------------------------------------------
+function updateChars() {         
+  setTimeout(function() {   
+    console.log('hello');                   
+    if (true) {
+      socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
+      updateChars()   
+    }                      
+  }, 5000)
+}
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ---------------------------removes old participant images---------------------------
@@ -330,7 +344,6 @@ const getTypingMessages = (data) => {
 //   all other messages (default = false)
 const addMessageElement = (el, options) => {
   var $el = $(el);
-
   // Setup default options
   if (!options) {
     options = {};
@@ -352,6 +365,7 @@ const addMessageElement = (el, options) => {
     $messages.append($el);
   }
   $messages[0].scrollTop = $messages[0].scrollHeight;
+
 };
 
 
@@ -369,7 +383,6 @@ const addChatTyping = (data) => {
 // Removes the visual chat typing message
 const removeChatTyping = (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    console.log("removing chat typing")
     getTypingMessages(data);
   }
 };
@@ -417,4 +430,5 @@ const getUsernameColor = (username) => {
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
 };
-
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------

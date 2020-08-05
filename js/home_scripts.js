@@ -9,10 +9,6 @@ logo.src = "/logo2_transparent.png";
 var instruction = document.getElementById("instruction");
 instruction.innerHTML = "Choose your character";
 
-document.getElementById('game-username').onkeydown = function(e) {
-  e.preventDefault()  
-  update_data()
-};
 document.getElementById("existing-game").onclick= function(e) {
   e.preventDefault()  
   update_data()
