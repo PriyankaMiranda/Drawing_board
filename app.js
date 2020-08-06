@@ -159,65 +159,128 @@ io.on("connection", (socket) => {
 // -----------------------------------LOBBY----------------------------------
 // --------------------------------------------------------------------------
 
-	socket.on("load chars on lobby", (data) => {				
-		disp_chars[data.gameID] = [];
-		disp_imgs[data.gameID] = [];
-		socket.gameID = data.gameID
-		socket.gamePWD = data.gamePWD
+	socket.on("load chars on lobby", (data) => {	
+		if(data.option == 'repeat'){
+			try{
+				disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
+				disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);
+			}
+			catch{
+				console.log("Error! Sending to homepage")
+				socket.emit("error");		
+			}
+		}
+		else{
+			disp_chars[data.gameID] = [];
+			disp_imgs[data.gameID] = [];
+			socket.gameID = data.gameID
+			socket.gamePWD = data.gamePWD
+		}		
 		socket.emit("get chars for lobby",data);
 		socket.broadcast.emit("get chars for lobby",data);		
 	});
 
 
 	socket.on("send chars for lobby", (data) => {
-		if(disp_chars[data.gameID] == undefined){
-			disp_chars[data.gameID] = []
-			disp_imgs[data.gameID] = []
-		}
-		if (
-			!disp_chars[data.gameID].includes(data.username) &&
-			!disp_imgs[data.gameID].includes(data.img)
-		) {
-			disp_chars[data.gameID].push(data.username);
-			disp_imgs[data.gameID].push(data.img);
-		}
-		socket.disp_chars = disp_chars[data.gameID];
-		socket.disp_imgs = disp_imgs[data.gameID];
+		if(data.option == 'repeat'){
+			try{
+				// if the user is in the list disp_chars, we dont do anything
+				var username_loc = disp_chars[data.gameID].indexOf(data.username);		
+				var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+				disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
+				disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc]; 
+			}
+			catch{
+				disp_chars[data.gameID].push(data.username)
+				disp_imgs[data.gameID].push(data.img)
+				disp_chars_copy[data.gameID].push(data.username)
+				disp_imgs_copy[data.gameID].push(data.img)
+			}
 
-		socket.emit("display chars lobby", {
-			chars: socket.disp_chars,
-			imgs: socket.disp_imgs,
-			gameID : data.gameID,
-			gamePWD : data.gamePWD
-		});
-		socket.broadcast.emit("display chars lobby", {
-			chars: socket.disp_chars,
-			imgs: socket.disp_imgs,
-			gameID : data.gameID,
-			gamePWD : data.gamePWD
-		});
+			console.log(disp_chars[data.gameID])
+			console.log(disp_imgs[data.gameID])
+			console.log(disp_chars_copy[data.gameID])
+			console.log(disp_imgs_copy[data.gameID])
+
+			socket.emit("display chars lobby", {
+				chars : disp_chars_copy[data.gameID],
+				imgs : disp_imgs_copy[data.gameID],
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option
+			});
+			socket.broadcast.emit("display chars lobby", {
+				chars : disp_chars_copy[data.gameID],
+				imgs : disp_imgs_copy[data.gameID],
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option
+			});
+		}
+		else{
+			if(disp_chars[data.gameID] == undefined){
+				disp_chars[data.gameID] = []
+				disp_imgs[data.gameID] = []
+			}
+			if (
+				!disp_chars[data.gameID].includes(data.username) &&
+				!disp_imgs[data.gameID].includes(data.img)
+			) {
+				disp_chars[data.gameID].push(data.username);
+				disp_imgs[data.gameID].push(data.img);
+			}
+			socket.disp_chars = disp_chars[data.gameID];
+			socket.disp_imgs = disp_imgs[data.gameID];
+
+			socket.emit("display chars lobby", {
+				chars: socket.disp_chars,
+				imgs: socket.disp_imgs,
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option
+			});
+			socket.broadcast.emit("display chars lobby", {
+				chars: socket.disp_chars,
+				imgs: socket.disp_imgs,
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option
+			});
+		}
+
+
 	});
 
-	socket.on("load chars on lobby repeated", (data) => {	
-		disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
-		disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);	
-		socket.emit("get chars for lobby repeated",data);	
-		socket.broadcast.emit("get chars for lobby repeated",data);	
-	});
 
 	socket.on("send chars for lobby repeated", (data) => {
 		try{
+			// if the user is in the list disp_chars, we dont do anything
 			var username_loc = disp_chars[data.gameID].indexOf(data.username);		
 			var img_loc = disp_imgs[data.gameID].indexOf(data.img);
 			disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
 			disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc]; 
 		}
 		catch{
-
+			disp_chars[data.gameID].push(data.username)
+			disp_imgs[data.gameID].push(data.img)
+			disp_chars_copy[data.gameID].push(data.username)
+			disp_imgs_copy[data.gameID].push(data.img)
 		}
+
+		console.log(disp_chars[data.gameID])
+		console.log(disp_imgs[data.gameID])
+		console.log(disp_chars_copy[data.gameID])
+		console.log(disp_imgs_copy[data.gameID])
+
 		socket.emit("display chars lobby repeated", {
-			chars: disp_chars_copy,
-			imgs: disp_imgs_copy,
+			chars: disp_chars_copy[data.gameID],
+			imgs: disp_imgs_copy[data.gameID],
+			gameID : data.gameID,
+			gamePWD : data.gamePWD
+		});
+		socket.broadcast.emit("display chars lobby repeated", {
+			chars: disp_chars_copy[data.gameID],
+			imgs: disp_imgs_copy[data.gameID],
 			gameID : data.gameID,
 			gamePWD : data.gamePWD
 		});

@@ -64,8 +64,7 @@ document.getElementById("gameID").innerHTML += gameID;
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
 // load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
-// updateChars() 
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"not repeat"});   
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -86,23 +85,28 @@ socket.on("display chars lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
     removeParticipantsImg();
     removeReadyButton();
-    if (username == data.chars[0] && img == data.imgs[0]){
-      //first user gets the ready button!
-      setReadyButton()
+      if (username == data.chars[0] && img == data.imgs[0]){
+        // first user gets the ready button!
+        setReadyButton()
+      }
+      for (var i = 0; i < data.chars.length; i++) {
+        if(data.chars[i]!= 0){
+          addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
+        }
+      }
+    if(data.option == "not repeat"){
       updateChars()   
     }
-    for (var i = 0; i < data.chars.length; i++) {
-      addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
-    }
+
   }
 });
 
 // get chars from all users present in lobby repeated
-socket.on("get chars for lobby repeated", (data) => {  
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby repeated", { username: username, img: img,gameID:gameID,gamePWD:gamePWD});
-  }
-});
+// socket.on("get chars for lobby", (data) => {  
+//   if(data.gameID == gameID && data.gamePWD == gamePWD){
+//     socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD});
+//   }
+// });
 
 // display all the details of the users present in lobby repeated
 socket.on("display chars lobby repeated", (data) => {
@@ -110,11 +114,13 @@ socket.on("display chars lobby repeated", (data) => {
     removeParticipantsImg();
     removeReadyButton();
     if (username == data.chars[0] && img == data.imgs[0]){
-      //first user gets the ready button!
+      // first user gets the ready button!
       setReadyButton()
     }
     for (var i = 0; i < data.chars.length; i++) {
-      addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
+      if(data.chars[i]!= 0){
+        addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
+      }
     }
   }
 });
@@ -147,6 +153,11 @@ socket.on("typing", (data) => {
 socket.on("stop typing", (data) => {
   removeChatTyping(data);
 });
+
+socket.on("error", () => {
+  window.location.href = "/";  
+});
+
 
 // Whenever the server emits 'user joined', log it in the chat body
 // socket.on("user joined", (data) => {
@@ -221,9 +232,9 @@ function updateChars() {
   setTimeout(function() {
       // refresh the lobby chars 
       console.log("alo")
-      socket.emit("load chars on lobby repeated",{gameID:gameID,gamePWD:gamePWD,username: username, img: img}); 
+      socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username: username, img: img, option:"repeat"}); 
       updateChars()                 
-  }, 3000)
+  }, 10000)
 }
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
