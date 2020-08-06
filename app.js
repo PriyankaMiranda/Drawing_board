@@ -37,6 +37,8 @@ var imgs = {};//for homepage
 
 var disp_chars = {};//for lobby
 var disp_imgs = {};//for lobby
+var disp_chars_copy = {};//for lobby
+var disp_imgs_copy = {};//for lobby
 
 var game_chars = [];//for game
 var game_imgs = [];//for game
@@ -196,6 +198,60 @@ io.on("connection", (socket) => {
 		});
 	});
 
+	socket.on("load chars on lobby repeated", (data) => {	
+		disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
+		disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);	
+		socket.emit("get chars for lobby repeated",data);	
+		socket.broadcast.emit("get chars for lobby repeated",data);	
+	});
+
+	socket.on("send chars for lobby repeated", (data) => {
+		try{
+			var username_loc = disp_chars[data.gameID].indexOf(data.username);		
+			var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+			disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
+			disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc]; 
+		}
+		catch{
+
+		}
+		socket.emit("display chars lobby repeated", {
+			chars: disp_chars_copy,
+			imgs: disp_imgs_copy,
+			gameID : data.gameID,
+			gamePWD : data.gamePWD
+		});
+		// disp_chars[data.gameID].push(data.username);
+		// disp_imgs[data.gameID].push(data.img);
+		// try{
+		// 	if (
+		// 		!disp_chars[data.gameID].includes(data.username) &&
+		// 		!disp_imgs[data.gameID].includes(data.img)
+		// 	) {
+		// 		disp_chars[data.gameID].push(data.username);
+		// 		disp_imgs[data.gameID].push(data.img);
+		// 	}
+		// 	socket.disp_chars = disp_chars[data.gameID];
+		// 	socket.disp_imgs = disp_imgs[data.gameID];
+
+		// 	socket.emit("display chars lobby repeated", {
+		// 		chars: socket.disp_chars,
+		// 		imgs: socket.disp_imgs,
+		// 		gameID : data.gameID,
+		// 		gamePWD : data.gamePWD
+		// 	});
+		// 	// socket.broadcast.emit("display chars lobby repeated", {
+		// 	// 	chars: socket.disp_chars,
+		// 	// 	imgs: socket.disp_imgs,
+		// 	// 	gameID : data.gameID,
+		// 	// 	gamePWD : data.gamePWD
+		// 	// });
+		// }
+		// catch{
+		// 	console.log("Disp chars empty!")
+		// }
+	});
+
 	socket.on("enter game", (data) => {
 		socket.emit("enter game", data);
 		socket.broadcast.emit("enter game", data);
@@ -227,21 +283,21 @@ io.on("connection", (socket) => {
 	});
 
 
-	var addedUser = false;
-	// when the client emits 'add user', this listens and executes
-	socket.on("add user", (data) => {
-		if (addedUser) return;
-		// we store the username in the socket session for this client
-		socket.username = data.username;
-		socket.message = data.message;
-		addedUser = true;
+	// var addedUser = false;
+	// // when the client emits 'add user', this listens and executes
+	// socket.on("add user", (data) => {
+	// 	if (addedUser) return;
+	// 	// we store the username in the socket session for this client
+	// 	socket.username = data.username;
+	// 	socket.message = data.message;
+	// 	addedUser = true;
 
-		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit("user joined", {
-			username: socket.username,
-			message: socket.message,
-		});
-	});
+	// 	// echo globally (all clients) that a person has connected
+	// 	socket.broadcast.emit("user joined", {
+	// 		username: socket.username,
+	// 		message: socket.message,
+	// 	});
+	// });
 
 
 	socket.on("reload chars for others not the one that left", () => {
@@ -678,7 +734,7 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 	// when the user disconnects.. perform this
 	socket.on("disconnect", () => {
-		  console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
+
 		if (!socket.gameID){
 			socket.broadcast.emit("get chars for reloading upon disconnection");
 			socket.broadcast.emit("user left", {
