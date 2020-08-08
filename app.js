@@ -183,6 +183,8 @@ io.on("connection", (socket) => {
 
 	socket.on("send chars for lobby", (data) => {
 		if(data.option == 'repeat'){
+			console.log("send chars for lobby")
+
 			try{
 				// if the user is in the list disp_chars, we dont do anything
 				var username_loc = disp_chars[data.gameID].indexOf(data.username);		

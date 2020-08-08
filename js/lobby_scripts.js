@@ -64,7 +64,7 @@ document.getElementById("gameID").innerHTML += gameID;
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
 // load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"not repeat"});   
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -77,7 +77,7 @@ socket.on("get chars", (data) => {
 // get chars from all users present in lobby
 socket.on("get chars for lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD});
+    socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD,option:data.option});
   }
 });
 // display all the details of the users present in lobby
@@ -89,14 +89,14 @@ socket.on("display chars lobby", (data) => {
         // first user gets the ready button!
         setReadyButton()
       }
+      if(data.option == "not repeat"){
+        updateChars()   
+      }
       for (var i = 0; i < data.chars.length; i++) {
         if(data.chars[i]!= 0){
           addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
         }
       }
-    if(data.option == "not repeat"){
-      updateChars()   
-    }
 
   }
 });
@@ -234,7 +234,7 @@ function updateChars() {
       console.log("alo")
       socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username: username, img: img, option:"repeat"}); 
       updateChars()                 
-  }, 10000)
+  }, 2000)
 }
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
