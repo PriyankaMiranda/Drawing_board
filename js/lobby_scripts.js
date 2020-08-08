@@ -80,12 +80,23 @@ socket.on("get chars for lobby", (data) => {
     socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD,option:data.option});
   }
 });
+setTimeout(function() {
+    socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"not repeat"});              
+}, 2000)
+
+
+
 // display all the details of the users present in lobby
 socket.on("display chars lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
     removeParticipantsImg();
     removeReadyButton();
-      if (username == data.chars[0] && img == data.imgs[0]){
+      console.log(data.chars)
+      var ready_loc = 0
+      while(data.chars[ready_loc] == 0 && data.imgs[ready_loc] == 0){
+        ready_loc+=1
+      }
+      if (username == data.chars[ready_loc] && img == data.imgs[ready_loc]){
         // first user gets the ready button!
         setReadyButton()
       }
@@ -154,7 +165,7 @@ socket.on("stop typing", (data) => {
   removeChatTyping(data);
 });
 
-socket.on("error", () => {
+socket.on("send error", () => {
   window.location.href = "/";  
 });
 
@@ -231,7 +242,6 @@ $inputMessage.click(() => {
 function updateChars() {         
   setTimeout(function() {
       // refresh the lobby chars 
-      console.log("alo")
       socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username: username, img: img, option:"repeat"}); 
       updateChars()                 
   }, 2000)

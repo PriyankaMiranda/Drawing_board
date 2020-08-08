@@ -161,13 +161,13 @@ io.on("connection", (socket) => {
 
 	socket.on("load chars on lobby", (data) => {	
 		if(data.option == 'repeat'){
-			try{
+			if(disp_chars[data.gameID] == undefined){
+				console.log("Error! Sending to homepage")
+				socket.emit("send error");		
+			}
+			else{
 				disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
 				disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);
-			}
-			catch{
-				console.log("Error! Sending to homepage")
-				socket.emit("error");		
 			}
 		}
 		else{
@@ -183,7 +183,6 @@ io.on("connection", (socket) => {
 
 	socket.on("send chars for lobby", (data) => {
 		if(data.option == 'repeat'){
-			console.log("send chars for lobby")
 
 			try{
 				// if the user is in the list disp_chars, we dont do anything
@@ -199,25 +198,20 @@ io.on("connection", (socket) => {
 				disp_imgs_copy[data.gameID].push(data.img)
 			}
 
-			console.log(disp_chars[data.gameID])
-			console.log(disp_imgs[data.gameID])
-			console.log(disp_chars_copy[data.gameID])
-			console.log(disp_imgs_copy[data.gameID])
-
-			socket.emit("display chars lobby", {
-				chars : disp_chars_copy[data.gameID],
-				imgs : disp_imgs_copy[data.gameID],
-				gameID : data.gameID,
-				gamePWD : data.gamePWD,
-				option : data.option
-			});
-			socket.broadcast.emit("display chars lobby", {
-				chars : disp_chars_copy[data.gameID],
-				imgs : disp_imgs_copy[data.gameID],
-				gameID : data.gameID,
-				gamePWD : data.gamePWD,
-				option : data.option
-			});
+			// socket.emit("display chars lobby", {
+			// 	chars : disp_chars_copy[data.gameID],
+			// 	imgs : disp_imgs_copy[data.gameID],
+			// 	gameID : data.gameID,
+			// 	gamePWD : data.gamePWD,
+			// 	option : data.option
+			// });
+			// socket.broadcast.emit("display chars lobby", {
+			// 	chars : disp_chars_copy[data.gameID],
+			// 	imgs : disp_imgs_copy[data.gameID],
+			// 	gameID : data.gameID,
+			// 	gamePWD : data.gamePWD,
+			// 	option : data.option
+			// });
 		}
 		else{
 			if(disp_chars[data.gameID] == undefined){
@@ -234,26 +228,59 @@ io.on("connection", (socket) => {
 			socket.disp_chars = disp_chars[data.gameID];
 			socket.disp_imgs = disp_imgs[data.gameID];
 
+			// socket.emit("display chars lobby", {
+			// 	chars: socket.disp_chars,
+			// 	imgs: socket.disp_imgs,
+			// 	gameID : data.gameID,
+			// 	gamePWD : data.gamePWD,
+			// 	option : data.option
+			// });
+			// socket.broadcast.emit("display chars lobby", {
+			// 	chars: socket.disp_chars,
+			// 	imgs: socket.disp_imgs,
+			// 	gameID : data.gameID,
+			// 	gamePWD : data.gamePWD,
+			// 	option : data.option
+			// });
+		}
+
+
+	});
+	
+	socket.on("display chars on lobby", (data) => {
+		if(data.option == 'repeat'){
 			socket.emit("display chars lobby", {
-				chars: socket.disp_chars,
-				imgs: socket.disp_imgs,
+				chars : disp_chars_copy[data.gameID],
+				imgs : disp_imgs_copy[data.gameID],
 				gameID : data.gameID,
 				gamePWD : data.gamePWD,
 				option : data.option
 			});
 			socket.broadcast.emit("display chars lobby", {
-				chars: socket.disp_chars,
-				imgs: socket.disp_imgs,
+				chars : disp_chars_copy[data.gameID],
+				imgs : disp_imgs_copy[data.gameID],
 				gameID : data.gameID,
 				gamePWD : data.gamePWD,
 				option : data.option
 			});
 		}
-
-
+		else{
+			socket.emit("display chars lobby", {
+				chars: disp_chars[data.gameID],
+				imgs: disp_imgs[data.gameID],
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option
+			});
+			socket.broadcast.emit("display chars lobby", {
+				chars: disp_chars[data.gameID],
+				imgs: disp_imgs[data.gameID],
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option
+			});
+		}
 	});
-
-
 	socket.on("send chars for lobby repeated", (data) => {
 		try{
 			// if the user is in the list disp_chars, we dont do anything
