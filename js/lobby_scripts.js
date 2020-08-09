@@ -82,7 +82,7 @@ socket.on("get chars for lobby", (data) => {
 });
 setTimeout(function() {
     socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"not repeat"});              
-}, 2000)
+}, 1000)
 
 
 
@@ -243,6 +243,9 @@ function updateChars() {
   setTimeout(function() {
       // refresh the lobby chars 
       socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username: username, img: img, option:"repeat"}); 
+      setTimeout(function() {
+          socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"repeat"});              
+      }, 1000)
       updateChars()                 
   }, 2000)
 }

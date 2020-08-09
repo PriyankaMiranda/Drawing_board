@@ -198,20 +198,7 @@ io.on("connection", (socket) => {
 				disp_imgs_copy[data.gameID].push(data.img)
 			}
 
-			// socket.emit("display chars lobby", {
-			// 	chars : disp_chars_copy[data.gameID],
-			// 	imgs : disp_imgs_copy[data.gameID],
-			// 	gameID : data.gameID,
-			// 	gamePWD : data.gamePWD,
-			// 	option : data.option
-			// });
-			// socket.broadcast.emit("display chars lobby", {
-			// 	chars : disp_chars_copy[data.gameID],
-			// 	imgs : disp_imgs_copy[data.gameID],
-			// 	gameID : data.gameID,
-			// 	gamePWD : data.gamePWD,
-			// 	option : data.option
-			// });
+	
 		}
 		else{
 			if(disp_chars[data.gameID] == undefined){
@@ -228,20 +215,7 @@ io.on("connection", (socket) => {
 			socket.disp_chars = disp_chars[data.gameID];
 			socket.disp_imgs = disp_imgs[data.gameID];
 
-			// socket.emit("display chars lobby", {
-			// 	chars: socket.disp_chars,
-			// 	imgs: socket.disp_imgs,
-			// 	gameID : data.gameID,
-			// 	gamePWD : data.gamePWD,
-			// 	option : data.option
-			// });
-			// socket.broadcast.emit("display chars lobby", {
-			// 	chars: socket.disp_chars,
-			// 	imgs: socket.disp_imgs,
-			// 	gameID : data.gameID,
-			// 	gamePWD : data.gamePWD,
-			// 	option : data.option
-			// });
+	
 		}
 
 
@@ -256,13 +230,13 @@ io.on("connection", (socket) => {
 				gamePWD : data.gamePWD,
 				option : data.option
 			});
-			socket.broadcast.emit("display chars lobby", {
-				chars : disp_chars_copy[data.gameID],
-				imgs : disp_imgs_copy[data.gameID],
-				gameID : data.gameID,
-				gamePWD : data.gamePWD,
-				option : data.option
-			});
+			// socket.broadcast.emit("display chars lobby", {
+			// 	chars : disp_chars_copy[data.gameID],
+			// 	imgs : disp_imgs_copy[data.gameID],
+			// 	gameID : data.gameID,
+			// 	gamePWD : data.gamePWD,
+			// 	option : data.option
+			// });
 		}
 		else{
 			socket.emit("display chars lobby", {
@@ -272,13 +246,13 @@ io.on("connection", (socket) => {
 				gamePWD : data.gamePWD,
 				option : data.option
 			});
-			socket.broadcast.emit("display chars lobby", {
-				chars: disp_chars[data.gameID],
-				imgs: disp_imgs[data.gameID],
-				gameID : data.gameID,
-				gamePWD : data.gamePWD,
-				option : data.option
-			});
+			// socket.broadcast.emit("display chars lobby", {
+			// 	chars: disp_chars[data.gameID],
+			// 	imgs: disp_imgs[data.gameID],
+			// 	gameID : data.gameID,
+			// 	gamePWD : data.gamePWD,
+			// 	option : data.option
+			// });
 		}
 	});
 	socket.on("send chars for lobby repeated", (data) => {
