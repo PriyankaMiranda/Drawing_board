@@ -36,6 +36,7 @@ var chars = {};//for homepage
 var imgs = {};//for homepage
 
 var socket_ids = {};//for game
+var socket_ids_copy = {};//for game
 
 var disp_chars = {};//for lobby
 var disp_imgs = {};//for lobby
@@ -168,6 +169,7 @@ io.on("connection", (socket) => {
 			else{
 				disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
 				disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);
+				socket_ids_copy[data.gameID] = Array(socket_ids[data.gameID].length).fill(0);
 			}
 		}
 		else{
@@ -190,33 +192,62 @@ io.on("connection", (socket) => {
 			disp_chars_copy[data.gameID] = []
 			disp_imgs_copy[data.gameID] = []
 		}
+		if(socket_ids[data.gameID] == undefined){
+			socket_ids[data.gameID] = []
+		}
 
 		if(data.option == 'repeat'){
-			socket_ids[data.gameID].push(data.socket_id);
 			try{
-				// if the user is in the list disp_chars, we dont do anything
+				// if the user socket id exists in the list already, we dont update any of the lists
+				var socket_id_loc = socket_ids[data.gameID].indexOf(data.socket_id);
 				var username_loc = disp_chars[data.gameID].indexOf(data.username);		
 				var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+				socket_ids_copy[data.gameID][socket_id_loc] = socket_ids[data.gameID][socket_id_loc]; 
 				disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
-				disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc]; 
+				disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
 			}
 			catch{
-				disp_chars[data.gameID].push(data.username);
-				disp_imgs[data.gameID].push(data.img);
-				disp_chars_copy[data.gameID].push(data.username);
-				disp_imgs_copy[data.gameID].push(data.img);
+				// now, we have to check if it is the socket id that isnt present
+				try{
+					// if the current username and img is there, then socked id mustve been updates
+					var username_loc = disp_chars[data.gameID].indexOf(data.username);		
+					var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+					disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
+					disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
+				}
+				catch{
+					// if the username and img is also new, the user must be completely new
+					socket_ids[data.gameID].push(data.socket_id);
+					disp_chars[data.gameID].push(data.username);
+					disp_imgs[data.gameID].push(data.img);
+					socket_ids_copy[data.gameID].push(data.socket_id);
+					disp_chars_copy[data.gameID].push(data.username);
+					disp_imgs_copy[data.gameID].push(data.img);
+				}
 			}
-
-	
 		}
 		else{
 			if (
 				!disp_chars[data.gameID].includes(data.username) &&
+				!disp_imgs[data.gameID].includes(data.img) &&
+				!socket_ids[data.gameID].includes(data.socket_id) 
+			) {
+			// now, we have to check if it is only the socket id that is new 
+			if (
+				!disp_chars[data.gameID].includes(data.username) &&
 				!disp_imgs[data.gameID].includes(data.img)
 			) {
+				//this means that the user is completely new
 				socket_ids[data.gameID].push(data.socket_id);
 				disp_chars[data.gameID].push(data.username);
 				disp_imgs[data.gameID].push(data.img);
+			}
+			else{
+				//this means that only the socket id is new
+				var socket_id_loc = socket_ids[data.gameID].indexOf(data.socket_id);
+				socket_ids[data.gameID][socket_id_loc] = socket_ids[data.gameID][socket_id_loc]; 
+			}
+
 			}
 	
 		}
