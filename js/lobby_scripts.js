@@ -61,7 +61,7 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
-// -------------------cascade of events based on entry for every user------------------
+// -------------------cascade of events on entry for every user------------------
 // ------------------------------------------------------------------------------------
 // load chars in lobby
 socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
@@ -80,10 +80,10 @@ socket.on("get chars for lobby", (data) => {
     socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD,option:data.option});
   }
 });
+
 setTimeout(function() {
     socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"not repeat"});              
 }, 1000)
-
 
 
 // display all the details of the users present in lobby
@@ -111,31 +111,6 @@ socket.on("display chars lobby", (data) => {
 
   }
 });
-
-// get chars from all users present in lobby repeated
-// socket.on("get chars for lobby", (data) => {  
-//   if(data.gameID == gameID && data.gamePWD == gamePWD){
-//     socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD});
-//   }
-// });
-
-// display all the details of the users present in lobby repeated
-socket.on("display chars lobby repeated", (data) => {
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    removeParticipantsImg();
-    removeReadyButton();
-    if (username == data.chars[0] && img == data.imgs[0]){
-      // first user gets the ready button!
-      setReadyButton()
-    }
-    for (var i = 0; i < data.chars.length; i++) {
-      if(data.chars[i]!= 0){
-        addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
-      }
-    }
-  }
-});
-
 
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
@@ -169,35 +144,12 @@ socket.on("send error", () => {
   window.location.href = "/";  
 });
 
-
-// Whenever the server emits 'user joined', log it in the chat body
-// socket.on("user joined", (data) => {
-//   addChatMessage(data);
-// });
-
-// Whenever the server emits 'user left', log it in the chat body
-// socket.on("user left", (data) => {
-//   removeChatTyping(data);
-// });
-
 socket.on("disconnect", () => {
-  console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
   log("you have been disconnected");  
 });
 
 socket.on("reconnect", () => {
-  console.log("oooooooooooooooooooooooooooooo")
-  console.log("oooooooooooooooooooooooooooooo") 
-  console.log("oooooooooooooooooooooooooooooo")
-  console.log("oooooooooooooooooooooooooooooo")
   log("you have been reconnected");
-  if (username) {
-    socket.emit("add user", username);
-  }
-});
-
-socket.on("reconnect_error", () => {
-  log("attempt to reconnect has failed");
 });
 
 socket.on("get chars for reloading", () => {

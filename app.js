@@ -183,7 +183,6 @@ io.on("connection", (socket) => {
 
 	socket.on("send chars for lobby", (data) => {
 		if(data.option == 'repeat'){
-
 			try{
 				// if the user is in the list disp_chars, we dont do anything
 				var username_loc = disp_chars[data.gameID].indexOf(data.username);		
@@ -230,13 +229,6 @@ io.on("connection", (socket) => {
 				gamePWD : data.gamePWD,
 				option : data.option
 			});
-			// socket.broadcast.emit("display chars lobby", {
-			// 	chars : disp_chars_copy[data.gameID],
-			// 	imgs : disp_imgs_copy[data.gameID],
-			// 	gameID : data.gameID,
-			// 	gamePWD : data.gamePWD,
-			// 	option : data.option
-			// });
 		}
 		else{
 			socket.emit("display chars lobby", {
@@ -246,76 +238,7 @@ io.on("connection", (socket) => {
 				gamePWD : data.gamePWD,
 				option : data.option
 			});
-			// socket.broadcast.emit("display chars lobby", {
-			// 	chars: disp_chars[data.gameID],
-			// 	imgs: disp_imgs[data.gameID],
-			// 	gameID : data.gameID,
-			// 	gamePWD : data.gamePWD,
-			// 	option : data.option
-			// });
 		}
-	});
-	socket.on("send chars for lobby repeated", (data) => {
-		try{
-			// if the user is in the list disp_chars, we dont do anything
-			var username_loc = disp_chars[data.gameID].indexOf(data.username);		
-			var img_loc = disp_imgs[data.gameID].indexOf(data.img);
-			disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
-			disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc]; 
-		}
-		catch{
-			disp_chars[data.gameID].push(data.username)
-			disp_imgs[data.gameID].push(data.img)
-			disp_chars_copy[data.gameID].push(data.username)
-			disp_imgs_copy[data.gameID].push(data.img)
-		}
-
-		console.log(disp_chars[data.gameID])
-		console.log(disp_imgs[data.gameID])
-		console.log(disp_chars_copy[data.gameID])
-		console.log(disp_imgs_copy[data.gameID])
-
-		socket.emit("display chars lobby repeated", {
-			chars: disp_chars_copy[data.gameID],
-			imgs: disp_imgs_copy[data.gameID],
-			gameID : data.gameID,
-			gamePWD : data.gamePWD
-		});
-		socket.broadcast.emit("display chars lobby repeated", {
-			chars: disp_chars_copy[data.gameID],
-			imgs: disp_imgs_copy[data.gameID],
-			gameID : data.gameID,
-			gamePWD : data.gamePWD
-		});
-		// disp_chars[data.gameID].push(data.username);
-		// disp_imgs[data.gameID].push(data.img);
-		// try{
-		// 	if (
-		// 		!disp_chars[data.gameID].includes(data.username) &&
-		// 		!disp_imgs[data.gameID].includes(data.img)
-		// 	) {
-		// 		disp_chars[data.gameID].push(data.username);
-		// 		disp_imgs[data.gameID].push(data.img);
-		// 	}
-		// 	socket.disp_chars = disp_chars[data.gameID];
-		// 	socket.disp_imgs = disp_imgs[data.gameID];
-
-		// 	socket.emit("display chars lobby repeated", {
-		// 		chars: socket.disp_chars,
-		// 		imgs: socket.disp_imgs,
-		// 		gameID : data.gameID,
-		// 		gamePWD : data.gamePWD
-		// 	});
-		// 	// socket.broadcast.emit("display chars lobby repeated", {
-		// 	// 	chars: socket.disp_chars,
-		// 	// 	imgs: socket.disp_imgs,
-		// 	// 	gameID : data.gameID,
-		// 	// 	gamePWD : data.gamePWD
-		// 	// });
-		// }
-		// catch{
-		// 	console.log("Disp chars empty!")
-		// }
 	});
 
 	socket.on("enter game", (data) => {
@@ -347,24 +270,6 @@ io.on("connection", (socket) => {
 	socket.on("stop typing", (data) => {
 		socket.broadcast.emit("stop typing", data);
 	});
-
-
-	// var addedUser = false;
-	// // when the client emits 'add user', this listens and executes
-	// socket.on("add user", (data) => {
-	// 	if (addedUser) return;
-	// 	// we store the username in the socket session for this client
-	// 	socket.username = data.username;
-	// 	socket.message = data.message;
-	// 	addedUser = true;
-
-	// 	// echo globally (all clients) that a person has connected
-	// 	socket.broadcast.emit("user joined", {
-	// 		username: socket.username,
-	// 		message: socket.message,
-	// 	});
-	// });
-
 
 	socket.on("reload chars for others not the one that left", () => {
 		disp_chars = [];
@@ -404,6 +309,10 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // -----------------------------------GAME-----------------------------------
 // --------------------------------------------------------------------------
+
+
+
+/*
 	var user_data = {}
 
 	var client_dict = {};
@@ -424,7 +333,6 @@ io.on("connection", (socket) => {
 	var client_data = {};
 
 	var my_data_current = {};
-
 	var id_match = {};
 
 	socket.on("update my data for everyone", (data) => {
@@ -790,6 +698,7 @@ io.on("connection", (socket) => {
 			gameID: data.gameID
 		});
 	});
+*/
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
@@ -818,6 +727,8 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
+
+
 
 
 
