@@ -35,13 +35,13 @@ var ejs = require("ejs");
 var chars = {};//for homepage
 var imgs = {};//for homepage
 
+var socket_ids = {};//for game
+
 var disp_chars = {};//for lobby
 var disp_imgs = {};//for lobby
 var disp_chars_copy = {};//for lobby
 var disp_imgs_copy = {};//for lobby
 
-var game_chars = [];//for game
-var game_imgs = [];//for game
 
 var curr_loc = []
 var curr_games = [];
@@ -171,10 +171,10 @@ io.on("connection", (socket) => {
 			}
 		}
 		else{
+			socket_ids[data.gameID] = [];
 			disp_chars[data.gameID] = [];
 			disp_imgs[data.gameID] = [];
-			socket.gameID = data.gameID
-			socket.gamePWD = data.gamePWD
+
 		}		
 		socket.emit("get chars for lobby",data);
 		socket.broadcast.emit("get chars for lobby",data);		
@@ -192,6 +192,7 @@ io.on("connection", (socket) => {
 		}
 
 		if(data.option == 'repeat'){
+			socket_ids[data.gameID].push(data.socket_id);
 			try{
 				// if the user is in the list disp_chars, we dont do anything
 				var username_loc = disp_chars[data.gameID].indexOf(data.username);		
@@ -200,10 +201,10 @@ io.on("connection", (socket) => {
 				disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc]; 
 			}
 			catch{
-				disp_chars[data.gameID].push(data.username)
-				disp_imgs[data.gameID].push(data.img)
-				disp_chars_copy[data.gameID].push(data.username)
-				disp_imgs_copy[data.gameID].push(data.img)
+				disp_chars[data.gameID].push(data.username);
+				disp_imgs[data.gameID].push(data.img);
+				disp_chars_copy[data.gameID].push(data.username);
+				disp_imgs_copy[data.gameID].push(data.img);
 			}
 
 	
@@ -213,12 +214,10 @@ io.on("connection", (socket) => {
 				!disp_chars[data.gameID].includes(data.username) &&
 				!disp_imgs[data.gameID].includes(data.img)
 			) {
+				socket_ids[data.gameID].push(data.socket_id);
 				disp_chars[data.gameID].push(data.username);
 				disp_imgs[data.gameID].push(data.img);
 			}
-			socket.disp_chars = disp_chars[data.gameID];
-			socket.disp_imgs = disp_imgs[data.gameID];
-
 	
 		}
 
@@ -232,7 +231,8 @@ io.on("connection", (socket) => {
 				imgs : disp_imgs_copy[data.gameID],
 				gameID : data.gameID,
 				gamePWD : data.gamePWD,
-				option : data.option
+				option : data.option,
+				socket_ids : socket_ids
 			});
 		}
 		else{
@@ -241,7 +241,8 @@ io.on("connection", (socket) => {
 				imgs: disp_imgs[data.gameID],
 				gameID : data.gameID,
 				gamePWD : data.gamePWD,
-				option : data.option
+				option : data.option,
+				socket_ids : socket_ids
 			});
 		}
 	});

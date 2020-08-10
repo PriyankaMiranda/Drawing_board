@@ -70,19 +70,19 @@ socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
 socket.on("get chars", (data) => {
   if(gameID == data.gameID && gamePWD == data.gamePWD){
-    socket.emit("send chars", { username: username, img: img , return_id: data.return_id,chars:data.chars,imgs:data.imgs});
+    socket.emit("send chars", {username:username,img:img,return_id:data.return_id,chars:data.chars,imgs:data.imgs});
   }
 });
 
 // get chars from all users present in lobby
 socket.on("get chars for lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", { username: username, img: img,gameID:gameID,gamePWD:gamePWD,option:data.option});
+    socket.emit("send chars for lobby", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id});
   }
 });
 
 setTimeout(function() {
-    socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"not repeat"});              
+    socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat",socket_id:socket.id});              
 }, 1000)
 
 
