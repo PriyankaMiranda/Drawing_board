@@ -182,6 +182,15 @@ io.on("connection", (socket) => {
 
 
 	socket.on("send chars for lobby", (data) => {
+		if(disp_chars[data.gameID] == undefined){
+			disp_chars[data.gameID] = []
+			disp_imgs[data.gameID] = []
+		}
+		if(disp_chars_copy[data.gameID] == undefined){
+			disp_chars_copy[data.gameID] = []
+			disp_imgs_copy[data.gameID] = []
+		}
+
 		if(data.option == 'repeat'){
 			try{
 				// if the user is in the list disp_chars, we dont do anything
@@ -200,10 +209,6 @@ io.on("connection", (socket) => {
 	
 		}
 		else{
-			if(disp_chars[data.gameID] == undefined){
-				disp_chars[data.gameID] = []
-				disp_imgs[data.gameID] = []
-			}
 			if (
 				!disp_chars[data.gameID].includes(data.username) &&
 				!disp_imgs[data.gameID].includes(data.img)
@@ -310,6 +315,7 @@ io.on("connection", (socket) => {
 // -----------------------------------GAME-----------------------------------
 // --------------------------------------------------------------------------
 
+socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
 
 
 /*
@@ -639,7 +645,7 @@ io.on("connection", (socket) => {
 		});
 	});
 
-	socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
+
 
 	socket.on("reload chars for others not the one that left in game", () => {
 		game_chars = [];

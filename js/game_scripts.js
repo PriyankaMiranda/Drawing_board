@@ -293,8 +293,7 @@ function onMouseMove(e){
 }
 
 function onDrawingEvent(data){
-  gameID = cookie_val.split("gameID=")[1].split(";")[0];
-  if(gameID == data.gameID){
+  if(gameID == data.gameID && gamePWD == data.gamePWD){
     drawLine(data.x0 , data.y0 , data.x1 , data.y1 , data.lineWidth, data.color);
   }
 }
@@ -321,7 +320,8 @@ function drawLine(x0, y0, x1, y1, lineWidth, color, emit){
     y1: y1 ,
     lineWidth: context.lineWidth ,
     color: color,
-    gameID: gameID
+    gameID: gameID,
+    gamePWD: gamePWD
   });
 }
 
@@ -940,7 +940,7 @@ const addParticipantsImg = (data) => {
 // --------------------------------sends a chat message--------------------------------
 // ------------------------------------------------------------------------------------
 const sendMessage = () => {
-  var message = $inputMessage.val();
+  var message = ' '+$inputMessage.val();
   // Prevent markup from being injected into the message
   message = cleanInput(message);
   if (message) {
