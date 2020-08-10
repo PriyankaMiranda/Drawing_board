@@ -61,22 +61,6 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------------------
-//-------------------------------------Get cookie data-------------------------------------
-//-----------------------------------------------------------------------------------------
-const cookie_val = document.cookie;
-try{
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1].split(";")[0];
-  gameID = cookie_val.split("gameID=")[1].split(";")[0];
-  gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
-}
-catch{
-  window.location.href = "/";
-}
-//-----------------------------------------------------------------------------------------  
-//-----------------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------------
 //-------------------------------Set drawing board variables-------------------------------
 //-----------------------------------------------------------------------------------------
 var canvas = document.getElementsByClassName('whiteboard')[0];
@@ -125,7 +109,7 @@ setTimeout(function() {
 socket.on("display chars lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
     removeParticipantsImg();
-    removeReadyButton();
+    // removeReadyButton();
       console.log(data.chars)
       var ready_loc = 0
       while(data.chars[ready_loc] == 0 && data.imgs[ready_loc] == 0){
@@ -133,7 +117,7 @@ socket.on("display chars lobby", (data) => {
       }
       if (username == data.chars[ready_loc] && img == data.imgs[ready_loc]){
         // first user gets the ready button!
-        setReadyButton()
+        // setReadyButton()
       }
       if(data.option == "not repeat"){
         updateChars()   
@@ -915,43 +899,6 @@ const removeParticipantsImg = (data) => {
 };
 
 // ------------------------------------------------------------------------------------
-// ------------------------------removes old ready button------------------------------
-// ------------------------------------------------------------------------------------
-function removeReadyButton(){
-  var parent = document.getElementById("row_ready");
-  while (parent.lastElementChild) {
-   parent.removeChild(parent.lastElementChild);
-  } 
-}
-
-// ------------------------------------------------------------------------------------
-// ----------------------------------sets ready button---------------------------------
-// ------------------------------------------------------------------------------------
-function setReadyButton(){  
-  var parent = document.getElementById("row_ready");
-  if (parent.lastElementChild){
-    console.log("Button already exists")
-  }
-  else{    
-  var btn = document.createElement("BUTTON");
-  btn.innerHTML = "ready";
-  btn.style.backgroundColor = "#cbe6ef";
-  btn.style.height = "4vh"; 
-  btn.style.marginTop= "0px";
-  btn.style.marginLeft= "50px";
-  btn.Id = "ready-button";
-  btn.style.borderRadius = "12px";
-  btn.style.width = "90%";
-  btn.style.textAlign = "center";
-  btn.style.verticalAlign = "middle";
-  parent.appendChild(btn);
-  btn.onclick = function() {
-    socket.emit("enter game", {gameID:gameID,gamePWD:gamePWD});
-  };
-  }
-}
-
-// ------------------------------------------------------------------------------------
 // ----------------------------shows all current partiipants---------------------------
 // ------------------------------------------------------------------------------------
 const addParticipantsImg = (data) => {
@@ -1135,3 +1082,5 @@ const getUsernameColor = (username) => {
 };
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
+
+
