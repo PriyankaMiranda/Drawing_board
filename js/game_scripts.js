@@ -1,39 +1,22 @@
 if (!document.cookie) {
   window.location.href = '/';
 }
+// if unique id is assigned, allow them to be in the game, else, send back to lobby
+/*
+if(){
+
+}
+*/
+
 // ------------------------------------------------------------------------------------
 // --------------------------------initialize variables--------------------------------
 // ------------------------------------------------------------------------------------
 var socket = io();
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 10; // ms
-var COLORS = [
-  "#008b8b",
-  "#006060",
-  "#1b7742",
-  "#002627",
-  "#3477db",
-  "#870c25",
-  "#d50000",
-  "#d24d57",
-  "#aa2e00",
-  "#d35400",
-  "#aa6b51",
-  "#554800",
-  "#1c2833",
-  "#34515e",
-  "#4b6a88",
-  "#220b38",
-  "#522032",
-  "#7d314c",
-  "#483d8b",
-  "#77448b",
-  "#8a2be2",
-  "#a74165",
-  "#9b59b6",
-  "#db0a5b",
-];
-
+var COLORS = ["#008b8b","#006060","#1b7742","#002627","#3477db","#870c25","#d50000","#d24d57",
+              "#aa2e00","#d35400","#aa6b51","#554800","#1c2833","#34515e","#4b6a88","#220b38",
+              "#522032","#7d314c","#483d8b","#77448b","#8a2be2","#a74165","#9b59b6","#db0a5b"];
 var $window = $(window);
 var $messages = $(".messages"); // Messages area
 var $inputMessage = $(".inputMessage"); // Input message input box
@@ -44,7 +27,7 @@ var username;
 var img;
 var gameID;
 var score = 0;
-var word = "___s";
+var word = "___";
 const cookie_val = document.cookie;
 
 try{
@@ -83,8 +66,6 @@ if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine
 //-----------------------------------------------------------------------------------------
 var socket = io();
 
-// load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -94,20 +75,22 @@ socket.on("get chars", (data) => {
   }
 });
 
+// load chars in lobby
+socket.emit("load chars on game",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
 // get chars from all users present in lobby
-socket.on("get chars for lobby", (data) => {
+socket.on("get chars for game", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id,score:score,word:word});
+    socket.emit("send chars for game", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id,score:score,word:word});
   }
 });
 
 setTimeout(function() {
-    socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});              
+    socket.emit("display chars on game",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});              
 }, 1000)
 
 
 // display all the details of the users present in lobby
-socket.on("display chars lobby", (data) => {
+socket.on("display chars game", (data) => {
   console.log(data.socket_ids)
   if(data.gameID == gameID && data.gamePWD == gamePWD){
     removeParticipantsImg();

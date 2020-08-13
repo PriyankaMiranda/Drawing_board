@@ -53,89 +53,89 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // ---------------------------------HOMEPAGE---------------------------------
 // --------------------------------------------------------------------------
-	socket.on("update existing game list", () =>{
-		socket.broadcast.emit("get existing game list", {return_id:socket.id})
-	});
+socket.on("update existing game list", () =>{
+	socket.broadcast.emit("get existing game list", {return_id:socket.id})
+});
 
-	socket.on("get existing game list", (data) =>{
-		io.to(data.return_id).emit('send existing game list', {existing_games:existing_games});
-	});
-	
-	socket.on("send existing game list", (data) =>{
-		if(Object.keys(data.existing_games).length != 0){
-			existing_games = data.existing_games
-			socket.broadcast.emit("update existing game list for all", {existing_games:existing_games})
-		}
-	});
+socket.on("get existing game list", (data) =>{
+	io.to(data.return_id).emit('send existing game list', {existing_games:existing_games});
+});
 
-	socket.on("update existing game list for all", (data) =>{
-		if(data.existing_games){
-			existing_games = data.existing_games
-		}
-		else{
-			existing_games = data
-		}
-	});
+socket.on("send existing game list", (data) =>{
+	if(Object.keys(data.existing_games).length != 0){
+		existing_games = data.existing_games
+		socket.broadcast.emit("update existing game list for all", {existing_games:existing_games})
+	}
+});
 
-	socket.on("update data", (data) => {
-		if(Object.keys(existing_games).length === 0) {
-			existing_games[data.gameID] = data.gamePWD
-			socket.broadcast.emit("update existing game list for all", existing_games);
-			socket.join(data.gameID);
-			socket.emit("update data", data);
-		}
-		else if(data.gameID in existing_games) {
-		    // remove chars selected from existing game
-		    if(existing_games[data.gameID] == data.gamePWD){
-				// match ! if there is a match, we allow the user to enter 
-				socket.join(data.gameID);
-				socket.emit("update data", data);
-		    } 
-		    else{
-		    	// password mismatch !
-				socket.emit("password error");
-		    }
-		}
-		else{
-			// update gameID
-			existing_games[data.gameID] = data.gamePWD
-			socket.broadcast.emit("update existing game list for all", existing_games);
-			socket.join(data.gameID);
-			socket.emit("update data", data);
-		}
-	});
+socket.on("update existing game list for all", (data) =>{
+	if(data.existing_games){
+		existing_games = data.existing_games
+	}
+	else{
+		existing_games = data
+	}
+});
 
-	socket.on("load chars", (data) => {
+socket.on("update data", (data) => {
+	if(Object.keys(existing_games).length === 0) {
+		existing_games[data.gameID] = data.gamePWD
+		socket.broadcast.emit("update existing game list for all", existing_games);
 		socket.join(data.gameID);
-		chars[data.gameID] = [];
-		imgs[data.gameID] = [];
+		socket.emit("update data", data);
+	}
+	else if(data.gameID in existing_games) {
+	    // remove chars selected from existing game
+	    if(existing_games[data.gameID] == data.gamePWD){
+			// match ! if there is a match, we allow the user to enter 
+			socket.join(data.gameID);
+			socket.emit("update data", data);
+	    } 
+	    else{
+	    	// password mismatch !
+			socket.emit("password error");
+	    }
+	}
+	else{
+		// update gameID
+		existing_games[data.gameID] = data.gamePWD
+		socket.broadcast.emit("update existing game list for all", existing_games);
+		socket.join(data.gameID);
+		socket.emit("update data", data);
+	}
+});
 
-		if(data.return_id == "-"){
-			data.return_id = socket.id
-		}	
-		socket.broadcast.emit("get chars", {return_id:data.return_id,gameID:data.gameID,gamePWD:data.gamePWD,chars:chars[data.gameID],imgs:imgs[data.gameID]});		
-		socket.emit("in case no one is in lobby", {return_id:data.return_id,gameID:data.gameID,gamePWD:data.gamePWD,chars:chars[data.gameID],imgs:imgs[data.gameID]});
-	});
+socket.on("load chars", (data) => {
+	socket.join(data.gameID);
+	chars[data.gameID] = [];
+	imgs[data.gameID] = [];
 
-	socket.on("send chars", (data) => {
-		io.to(data.return_id).emit('send chars', { username: data.username, img: data.img ,chars:data.chars, imgs:data.imgs});
-	});
+	if(data.return_id == "-"){
+		data.return_id = socket.id
+	}	
+	socket.broadcast.emit("get chars", {return_id:data.return_id,gameID:data.gameID,gamePWD:data.gamePWD,chars:chars[data.gameID],imgs:imgs[data.gameID]});		
+	socket.emit("in case no one is in lobby", {return_id:data.return_id,gameID:data.gameID,gamePWD:data.gamePWD,chars:chars[data.gameID],imgs:imgs[data.gameID]});
+});
 
-	socket.on("update chars", (data) => {
-		if(chars[data.gameID] == undefined){
-			chars[data.gameID] = data.chars;
-			imgs[data.gameID] = data.imgs;	
-		}
-		if (!chars[data.gameID].includes(data.username) && !imgs[data.gameID].includes(data.img)) {
-			chars[data.gameID].push(data.username);
-			imgs[data.gameID].push(data.img);
-		}
-		socket.emit("hide chars globally", { imgs: imgs[data.gameID] });
-	});
+socket.on("send chars", (data) => {
+	io.to(data.return_id).emit('send chars', { username: data.username, img: data.img ,chars:data.chars, imgs:data.imgs});
+});
 
-	socket.on("hide chars reloading", (data) => {
-		socket.broadcast.emit("reload chars",data);		
-	});
+socket.on("update chars", (data) => {
+	if(chars[data.gameID] == undefined){
+		chars[data.gameID] = data.chars;
+		imgs[data.gameID] = data.imgs;	
+	}
+	if (!chars[data.gameID].includes(data.username) && !imgs[data.gameID].includes(data.img)) {
+		chars[data.gameID].push(data.username);
+		imgs[data.gameID].push(data.img);
+	}
+	socket.emit("hide chars globally", { imgs: imgs[data.gameID] });
+});
+
+socket.on("hide chars reloading", (data) => {
+	socket.broadcast.emit("reload chars",data);		
+});
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
@@ -143,105 +143,55 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // -----------------------------------LOBBY----------------------------------
 // --------------------------------------------------------------------------
-
-	socket.on("load chars on lobby", (data) => {	
-		if(data.option == 'repeat'){
-			if(disp_chars[data.gameID] == undefined){
-				console.log("Error! Sending to homepage")
-				socket.emit("send error");		
-			}
-			else{
-				disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
-				disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);
-				socket_ids_copy[data.gameID] = Array(socket_ids[data.gameID].length).fill(0);
-			}
+socket.on("load chars on lobby", (data) => {	
+	if(data.option == 'repeat'){
+		if(disp_chars[data.gameID] != undefined){
+			disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
+			disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);
+			// socket_ids_copy[data.gameID] = Array(socket_ids[data.gameID].length).fill(0);
 		}
-		else{
-			socket_ids[data.gameID] = [];
-			disp_chars[data.gameID] = [];
-			disp_imgs[data.gameID] = [];
-
-		}		
-		socket.emit("get chars for lobby",data);
-		socket.broadcast.emit("get chars for lobby",data);		
-	});
+	}
+	else{
+		// socket_ids[data.gameID] = [];
+		disp_chars[data.gameID] = [];
+		disp_imgs[data.gameID] = [];
+	}		
+	socket.emit("get chars for lobby",data);
+	socket.broadcast.emit("get chars for lobby",data);		
+});
 
 
-	socket.on("send chars for lobby", (data) => {
-		if(disp_chars[data.gameID] == undefined){
-			disp_chars[data.gameID] = []
-			disp_imgs[data.gameID] = []
-		}
-		if(disp_chars_copy[data.gameID] == undefined){
-			disp_chars_copy[data.gameID] = []
-			disp_imgs_copy[data.gameID] = []
-		}
-		if(socket_ids[data.gameID] == undefined){
-			socket_ids[data.gameID] = []
-		}
+socket.on("send chars for lobby", (data) => {
+	if(disp_chars[data.gameID] == undefined){
+		disp_chars[data.gameID] = []
+		disp_imgs[data.gameID] = []
+	}
 
-		if(data.option == 'repeat'){
-			try{
-				// if the user socket id exists in the list already, we dont update any of the lists
-				var username_loc = disp_chars[data.gameID].indexOf(data.username);		
-				disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
-				var img_loc = disp_imgs[data.gameID].indexOf(data.img);
-				disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
-				var socket_id_loc = socket_ids[data.gameID].indexOf([data.socket_id,data.username,data.img]);
-				socket_ids_copy[data.gameID][socket_id_loc] = socket_ids[data.gameID][socket_id_loc]; 
-			}
-			catch{
-				// now, we have to check if it is the socket id that isnt present
-				try{
-					// if the current username and img is there, then socked id mustve been updated
-					var username_loc = disp_chars[data.gameID].indexOf(data.username);		
-					var img_loc = disp_imgs[data.gameID].indexOf(data.img);
-					if(username_loc == img_loc){
-						disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
-						disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
-						socket_ids[data.gameID][img_loc] = [data.socket_id,data.username,data.img];
-						socket_ids_copy[data.gameID][img_loc] = [data.socket_id,data.username,data.img];
-					}
-					else{
-						console.log("weird error. Fix later maybe")
-					}
-				}
-				catch{
-					// if the username and img is also new, the user must be completely new
-					socket_ids[data.gameID].push([data.socket_id,data.username,data.img]);
-					disp_chars[data.gameID].push(data.username);
-					disp_imgs[data.gameID].push(data.img);
-					socket_ids_copy[data.gameID].push([data.socket_id,data.username,data.img]);
-					disp_chars_copy[data.gameID].push(data.username);
-					disp_imgs_copy[data.gameID].push(data.img);
-				}
-			}
+	if(data.option == 'repeat' && disp_chars_copy[data.gameID] != undefined){
+		try{
+			// if the user socket id exists in the list already, we dont update any of the lists
+			var username_loc = disp_chars[data.gameID].indexOf(data.username);		
+			var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+			disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
+			disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
 		}
-		else{
-			// for new users entering, chceck if it already exists in the arrays
-			if (
-				!disp_chars[data.gameID].includes(data.username) &&
-				!disp_imgs[data.gameID].includes(data.img) &&
-				!socket_ids[data.gameID].includes([data.socket_id,data.username,data.img]) 
-			) {
-			// now, we have to check if it is only the socket id that is new 
-				if (
-					!disp_chars[data.gameID].includes(data.username) &&
-					!disp_imgs[data.gameID].includes(data.img)
-				) {
-					//this means that the user is completely new
-					socket_ids[data.gameID].push([data.socket_id,data.username,data.img]);
-					disp_chars[data.gameID].push(data.username);
-					disp_imgs[data.gameID].push(data.img);
-				}
-				else{
-					//this means that only the socket id is new but the user data is old 
-					var socket_id_loc = socket_ids[data.gameID].indexOf(data.username);
-					socket_ids[data.gameID][socket_id_loc] = [data.socket_id,data.username,data.img]; 
-				}
-			}
+		catch{
+			// if the username and img is also new, the user must be completely new
+			disp_chars[data.gameID].push(data.username);
+			disp_imgs[data.gameID].push(data.img);				
+			disp_chars_copy[data.gameID].push(0);
+			disp_imgs_copy[data.gameID].push(0);
 		}
-	});
+	}
+	else{
+		// for new users entering, chceck if it already exists in the arrays
+		if (!disp_chars[data.gameID].includes(data.username) &&!disp_imgs[data.gameID].includes(data.img)) {
+			//this means that the user is completely new
+			disp_chars[data.gameID].push(data.username);
+			disp_imgs[data.gameID].push(data.img);
+		}
+	}
+});
 	
 	socket.on("display chars on lobby", (data) => {
 		if(data.option == 'repeat'){
@@ -251,7 +201,6 @@ io.on("connection", (socket) => {
 				gameID : data.gameID,
 				gamePWD : data.gamePWD,
 				option : data.option,
-				socket_ids : socket_ids
 			});
 		}
 		else{
@@ -261,7 +210,6 @@ io.on("connection", (socket) => {
 				gameID : data.gameID,
 				gamePWD : data.gamePWD,
 				option : data.option,
-				socket_ids : socket_ids
 			});
 		}
 	});
@@ -336,6 +284,154 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 
 socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
+
+
+
+
+
+	socket.on("load chars on game", (data) => {	
+		if(data.option == 'repeat'){
+			if(disp_chars[data.gameID] == undefined){
+				console.log("Error! Sending to homepage")
+				socket.emit("send error");		
+			}
+			else{
+				disp_chars_copy[data.gameID] = Array(disp_chars[data.gameID].length).fill(0);
+				disp_imgs_copy[data.gameID] = Array(disp_imgs[data.gameID].length).fill(0);
+				socket_ids_copy[data.gameID] = Array(socket_ids[data.gameID].length).fill(0);
+			}
+		}
+		else{
+			socket_ids[data.gameID] = [];
+			disp_chars[data.gameID] = [];
+			disp_imgs[data.gameID] = [];
+
+		}		
+		socket.emit("get chars for game",data);
+		socket.broadcast.emit("get chars for game",data);		
+	});
+
+
+	socket.on("send chars for game", (data) => {
+		if(disp_chars[data.gameID] == undefined){
+			disp_chars[data.gameID] = []
+			disp_imgs[data.gameID] = []
+		}
+		if(disp_chars_copy[data.gameID] == undefined){
+			disp_chars_copy[data.gameID] = []
+			disp_imgs_copy[data.gameID] = []
+		}
+		if(socket_ids[data.gameID] == undefined){
+			socket_ids[data.gameID] = []
+		}
+
+		if(data.option == 'repeat'){
+			try{
+				// if the user socket id exists in the list already, we dont update any of the lists
+				var username_loc = disp_chars[data.gameID].indexOf(data.username);		
+				disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
+				var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+				disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
+				for(var i=0;i<socket_ids[data.gameID].length;i++){
+					var curr_elem = socket_ids[data.gameID][i];
+					if(curr_elem[0] == data.socket_id){
+						var socket_id_loc = i
+					}
+				}
+				socket_ids_copy[data.gameID][socket_id_loc] = socket_ids[data.gameID][socket_id_loc]; 
+			}
+			catch{
+				// now, we have to check if it is the socket id that isnt present
+				try{
+					// if the current username and img is there, then socked id mustve been updated
+					var username_loc = disp_chars[data.gameID].indexOf(data.username);		
+					var img_loc = disp_imgs[data.gameID].indexOf(data.img);
+					if(username_loc == img_loc){
+						disp_chars_copy[data.gameID][username_loc] = disp_chars[data.gameID][username_loc];
+						disp_imgs_copy[data.gameID][img_loc] = disp_imgs[data.gameID][img_loc];
+						
+						for(var i=0;i<socket_ids[data.gameID].length;i++){
+							var curr_elem = socket_ids[data.gameID][i];
+							if(curr_elem[1] == data.username && curr_elem[2] == data.img){
+								var socket_id_loc = i
+							}
+						}
+						socket_ids[data.gameID][socket_id_loc][0] = data.socket_id;
+						socket_ids_copy[data.gameID][socket_id_loc][0] = data.socket_id;
+					}
+					else{
+						console.log("weird error. Fix later maybe")
+					}
+				}
+				catch{
+					// if the username and img is also new, the user must be completely new
+					socket_ids[data.gameID].push([data.socket_id,data.username,data.img,data.score,data.word]);
+					disp_chars[data.gameID].push(data.username);
+					disp_imgs[data.gameID].push(data.img);
+					
+					socket_ids_copy[data.gameID].push(0);
+					disp_chars_copy[data.gameID].push(0);
+					disp_imgs_copy[data.gameID].push(0);
+				}
+			}
+		}
+		else{
+			// for new users entering, chceck if it already exists in the arrays
+			if (
+				!disp_chars[data.gameID].includes(data.username) &&
+				!disp_imgs[data.gameID].includes(data.img) &&
+				!socket_ids[data.gameID].includes([data.socket_id,data.username,data.img]) 
+			) {
+			// now, we have to check if it is only the socket id that is new 
+				if (
+					!disp_chars[data.gameID].includes(data.username) &&
+					!disp_imgs[data.gameID].includes(data.img)
+				) {
+					//this means that the user is completely new
+					socket_ids[data.gameID].push([data.socket_id,data.username,data.img]);
+					disp_chars[data.gameID].push(data.username);
+					disp_imgs[data.gameID].push(data.img);
+				}
+				else{
+					//this means that only the socket id is new but the user data is old 
+					var socket_id_loc = socket_ids[data.gameID].indexOf(data.username);
+					socket_ids[data.gameID][socket_id_loc] = [data.socket_id,data.username,data.img]; 
+				}
+			}
+		}
+	});
+	
+	socket.on("display chars on game", (data) => {
+		if(data.option == 'repeat'){
+			socket.emit("display chars game", {
+				chars : disp_chars_copy[data.gameID],
+				imgs : disp_imgs_copy[data.gameID],
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option,
+				socket_ids : socket_ids
+			});
+		}
+		else{
+			socket.emit("display chars game", {
+				chars: disp_chars[data.gameID],
+				imgs: disp_imgs[data.gameID],
+				gameID : data.gameID,
+				gamePWD : data.gamePWD,
+				option : data.option,
+				socket_ids : socket_ids
+			});
+		}
+	});
+
+
+
+
+
+
+
+
+
 
 
 /*

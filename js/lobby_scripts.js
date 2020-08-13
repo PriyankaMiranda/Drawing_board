@@ -63,8 +63,6 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events on entry for every user------------------
 // ------------------------------------------------------------------------------------
-// load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -74,17 +72,17 @@ socket.on("get chars", (data) => {
   }
 });
 
+// load chars in lobby
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
 // get chars from all users present in lobby
 socket.on("get chars for lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
     socket.emit("send chars for lobby", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id});
   }
 });
-
 setTimeout(function() {
     socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat",socket_id:socket.id});              
 }, 1000)
-
 
 // display all the details of the users present in lobby
 socket.on("display chars lobby", (data) => {
