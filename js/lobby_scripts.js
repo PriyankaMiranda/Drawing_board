@@ -291,7 +291,7 @@ const addParticipantsImg = (data) => {
 // --------------------------------sends a chat message--------------------------------
 // ------------------------------------------------------------------------------------
 const sendMessage = () => {
-  var message = $inputMessage.val();
+  var message = ' '+$inputMessage.val();
   // Prevent markup from being injected into the message
   message = cleanInput(message);
   if (message) {

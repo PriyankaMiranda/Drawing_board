@@ -43,7 +43,8 @@ var lastTypingTime;
 var username;
 var img;
 var gameID;
-
+var score = 0;
+var word = "___s";
 const cookie_val = document.cookie;
 
 try{
@@ -96,7 +97,7 @@ socket.on("get chars", (data) => {
 // get chars from all users present in lobby
 socket.on("get chars for lobby", (data) => {
   if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id});
+    socket.emit("send chars for lobby", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id,score:score,word:word});
   }
 });
 

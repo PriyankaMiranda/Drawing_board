@@ -225,20 +225,20 @@ io.on("connection", (socket) => {
 				!socket_ids[data.gameID].includes([data.socket_id,data.username,data.img]) 
 			) {
 			// now, we have to check if it is only the socket id that is new 
-			if (
-				!disp_chars[data.gameID].includes(data.username) &&
-				!disp_imgs[data.gameID].includes(data.img)
-			) {
-				//this means that the user is completely new
-				socket_ids[data.gameID].push([data.socket_id,data.username,data.img]);
-				disp_chars[data.gameID].push(data.username);
-				disp_imgs[data.gameID].push(data.img);
-			}
-			else{
-				//this means that only the socket id is new but the user data is old 
-				var socket_id_loc = socket_ids[data.gameID].indexOf(data.username);
-				socket_ids[data.gameID][socket_id_loc] = [data.socket_id,data.username,data.img]; 
-			}
+				if (
+					!disp_chars[data.gameID].includes(data.username) &&
+					!disp_imgs[data.gameID].includes(data.img)
+				) {
+					//this means that the user is completely new
+					socket_ids[data.gameID].push([data.socket_id,data.username,data.img]);
+					disp_chars[data.gameID].push(data.username);
+					disp_imgs[data.gameID].push(data.img);
+				}
+				else{
+					//this means that only the socket id is new but the user data is old 
+					var socket_id_loc = socket_ids[data.gameID].indexOf(data.username);
+					socket_ids[data.gameID][socket_id_loc] = [data.socket_id,data.username,data.img]; 
+				}
 			}
 		}
 	});
