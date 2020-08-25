@@ -63,6 +63,7 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events on entry for every user------------------
 // ------------------------------------------------------------------------------------
+
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
@@ -70,43 +71,35 @@ socket.on("get chars", (data) => {
   if(gameID == data.gameID && gamePWD == data.gamePWD){
     socket.emit("send chars", {username:username,img:img,return_id:data.return_id,chars:data.chars,imgs:data.imgs});
   }
+  removeParticipantsImg();
+  removeReadyButton();
 });
 
 // load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
+
 // get chars from all users present in lobby
-socket.on("get chars for lobby", (data) => {
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("send chars for lobby", {username:username,img:img,gameID:gameID,gamePWD:gamePWD,option:data.option,socket_id:socket.id});
-  }
+socket.on("load chars on lobby", () => {
+  socket.emit("load old chars on lobby", {return_address:socket.id});
+  socket.emit("display chars for lobby", {username:username,img:img});
 });
-setTimeout(function() {
-    socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD,option:"not repeat",socket_id:socket.id});              
-}, 1000)
+
+// get chars from all old users present
+socket.on("load old chars on lobby", (data) => {
+  socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.return_address});
+});
 
 // display all the details of the users present in lobby
-socket.on("display chars lobby", (data) => {
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    removeParticipantsImg();
-    removeReadyButton();
-      console.log(data.chars)
-      var ready_loc = 0
-      while(data.chars[ready_loc] == 0 && data.imgs[ready_loc] == 0){
-        ready_loc+=1
-      }
-      if (username == data.chars[ready_loc] && img == data.imgs[ready_loc]){
-        // first user gets the ready button!
-        setReadyButton()
-      }
-      if(data.option == "not repeat"){
-        updateChars()   
-      }
-      for (var i = 0; i < data.chars.length; i++) {
-        if(data.chars[i]!= 0){
-          addParticipantsImg({char: data.chars[i], img: data.imgs[i]});
-        }
-      }
+socket.on("display chars for lobby", (data) => {
+  addParticipantsImg({char: data.username, img: data.img});
+});
 
+// reload lobby when user leaves
+socket.on("reload lobby page", (data) => {
+  removeParticipantsImg();
+  removeReadyButton();
+  if(data.gameID == gameID && data.gamePWD == gamePWD){
+    socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
   }
 });
 
@@ -252,37 +245,53 @@ function setReadyButton(){
 // ------------------------------------------------------------------------------------
 const addParticipantsImg = (data) => {
   var parent = document.getElementById("row_chars");
+  var children = parent.children;
+  var char_list = []
+  var img_list = []
+  
+  for(var i = 0; i < children.length; i++){
+    char_list.push(children[i].children[1].innerText)
+    img_list.push(children[i].children[0].id)
+  }
 
-  var char_div = document.createElement("DIV");
-  char_div.className = "characters";
-  char_div.style.maxWidth = "150px";
-  char_div.style.maxHeight = "150px";
-  char_div.style.flex = "25%";
-  char_div.style.padding = "40px";
-  char_div.style.opacity = 1;
-  char_div.style.transform = "scale(1)";
-  parent.appendChild(char_div);
+  if(char_list.length == 0 && img_list.length == 0){
+    setReadyButton()
+  }
 
-  var image = document.createElement("IMG");
-  image.className = "characters_img";
-  image.src = data.img;
-  image.style.width = "100%";
-  image.style.height = "100%";
-  char_div.appendChild(image);
+  if(!char_list.includes(data.char) && !img_list.includes(data.img)){
+    var char_div = document.createElement("DIV");
+    char_div.className = "characters";
+    char_div.style.maxWidth = "150px";
+    char_div.style.maxHeight = "150px";
+    char_div.style.flex = "25%";
+    char_div.style.padding = "40px";
+    char_div.style.opacity = 1;
+    char_div.style.transform = "scale(1)";
+    parent.appendChild(char_div);
 
-  var div_form = document.createElement("FORM");
-  div_form.className = "characters_form";
-  div_form.style.textAlign = "center";
-  div_form.style.fontStyle = "italic";
-  div_form.style.fontFamily = "cursive";
-  char_div.appendChild(div_form);
+    var image = document.createElement("IMG");
+    image.className = "characters_img";
+    image.src = data.img;
+    image.style.width = "100%";
+    image.style.height = "100%";
+    image.id = data.img;
+    char_div.appendChild(image);
 
-  var div_label = document.createElement("LABEL");
-  div_label.className = "characters_label";
+    var div_form = document.createElement("FORM");
+    div_form.className = "characters_form";
+    div_form.style.textAlign = "center";
+    div_form.style.fontStyle = "italic";
+    div_form.style.fontFamily = "cursive";
+    char_div.appendChild(div_form);
 
-  div_label.style.fontSize = "30px";
-  div_label.innerHTML = data.char;
-  div_form.appendChild(div_label);
+    var div_label = document.createElement("LABEL");
+    div_label.className = "characters_label";
+
+    div_label.style.fontSize = "30px";
+    div_label.innerHTML = data.char;
+    div_form.appendChild(div_label);
+  }
+
 };
 
 // ------------------------------------------------------------------------------------
