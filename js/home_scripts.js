@@ -2,34 +2,31 @@
 // --------------------------------initialize variables--------------------------------
 // ------------------------------------------------------------------------------------
 var socket = io();
-var prev = { node: null };
+var prev = { node: null }; // to track the character selected before
 var parent = document.getElementsByClassName("row")[0];
-// var instruction = document.getElementById("instruction");
-// instruction.innerHTML = "Choose your character";
+var current_ids = []
+var entered_char_page = false
+const cookie_val = document.cookie;
 
 document.getElementById("existing-game").onclick= function(e) {
   e.preventDefault()  
   update_data()
 };
 
-const cookie_val = document.cookie;
 try{
-  username = cookie_val.split("name=")[1].split(";")[0];
-  document.getElementById("game-username").value = username
+  document.getElementById("game-username").value = cookie_val.split("name=")[1].split(";")[0];
 }
 catch{
   console.log("No old username")
 }
 try{
-  gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
-  document.getElementById("game-pwd").value = gamePWD
+  document.getElementById("game-pwd").value = cookie_val.split("game-pwd=")[1].split(";")[0];
 }
 catch{
   console.log("No old game password")
 }
 try {
-  gameID = cookie_val.split("gameID=")[1].split(";")[0];
-  document.getElementById("game-id").value = gameID  
+  document.getElementById("game-id").value = cookie_val.split("gameID=")[1].split(";")[0];
 }
 catch{
   console.log("No old game ID")
@@ -40,15 +37,17 @@ catch{
 // ------------------------------------------------------------------------------------
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
+
 // request for list of current games 
 socket.emit("get ongoing games")
 
 // the user requesting the list receives the game data
 socket.on("send game data", (data) =>{
-  // show ongoing games
-
-  overlay_parent.innerHTML = overlay_parent.innerHTML +" &nbsp "+data.gameID 
+  if(!current_ids.includes(data.gameID)){
+    current_ids.push(data.gameID)
+  }
 });
+
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
@@ -56,62 +55,45 @@ socket.on("send game data", (data) =>{
 // -----------------------------------Socket Events------------------------------------
 // ------------------------------------------------------------------------------------
 
-// if password doesn't match
-socket.on("password error",(data)=>{
+// socket function for when there no match in the gameID and gamePWD
+socket.on("issue",()=>{
+  document.getElementById("game-id").style.borderColor = "red"
+  document.getElementById('game-id').innerHTML = 'Game ID already in use!';
   document.getElementById("game-pwd").style.borderColor = "red"
+  document.getElementById('game-pwd').innerHTML = 'Game PWD not matched!';
 });
 
-// load char page when user enters correct id and pwd
-socket.on("update data",(data)=>{
-  document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
-  document.cookie = "name=" + data.username;
-  document.cookie = "gameID=" + data.gameID;
-  document.cookie = "game-pwd=" + data.gamePWD;
-  username = data.username;
-  gameID = data.gameID;
-  gamePWD =data.gamePWD;
-  document.getElementsByClassName("overlay")[0].style.display = "none";
-  socket.emit("load chars", {gameID:data.gameID,gamePWD:data.gamePWD,return_id:"-"});
-});
-
-// reload chars when other user enters lobby
-socket.on("reload chars",(data)=>{
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("load chars",{gameID:data.gameID,gamePWD:data.gamePWD,return_id:socket.id})
+// socket function for when there is a match in the gameID and gamePWD
+socket.on("no issue",()=>{
+  if(!entered_char_page){
+    load_chars()
+    enter_char_page() 
   }
-});
-
-// socket functions for when no one is in the game
-socket.on("in case no one is in lobby", (data) => {
-  socket.emit("send chars", { username: "", img: "", return_id:data.return_id,chars:data.chars,imgs:data.imgs});
-});
-socket.on("send chars",(data)=>{
-  socket.emit("update chars",data)
 });
 
 // socket function for hiding already selected characters
-socket.on("hide chars globally", (data) => {
-  console.log("hide chars globally")
-  removePrevChars();
-  var Path = "/characters/"; //Folder where we will search for files
-  var i = 0;
-  var blocked_list = data.imgs;
-  const cookie_val = document.cookie;
-  var img;
-  try {
-    img = cookie_val.split("img=")[1].split(";")[0];
-  } catch {
-    console.log("Exception(e) - Cookie not available");
+socket.on("hide chars",(data)=>{
+  for(var i = 0; i <parent.children.length; i++){
+    if(data.img == parent.children[i].children[1].label){
+      // remove that image
+      while (parent.children[i].lastElementChild) {
+        parent.children[i].removeChild(parent.children[i].lastElementChild);
+      } 
+      parent.removeChild(parent.children[i]);
+    }
   }
+});
 
-  for (i = 1; i < 53; i++) {
-    if (
-      blocked_list.includes(Path + i + ".png") ||
-      img == Path + i + ".png"
-    ) {
-      console.log(Path + i + ".png - Avatar taken");
-    } 
-    else {
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------
+// ----------------------------------load characters-----------------------------------
+// ------------------------------------------------------------------------------------
+function load_chars(){
+  var Path = "/characters/"; //Folder where we will search for files  
+  for (var i = 1; i < 53; i++) {
       var char_div = document.createElement("DIV");
       char_div.className = "characters";
       if (window.screen.width > 500) {
@@ -128,6 +110,7 @@ socket.on("hide chars globally", (data) => {
 
       var image = document.createElement("IMG");
       image.className = "characters_img";
+      image.label = Path + i + ".png";
       image.src = Path + i + ".png";
       if (window.screen.width > 500) {
         image.style.width = "10vw";
@@ -144,13 +127,27 @@ socket.on("hide chars globally", (data) => {
 
       char_div.onclick = function() {
         img_select(this);
-      };
-    }
+      };    
   }
-});
+}
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
+// ------------------------------------------------------------------------------------
+// --------------------enter character page if the data is correct---------------------
+// ------------------------------------------------------------------------------------
+function enter_char_page(){
+  entered_char_page = true
+  document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+  document.cookie = "name=" + data.username;
+  document.cookie = "gameID=" + data.gameID;
+  document.cookie = "game-pwd=" + data.gamePWD;
+  username = data.username;
+  gameID = data.gameID;
+  gamePWD =data.gamePWD;
+  document.getElementsByClassName("overlay")[0].style.display = "none";
+  socket.emit("load chars",{gameID:gameID});   
+}
 // ------------------------------------------------------------------------------------
 // -------------when user enters data, update cookie value and show chars--------------
 // ------------------------------------------------------------------------------------
@@ -159,10 +156,16 @@ function update_data() {
     var gamePWD = document.getElementById("game-pwd").value
     var username = document.getElementById("game-username").value 
     //check if the gameID and password is a match
-    socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username,id:socket.id})
+    if(!current_ids.includes(data.gameID)){
+      // we need to check if there is a match in id because game id exists already!
+      socket.emit("check match", {gameID:gameID,gamePWD:gamePWD})
+    }else{
+      // this means the gameID is new! so we can just let the person enter since they are the first
+      load_chars()  
+      enter_char_page()
+    }
+
 }
-
-
 // ------------------------------------------------------------------------------------
 // ----------scale image when mouse hovevrs on top(only for desktop versions)----------
 // ------------------------------------------------------------------------------------
@@ -191,14 +194,5 @@ function img_select(div){
   window.location.href = "/lobby";
 }
 
-// ------------------------------------------------------------------------------------
-// ------------------------clear characters before loading page------------------------
-// ------------------------------------------------------------------------------------
-function removePrevChars() {
-  var elements = document.getElementsByClassName("characters");
-  while (elements.length > 0) {
-    elements[0].parentNode.removeChild(elements[0]);
-  }
-}
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------

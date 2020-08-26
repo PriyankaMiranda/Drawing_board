@@ -64,24 +64,7 @@ if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine
 //-----------------------------------------------------------------------------------------
 //---------------------Cascade of events based on entry for every user---------------------
 //-----------------------------------------------------------------------------------------
-var socket = io();
-
-// for the users using the application, send the existing game list
-socket.on("get ongoing games", (data) =>{
-  socket.emit("send game data",{return_id:data.return_id,gameID:gameID,img:img})
-});
-
-
-
-// hide currently used chars for other users in homepage 
-socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
-// get chars from all users present in lobby to hide in homempage
-socket.on("get chars", (data) => {
-  if(gameID == data.gameID && gamePWD == data.gamePWD){
-    socket.emit("send chars", {username:username,img:img,return_id:data.return_id,chars:data.chars,imgs:data.imgs});
-  }
-});
-
+socket.emit("send chars when entering", {img:img,gameID: gameID});
 // load chars in lobby
 socket.emit("load chars on game",{gameID:gameID,gamePWD:gamePWD,option:"not repeat"});   
 // get chars from all users present in lobby
@@ -136,6 +119,31 @@ catch{
 */
 var time_val;
 
+
+//-----------------------------------------------------------------------------------------  
+//-----------------------------------------------------------------------------------------  
+
+//-----------------------------------------------------------------------------------------  
+//--------------------------------------Socket Events--------------------------------------  
+//-----------------------------------------------------------------------------------------  
+
+// for the users using the application, send the existing game list
+socket.on("get ongoing games", (data) =>{
+  socket.emit("send game data",{id:data.id,gameID:gameID,img:img})
+});
+
+socket.on("check match",(data)=>{
+  if(data.gamePWD != gamePWD){
+    socket.emit("send issue",{id:data.id})
+  }else{
+    socket.emit("no issue",{id:data.id})
+  }
+});
+
+// get chars from all users present in game to hide in homempage
+socket.on("get chars", (data) => {
+  socket.emit("send chars", {img:img,id:data.id});
+});
 
 //-----------------------------------------------------------------------------------------  
 //-----------------------------------------------------------------------------------------  

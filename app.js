@@ -56,88 +56,39 @@ io.on("connection", (socket) => {
 // ---------------------------------HOMEPAGE---------------------------------
 // --------------------------------------------------------------------------
 socket.on("get ongoing games", () =>{
-	socket.broadcast.emit("get ongoing games", {return_id:socket.id})
+	socket.broadcast.emit("get ongoing games", {id:socket.id})
 });
 
 socket.on("send game data", (data) =>{
-	io.to(data.return_id).emit('send game data', {gameID:data.gameID,img:data.img});
+	io.to(data.id).emit('send game data', {gameID:data.gameID,img:data.img});
 });
 
-socket.on("send game 2 data", (data) =>{
-	if(Object.keys(data.existing_games).length != 0){
-		existing_games = data.existing_games
-		socket.broadcast.emit("update existing game list for all", {existing_games:existing_games})
-	}
+socket.on("check match", (data) =>{
+	socket.to(data.gameID).emit('check match', {gamePWD:data.gamePWD,id:socket.id});
 });
 
-socket.on("update existing game list for all", (data) =>{
-	if(data.existing_games){
-		existing_games = data.existing_games
-	}
-	else{
-		existing_games = data
-	}
+socket.on("send issue",(data)=>{
+	io.to(data.id).emit('issue');
 });
 
-socket.on("update data", (data) => {
-
-	if(Object.keys(existing_games).length === 0) {
-		existing_games[data.gameID] = data.gamePWD
-		socket.broadcast.emit("update existing game list for all", existing_games);
-		socket.join(data.gameID);
-		socket.emit("update data", data);
-	}
-	else if(data.gameID in existing_games) {
-	    // remove chars selected from existing game
-	    if(existing_games[data.gameID] == data.gamePWD){
-			// match ! if there is a match, we allow the user to enter 
-			socket.join(data.gameID);
-			socket.emit("update data", data);
-	    } 
-	    else{
-	    	// password mismatch !
-			socket.emit("password error");
-	    }
-	}
-	else{
-		// update gameID
-		existing_games[data.gameID] = data.gamePWD
-		socket.broadcast.emit("update existing game list for all", existing_games);
-		socket.join(data.gameID);
-		socket.emit("update data", data);
-	}
+socket.on("no issue",(data)=>{
+	io.to(data.id).emit('no issue');
 });
 
 socket.on("load chars", (data) => {
-	chars[data.gameID] = [];
-	imgs[data.gameID] = [];
-
-	if(data.return_id == "-"){
-		data.return_id = socket.id
-	}	
-	socket.broadcast.emit("get chars", {return_id:data.return_id,gameID:data.gameID,gamePWD:data.gamePWD,chars:chars[data.gameID],imgs:imgs[data.gameID]});		
-	socket.emit("in case no one is in lobby", {return_id:data.return_id,gameID:data.gameID,gamePWD:data.gamePWD,chars:chars[data.gameID],imgs:imgs[data.gameID]});
+	socket.join(data.gameID);
+	socket.to(data.gameID).emit('get chars', {id:socket.id});
 });
 
 socket.on("send chars", (data) => {
-	io.to(data.return_id).emit('send chars', { username: data.username, img: data.img ,chars:data.chars, imgs:data.imgs});
+	io.to(data.id).emit('hide chars', {img: data.img});
 });
 
-socket.on("update chars", (data) => {
-	if(chars[data.gameID] == undefined){
-		chars[data.gameID] = data.chars;
-		imgs[data.gameID] = data.imgs;	
-	}
-	if (!chars[data.gameID].includes(data.username) && !imgs[data.gameID].includes(data.img)) {
-		chars[data.gameID].push(data.username);
-		imgs[data.gameID].push(data.img);
-	}
-	socket.emit("hide chars globally", { imgs: imgs[data.gameID] });
+socket.on("send chars when entering", (data) => {
+	socket.join(data.gameID);
+	socket.to(data.gameID).emit('hide chars', {id:socket.id});
 });
 
-socket.on("hide chars reloading", (data) => {
-	socket.broadcast.emit("reload chars",data);		
-});
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
