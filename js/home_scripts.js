@@ -4,10 +4,8 @@
 var socket = io();
 var prev = { node: null };
 var parent = document.getElementsByClassName("row")[0];
-var logo = document.getElementById("logo-internal");
-logo.src = "/logo2_transparent.png";
-var instruction = document.getElementById("instruction");
-instruction.innerHTML = "Choose your character";
+// var instruction = document.getElementById("instruction");
+// instruction.innerHTML = "Choose your character";
 
 document.getElementById("existing-game").onclick= function(e) {
   e.preventDefault()  
@@ -43,18 +41,13 @@ catch{
 // -------------------cascade of events based on entry for every user------------------
 // ------------------------------------------------------------------------------------
 // request for list of current games 
-socket.emit("update existing game list")
-// for the users using the application, send the existing game list
-socket.on("get existing game list", (data) =>{
-  socket.emit("get existing game list",data)
-});
-// the user requesting the list receives the game list
-socket.on("send existing game list", (data) =>{
-  socket.emit("send existing game list", data)
-});
-// user updates the current game list for everyone 
-socket.on("update existing game list for all", (data) =>{
-  socket.emit("update existing game list for all", data)
+socket.emit("get ongoing games")
+
+// the user requesting the list receives the game data
+socket.on("send game data", (data) =>{
+  // show ongoing games
+
+  overlay_parent.innerHTML = overlay_parent.innerHTML +" &nbsp "+data.gameID 
 });
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
@@ -105,7 +98,6 @@ socket.on("hide chars globally", (data) => {
   var blocked_list = data.imgs;
   const cookie_val = document.cookie;
   var img;
-
   try {
     img = cookie_val.split("img=")[1].split(";")[0];
   } catch {
@@ -167,7 +159,7 @@ function update_data() {
     var gamePWD = document.getElementById("game-pwd").value
     var username = document.getElementById("game-username").value 
     //check if the gameID and password is a match
-    socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username})
+    socket.emit("update data",{gameID:gameID,gamePWD:gamePWD,username:username,id:socket.id})
 }
 
 

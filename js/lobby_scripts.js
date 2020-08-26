@@ -61,8 +61,14 @@ document.getElementById("gameID").innerHTML += gameID;
 // ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
-// -------------------cascade of events on entry for every user------------------
+// ----------------------cascade of events on entry for every user---------------------
 // ------------------------------------------------------------------------------------
+
+// for the users using the application, send the existing game list
+socket.on("get ongoing games", (data) =>{
+  socket.emit("send game data",{return_id:data.return_id,gameID:gameID,img:img})
+});
+
 
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
@@ -76,26 +82,31 @@ socket.on("get chars", (data) => {
 });
 
 // load chars in lobby
-socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
+socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:username});   
 
 // get chars from all users present in lobby
 socket.on("load chars on lobby", () => {
   socket.emit("load old chars on lobby", {return_address:socket.id});
-  socket.emit("display chars for lobby", {username:username,img:img});
+  socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img});
 });
 
 // get chars from all old users present
 socket.on("load old chars on lobby", (data) => {
-  socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.return_address});
+  socket.emit("display old chars for lobby", {gameID:gameID,username:username,img:img,return_address:data.return_address});
 });
 
 // display all the details of the users present in lobby
 socket.on("display chars for lobby", (data) => {
+  console.log(socket.id)
+  console.log(data.owner)
+  if(data.owner == socket.id){
+    setReadyButton()
+  }
   addParticipantsImg({char: data.username, img: data.img});
 });
 
 // reload lobby when user leaves
-socket.on("reload lobby page", (data) => {
+socket.on("reload lobby page", (data) => {  
   removeParticipantsImg();
   removeReadyButton();
   if(data.gameID == gameID && data.gamePWD == gamePWD){
@@ -252,10 +263,6 @@ const addParticipantsImg = (data) => {
   for(var i = 0; i < children.length; i++){
     char_list.push(children[i].children[1].innerText)
     img_list.push(children[i].children[0].id)
-  }
-
-  if(char_list.length == 0 && img_list.length == 0){
-    setReadyButton()
   }
 
   if(!char_list.includes(data.char) && !img_list.includes(data.img)){

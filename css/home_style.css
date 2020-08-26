@@ -3,7 +3,6 @@ body{
   height: 100vh;
   width: 100vw;
   text-align: center;
-  background-color: white;
 }
 
 .overlay{
@@ -19,24 +18,24 @@ body{
   z-index: 2;
   cursor: pointer;
   padding-top: 20vh;
-
 }
 
 .overlay-header {
-    width: 100%;
-    height: 15vh;
-    text-align: center;
+  width: 100%;
+  height: 15vh;
+  text-align: center;
 }
 
-.overlay-header-contents {
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 100%;
+.overlay-header-logo {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 100%;
 }
-.overlay-text{
+
+.overlay-form{
+  height: 80vh;
   color: #005582;
   text-align: center;
-
 }
 
 .overlay-logo{

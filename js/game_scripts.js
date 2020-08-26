@@ -66,6 +66,13 @@ if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine
 //-----------------------------------------------------------------------------------------
 var socket = io();
 
+// for the users using the application, send the existing game list
+socket.on("get ongoing games", (data) =>{
+  socket.emit("send game data",{return_id:data.return_id,gameID:gameID,img:img})
+});
+
+
+
 // hide currently used chars for other users in homepage 
 socket.emit("hide chars reloading",{gameID:gameID,gamePWD:gamePWD});
 // get chars from all users present in lobby to hide in homempage
