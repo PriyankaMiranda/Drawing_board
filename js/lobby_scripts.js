@@ -40,17 +40,14 @@ var $inputMessage = $(".inputMessage"); // Input message input box
 var $chatPage = $(".chat.page"); // The chatroom page
 var typing = false;
 var lastTypingTime;
-var username;
-var img;
-var gameID;
 
 const cookie_val = document.cookie;
 
 try{
-  username = cookie_val.split("name=")[1].split(";")[0];
-  img = cookie_val.split("img=")[1].split(";")[0];
-  gameID = cookie_val.split("gameID=")[1].split(";")[0];
-  gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
+  var username = cookie_val.split("name=")[1].split(";")[0];
+  var img = cookie_val.split("img=")[1].split(";")[0];
+  var gameID = cookie_val.split("gameID=")[1].split(";")[0];
+  var gamePWD = cookie_val.split("game-pwd=")[1].split(";")[0];
 }
 catch{
   window.location.href = "/";
@@ -83,8 +80,6 @@ socket.on("load old chars on lobby", (data) => {
 
 // display all the details of the users present in lobby
 socket.on("display chars for lobby", (data) => {
-  console.log(socket.id)
-  console.log(data.owner)
   if(data.owner == socket.id){
     setReadyButton()
   }

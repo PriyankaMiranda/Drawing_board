@@ -28,30 +28,29 @@ const server = app.listen(port, () => {
 	console.log("Server is running at port " + port);
 });
 
-
 var io = require("socket.io")(server);
 var ejs = require("ejs");
 
-var chars = {};//for homepage
-var imgs = {};//for homepage
+// var chars = {};//for homepage
+// var imgs = {};//for homepage
 
-var socket_ids = {};//for game
-var socket_ids_copy = {};//for game
+// var socket_ids = {};//for game
+// var socket_ids_copy = {};//for game
 
 var game_owner = {};//for lobby
 
 
-var disp_chars = {};//for lobby
-var disp_imgs = {};//for lobby
+// var disp_chars = {};//for lobby
+// var disp_imgs = {};//for lobby
 
-var disp_chars_copy = {};//for lobby
-var disp_imgs_copy = {};//for lobby
+// var disp_chars_copy = {};//for lobby
+// var disp_imgs_copy = {};//for lobby
 
-
-var curr_loc = []
-var curr_games = [];
+// var curr_loc = []
+// var curr_games = [];
 
 io.on("connection", (socket) => {
+
 // --------------------------------------------------------------------------
 // ---------------------------------HOMEPAGE---------------------------------
 // --------------------------------------------------------------------------
@@ -75,6 +74,10 @@ socket.on("no issue",(data)=>{
 	io.to(data.id).emit('no issue');
 });
 
+socket.on("join game",(data)=>{
+	socket.join(data.gameID);
+});
+
 socket.on("load chars", (data) => {
 	socket.join(data.gameID);
 	socket.to(data.gameID).emit('get chars', {id:socket.id});
@@ -86,7 +89,7 @@ socket.on("send chars", (data) => {
 
 socket.on("send chars when entering", (data) => {
 	socket.join(data.gameID);
-	socket.to(data.gameID).emit('hide chars', {id:socket.id});
+	socket.to(data.gameID).emit('hide chars', {id:socket.id,img:data.img});
 });
 
 // --------------------------------------------------------------------------
@@ -96,8 +99,6 @@ socket.on("send chars when entering", (data) => {
 // --------------------------------------------------------------------------
 // -----------------------------------LOBBY----------------------------------
 // --------------------------------------------------------------------------
-
-
 
 socket.on("load chars on lobby", (data) => {	
 	if(game_owner[data.gameID] == undefined) {
@@ -164,29 +165,6 @@ socket.on("stop typing", (data) => {
 	// socket.broadcast.emit("stop typing", data);
 });
 
-// socket.on("reload chars for others not the one that left", () => {
-// 	// disp_chars = [];
-// 	// disp_imgs = [];
-// 	socket.emit("reload chars upon disconnection");
-// });
-
-// socket.on("reload chars for others except the one that left", (data) => {
-// 	if (!disp_chars.includes(data.username) && !disp_imgs.includes(data.img)) {
-// 		disp_chars.push(data.username);
-// 		disp_imgs.push(data.img);
-// 	}
-// 	socket.disp_chars = disp_chars;
-// 	socket.disp_imgs = disp_imgs;
-
-// 	socket.emit("display chars lobby", {
-// 		chars: socket.disp_chars,
-// 		imgs: socket.disp_imgs,
-// 	});
-// 	socket.broadcast.emit("display chars lobby", {
-// 		chars: socket.disp_chars,
-// 		imgs: socket.disp_imgs,
-// 	});
-// });
 
 
 // --------------------------------------------------------------------------
