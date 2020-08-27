@@ -118,17 +118,16 @@ socket.on("display chars for lobby", (data) => {
 });
 
 socket.on("load old chars on lobby", (data) => {	
-	socket.join(data.gameID);
 	socket.to(data.gameID).emit("load old chars on lobby",data);	
 });
 
 socket.on("display old chars for lobby", (data) => {
-	io.to(data.return_address).emit("display chars for lobby", {username:data.username,img:data.img});
+	io.to(data.is).emit("display chars for lobby", {username:data.username,img:data.img,owner:game_owner[data.gameID]});
 });
 
 socket.on("enter game", (data) => {
-	socket.emit("enter game", data);
-	socket.broadcast.emit("enter game", data);
+	socket.emit("enter game");
+	socket.to(data.gameID).emit("enter game");	
 });
 
 // when the client emits 'new message', this listens and executes
@@ -137,6 +136,7 @@ socket.on("new message", (data) => {
 	socket.message = data.message;
 	socket.gameID = data.gameID;
 	socket.gamePWD = data.gamePWD;
+
 	// we tell the client to execute 'new message'
 	socket.to(data.gameID).emit("new message",{
 		username: socket.username,
@@ -145,24 +145,16 @@ socket.on("new message", (data) => {
 		gamePWD: socket.gamePWD
 	});
 
-	// socket.broadcast.emit("new message", {
-	// 	username: socket.username,
-	// 	message: socket.message,
-	// 	gameID: socket.gameID,
-	// 	gamePWD: socket.gamePWD
-	// });
 });
 
 // when the client emits 'typing', we broadcast it to others
 socket.on("typing", (data) => {
 	socket.to(data.gameID).emit("typing", data);
-	// socket.broadcast.emit("typing", data);
 });
 
 // when the client emits 'stop typing', we broadcast it to others
 socket.on("stop typing", (data) => {
 	socket.to(data.gameID).emit("stop typing", data);
-	// socket.broadcast.emit("stop typing", data);
 });
 
 
@@ -727,19 +719,19 @@ socket.on('drawing', (data) => socket.broadcast.emit('drawing', data));
 	// when the user disconnects.. perform this
 	socket.on("disconnect", () => {
 		if (!socket.gameID){
-			socket.broadcast.emit("get chars for reloading upon disconnection");
-			socket.broadcast.emit("user left", {username: socket.username});			
+			console.log("idk")
+			// socket.broadcast.emit("get chars for reloading upon disconnection");
+			// socket.broadcast.emit("user left", {username: socket.username});			
 		}else{
 			socket.leave(socket.gameID);
 			if(socket.id == game_owner[socket.gameID]){
 				game_owner[socket.gameID] = undefined
 			}
-			socket.broadcast.emit("reload lobby page", {gameID : socket.gameID, gamePWD : socket.gamePWD});
-			socket.broadcast.emit("user left game", 
-				{username : socket.username, gameID : socket.gameID, gamePWD : socket.gamePWD});
+			socket.to(socket.gameID).emit("reload lobby page", {gameID : socket.gameID});
 
+			socket.to(socket.gameID).emit("user left game", 
+				{username : socket.username, gameID : socket.gameID, gamePWD : socket.gamePWD});
 		}
-		
 	});
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------

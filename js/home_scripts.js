@@ -48,9 +48,11 @@ socket.on("send game data", (data) =>{
 socket.on("issue",()=>{
   document.getElementById("game-id").style.borderColor = "red"
   document.getElementById("game-id").style.borderRadius = "5px"
+  document.getElementById('game-id').value = '';
   document.getElementById('game-id').placeholder = 'Game ID already in use!';
   document.getElementById("game-pwd").style.borderColor = "red"
   document.getElementById("game-pwd").style.borderRadius = "5px"
+  document.getElementById('game-pwd').value = ''
   document.getElementById('game-pwd').placeholder = 'Game PWD not matched!';
 });
 

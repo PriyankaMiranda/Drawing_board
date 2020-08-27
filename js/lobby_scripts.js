@@ -69,13 +69,13 @@ socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:userna
 socket.on("load chars on lobby", () => {
   removeParticipantsImg();
   removeReadyButton();
-  socket.emit("load old chars on lobby", {return_address:socket.id});
+  socket.emit("load old chars on lobby", {id:socket.id,gameID:gameID});
   socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img});
 });
 
 // get chars from all old users present
 socket.on("load old chars on lobby", (data) => {
-  socket.emit("display old chars for lobby", {gameID:gameID,username:username,img:img,return_address:data.return_address});
+  socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.id});
 });
 
 // display all the details of the users present in lobby
@@ -90,9 +90,7 @@ socket.on("display chars for lobby", (data) => {
 socket.on("reload lobby page", (data) => {  
   removeParticipantsImg();
   removeReadyButton();
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD});   
-  }
+  socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:username});
 });
 
 // ------------------------------------------------------------------------------------
@@ -107,6 +105,7 @@ socket.on("get ongoing games", (data) =>{
   socket.emit("send game data",{id:data.id,gameID:gameID,img:img})
 });
 
+// socket function for checking whether the game password is correct 
 socket.on("check match",(data)=>{
   if(data.gamePWD != gamePWD){
     socket.emit("send issue",{id:data.id})
@@ -120,12 +119,9 @@ socket.on("get chars", (data) => {
   socket.emit("send chars", {img:img,id:data.id});
 });
 
-
 // if user clicks ready button, all current users enter the game through this emit 
-socket.on("enter game", (data) => {
-  if(data.gameID == gameID &&data.gamePWD == gamePWD){
-    window.location.href = "/game";
-  }
+socket.on("enter game", () => {
+  window.location.href = "/game";
 });
 
 // Whenever the server emits 'new message', update the chat body
@@ -143,30 +139,6 @@ socket.on("stop typing", (data) => {
   removeChatTyping(data);
 });
 
-socket.on("send error", () => {
-  window.location.href = "/";  
-});
-
-socket.on("disconnect", () => {
-  log("you have been disconnected");  
-});
-
-socket.on("reconnect", () => {
-  log("you have been reconnected");
-});
-
-socket.on("get chars for reloading", () => {
-  socket.emit("send chars for homepage", {username: username, img: img });
-});
-
-socket.on("get chars for reloading upon disconnection", () => {
-  socket.emit("reload chars for others not the one that left");
-});
-
-socket.on("reload chars upon disconnection", () => {
-  socket.emit("reload chars for others except the one that left", {username: username, img: img});  
-});
-
 // ------------------------------------------------------------------------------------
 // -----------------------------Keyboard and Click Events------------------------------
 // ------------------------------------------------------------------------------------
@@ -174,7 +146,7 @@ $window.keydown((event) => {
   // When the client hits ENTER on their keyboard, update message for everyone
   if (event.which === 13) {
     sendMessage();
-    socket.emit("stop typing ", {gameID:gameID,gamePWD:gamePWD});
+    socket.emit("stop typing", {gameID:gameID});
     typing = false;
   }
 });
@@ -190,22 +162,6 @@ $inputMessage.click(() => {
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 
-
-// ------------------------------------------------------------------------------------
-// --------------------------load chars in lobby every 3 secs--------------------------
-// ------------------------------------------------------------------------------------
-function updateChars() {         
-  setTimeout(function() {
-      // refresh the lobby chars 
-      socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username: username, img: img, option:"repeat"}); 
-      setTimeout(function() {
-          socket.emit("display chars on lobby",{gameID:gameID,gamePWD:gamePWD, option:"repeat"});              
-      }, 1000)
-      updateChars()                 
-  }, 2000)
-}
-// ------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
 // ---------------------------removes old participant images---------------------------
@@ -247,7 +203,7 @@ function setReadyButton(){
   btn.style.verticalAlign = "middle";
   parent.appendChild(btn);
   btn.onclick = function() {
-    socket.emit("enter game", {gameID:gameID,gamePWD:gamePWD});
+    socket.emit("enter game", {gameID:gameID});
   };
   }
 }
@@ -311,7 +267,7 @@ const sendMessage = () => {
   message = cleanInput(message);
   if (message) {
     $inputMessage.val("");
-    var dataval = { username: username, message: message , gameID: gameID, gamePWD: gamePWD};
+    var dataval = { username: username, message: message , gameID: gameID};
     addChatMessage(dataval);
     socket.emit("new message", dataval);
   }
@@ -322,28 +278,26 @@ const sendMessage = () => {
 // ------------------------------------------------------------------------------------
 // Adds the visual chat message to the message list
 const addChatMessage = (data) => {
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    // Don't fade the message in if there is an 'X was typing'
-    var $typingMessages = getTypingMessages(data);
+  // Don't fade the message in if there is an 'X was typing'
+  var $typingMessages = getTypingMessages(data);
 
-    if ($typingMessages.length !== 0) {
-      $typingMessages.remove();
-    }
-
-    var $usernameDiv = $('<span class="username"/>')
-    .text(data.username)
-    .css("color", getUsernameColor(data.username));
-    var $messageBodyDiv = $('<span class="messageBody">').text(data.message);
-
-    var typingClass = data.typing ? "typing" : "";
-    var $messageDiv = $('<p class="message"/>')
-    .data("username", data.username)
-    .addClass(typingClass)
-    .append($usernameDiv, $messageBodyDiv);
-
-    addMessageElement($messageDiv);
-    return $messageDiv
+  if ($typingMessages.length !== 0) {
+    $typingMessages.remove();
   }
+
+  var $usernameDiv = $('<span class="username"/>')
+  .text(data.username)
+  .css("color", getUsernameColor(data.username));
+  var $messageBodyDiv = $('<span class="messageBody">').text(data.message);
+
+  var typingClass = data.typing ? "typing" : "";
+  var $messageDiv = $('<p class="message"/>')
+  .data("username", data.username)
+  .addClass(typingClass)
+  .append($usernameDiv, $messageBodyDiv);
+
+  addMessageElement($messageDiv);
+  return $messageDiv
 };
 
 // Gets the 'X is typing...' messages of a user
@@ -387,27 +341,23 @@ const addMessageElement = (el, options) => {
 
 // Adds the visual chat typing message
 const addChatTyping = (data) => {
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    data.typing = true;
-    data.message = "is typing....";
-    addChatMessage(data).fadeOut(function() {
-      $(this).remove();
-    });
-  }
+  data.typing = true;
+  data.message = "is typing....";
+  addChatMessage(data).fadeOut(function() {
+    $(this).remove();
+  });
 };
 
 // Removes the visual chat typing message
 const removeChatTyping = (data) => {
-  if(data.gameID == gameID && data.gamePWD == gamePWD){
-    getTypingMessages(data);
-  }
+  getTypingMessages(data);
 };
 
 // Updates the typing event
 const updateTyping = () => {
   if (!typing) {
     typing = true;
-    socket.emit("typing", { username: username ,gameID:gameID, gamePWD:gamePWD});
+    socket.emit("typing", { username: username ,gameID:gameID});
   }
 
   lastTypingTime = new Date().getTime();
@@ -415,7 +365,7 @@ const updateTyping = () => {
     var typingTimer = new Date().getTime();
     var timeDiff = typingTimer - lastTypingTime;
     if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-      socket.emit("stop typing", {gameID:gameID, gamePWD:gamePWD});
+      socket.emit("stop typing", {gameID:gameID});
       typing = false;
     }
   }, TYPING_TIMER_LENGTH);
