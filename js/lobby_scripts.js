@@ -7,33 +7,9 @@ if (!document.cookie) {
 var socket = io();
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 10; // ms
-var COLORS = [
-  "#008b8b",
-  "#006060",
-  "#1b7742",
-  "#002627",
-  "#3477db",
-  "#870c25",
-  "#d50000",
-  "#d24d57",
-  "#aa2e00",
-  "#d35400",
-  "#aa6b51",
-  "#554800",
-  "#1c2833",
-  "#34515e",
-  "#4b6a88",
-  "#220b38",
-  "#522032",
-  "#7d314c",
-  "#483d8b",
-  "#77448b",
-  "#8a2be2",
-  "#a74165",
-  "#9b59b6",
-  "#db0a5b",
-];
-
+var COLORS = ["#008b8b","#006060","#1b7742","#002627","#3477db","#870c25","#d50000","#d24d57",
+              "#aa2e00","#d35400","#aa6b51","#554800","#1c2833","#34515e","#4b6a88","#220b38",
+              "#522032","#7d314c","#483d8b","#77448b","#8a2be2","#a74165","#9b59b6","#db0a5b"];
 var $window = $(window);
 var $messages = $(".messages"); // Messages area
 var $inputMessage = $(".inputMessage"); // Input message input box
@@ -74,9 +50,7 @@ socket.on("load chars on lobby", () => {
 });
 
 // get chars from all old users present
-socket.on("load old chars on lobby", (data) => {
-  socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.id});
-});
+socket.on("load old chars on lobby", (data) => socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.id}));
 
 // display all the details of the users present in lobby
 socket.on("display chars for lobby", (data) => {
@@ -101,9 +75,7 @@ socket.on("reload lobby page", (data) => {
 // ------------------------------------------------------------------------------------
 
 // for the users using the application, send the existing game list
-socket.on("get ongoing games", (data) =>{
-  socket.emit("send game data",{id:data.id,gameID:gameID,img:img})
-});
+socket.on("get ongoing games", (data) =>socket.emit("send game data",{id:data.id,gameID:gameID,img:img}));
 
 // socket function for checking whether the game password is correct 
 socket.on("check match",(data)=>{
@@ -115,32 +87,22 @@ socket.on("check match",(data)=>{
 });
 
 // get chars from all users present in lobby to hide in homempage
-socket.on("get chars", (data) => {
-  socket.emit("send chars", {img:img,id:data.id});
-});
+socket.on("get chars", (data) => socket.emit("send chars", {img:img,id:data.id}));
 
 // if user clicks ready button, all current users enter the game through this emit 
-socket.on("enter game", () => {
-  window.location.href = "/game";
-});
+socket.on("enter game", () => window.location.href = "/game" );
 
 // Whenever the server emits 'new message', update the chat body
-socket.on("new message", (data) => {
-  addChatMessage(data);
-});
+socket.on("new message", (data) => addChatMessage(data));
 
 // Whenever the server emits 'typing', show the typing message
-socket.on("typing", (data) => {
-  addChatTyping(data);
-});
+socket.on("typing", (data) => addChatTyping(data));
 
 // Whenever the server emits 'stop typing', kill the typing message
-socket.on("stop typing", (data) => {
-  removeChatTyping(data);
-});
+socket.on("stop typing", (data) => removeChatTyping(data));
 
 // ------------------------------------------------------------------------------------
-// -----------------------------Keyboard and Click Events------------------------------
+// ----------------------------------Event listeners-----------------------------------
 // ------------------------------------------------------------------------------------
 $window.keydown((event) => {
   // When the client hits ENTER on their keyboard, update message for everyone
@@ -151,14 +113,10 @@ $window.keydown((event) => {
   }
 });
 
-$inputMessage.on("input", () => {
-  updateTyping();
-}); 
+$inputMessage.on("input", () => updateTyping()); 
 
 // Focus input when clicking on the message input's border
-$inputMessage.click(() => {
-  $inputMessage.focus();
-});
+$inputMessage.click(() => $inputMessage.focus());
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
 

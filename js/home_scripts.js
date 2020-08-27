@@ -81,7 +81,7 @@ socket.on("hide chars",(data)=>{
 // ------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------
-// -----------------------------enter game onclick function----------------------------
+// -----------------------------Event listener for entering----------------------------
 // ------------------------------------------------------------------------------------
 document.getElementById("existing-game").onclick= function(e) {
   e.preventDefault()  
@@ -94,40 +94,40 @@ document.getElementById("existing-game").onclick= function(e) {
 function load_chars(){
   var Path = "/characters/"; //Folder where we will search for files  
   for (var i = 1; i < 53; i++) {
-      var char_div = document.createElement("DIV");
-      char_div.className = "characters";
-      if (window.screen.width > 500) {
-        char_div.style.width = "15vw";
-        char_div.style.height = "15vw";
-      } else {
-        char_div.style.width = "30vw";
-        char_div.style.height = "30vw";
-      }
-      char_div.style.flex = "25%";
-      char_div.style.padding = "30px";
-      char_div.style.position = "relative";
-      document.getElementsByClassName("row")[0].appendChild(char_div);
+    var char_div = document.createElement("DIV");
+    char_div.className = "characters";
+    if (window.screen.width > 500) {
+      char_div.style.width = "15vw";
+      char_div.style.height = "15vw";
+    } else {
+      char_div.style.width = "30vw";
+      char_div.style.height = "30vw";
+    }
+    char_div.style.flex = "25%";
+    char_div.style.padding = "30px";
+    char_div.style.position = "relative";
+    document.getElementsByClassName("row")[0].appendChild(char_div);
 
-      var image = document.createElement("IMG");
-      image.className = "characters_img";
-      image.label = Path + i + ".png";
-      image.src = Path + i + ".png";
-      if (window.screen.width > 500) {
-        image.style.width = "10vw";
-      } else {
-        image.style.width = "20vw";
-      }
-      image.style.position = "absolute";
-      image.style.top = "10px";
-      char_div.appendChild(image);
+    var image = document.createElement("IMG");
+    image.className = "characters_img";
+    image.label = Path + i + ".png";
+    image.src = Path + i + ".png";
+    if (window.screen.width > 500) {
+      image.style.width = "10vw";
+    } else {
+      image.style.width = "20vw";
+    }
+    image.style.position = "absolute";
+    image.style.top = "10px";
+    char_div.appendChild(image);
 
-      char_div.onmouseover = function() {
-        img_hover(this);
-      };
+    char_div.onmouseover = function() {
+      img_hover(this);
+    };
 
-      char_div.onclick = function() {
-        img_select(this);
-      };    
+    char_div.onclick = function() {
+      img_select(this);
+    };    
   }
 }
 

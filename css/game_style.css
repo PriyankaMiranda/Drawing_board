@@ -112,11 +112,21 @@ body{
 
 .row_chars{
   width:100vw;
-  height: 12vh;
+  max-height: 12vh;
 }
 
+.characters{
+  margin-left:22px;
+  max-width: 10vh;
+  max-height: 10vh;
+  flex:25%;
+}
+
+.characters_label{
+  font-size: 2vh;
+}
 .char{ 
-    height: 8vh;
+    /*max-height: 8vh;*/
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center
@@ -202,8 +212,8 @@ body{
   .footer {
     height: 15vh;
   }
-  .row_char{  
-      height: 15vh;
+  .row_chars{  
+    max-height: 15vh;
   }
   .info {
       height: 5vh;
