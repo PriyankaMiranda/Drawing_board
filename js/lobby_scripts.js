@@ -46,18 +46,18 @@ socket.on("load chars on lobby", () => {
   removeParticipantsImg();
   removeReadyButton();
   socket.emit("load old chars on lobby", {id:socket.id,gameID:gameID});
-  socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img});
+  socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img,id:socket.id});
 });
 
 // get chars from all old users present
-socket.on("load old chars on lobby", (data) => socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.id}));
+socket.on("load old chars on lobby", (data) => socket.emit("display old chars for lobby", {username:username,img:img,id:socket.id,return_address:data.id}));
 
 // display all the details of the users present in lobby
 socket.on("display chars for lobby", (data) => {
   if(data.owner == socket.id){
     setReadyButton()
   }
-  addParticipantsImg({char: data.username, img: data.img});
+  addParticipantsImg({char:data.username,img:data.img,id:data.id});
 });
 
 // reload lobby when user leaves
@@ -194,6 +194,7 @@ const addParticipantsImg = (data) => {
     var image = document.createElement("IMG");
     image.className = "characters_img";
     image.src = data.img;
+    image.alt = data.id;
     image.style.width = "100%";
     image.style.height = "100%";
     image.id = data.img;

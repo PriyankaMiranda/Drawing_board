@@ -89,13 +89,13 @@ socket.on("load chars on lobby", (data) => {
 });
 
 socket.on("display chars for lobby", (data) => {
-	socket.emit("display chars for lobby", {username:data.username,img:data.img,owner:gameOwner[data.gameID]});
-	socket.to(data.gameID).emit("display chars for lobby", {username:data.username,img:data.img,owner:gameOwner[data.gameID]});
+	socket.emit("display chars for lobby", {username:data.username,img:data.img,id:socket.id,owner:gameOwner[data.gameID]});
+	socket.to(data.gameID).emit("display chars for lobby", {username:data.username,img:data.img,id:socket.id,owner:gameOwner[data.gameID]});
 });
 
 socket.on("load old chars on lobby", (data) => socket.to(data.gameID).emit("load old chars on lobby",data));
 
-socket.on("display old chars for lobby", (data) => io.to(data.is).emit("display chars for lobby", {username:data.username,img:data.img,owner:gameOwner[data.gameID]}));
+socket.on("display old chars for lobby", (data) => io.to(data.is).emit("display chars for lobby", {username:data.username,img:data.img,id:socket.id,owner:gameOwner[data.gameID]}));
 
 socket.on("enter game", (data) => {
 	socket.emit("enter game");
@@ -163,25 +163,30 @@ socket.on("stop typing in game", (data) => socket.to(data.gameID).emit("stop typ
 socket.on("start game", (data) => {
 	if(gameStarted[data.gameID] == undefined) {
 		gameStarted[data.gameID] = true
-		socket.emit("start game");
+		socket.emit("start game");		
+	}
+});
+
+socket.on("update client list", (data) => {
+	if(gameStarted[data.gameID] == undefined) {
+		gameStarted[data.gameID] = true
+		socket.emit("start game");		
 	}
 });
 
 socket.on("start timeout", () => {
 
 
-		console.log("timer started")
-		var timeleft = 20
-		var downloadTimer = setInterval(function(){
-			if(timeleft <= 0){
-				clearInterval(downloadTimer);
-			}
-			timeleft -= 1;
+	var timeleft = 20
+	var downloadTimer = setInterval(function(){
+		if(timeleft <= 0){
+			clearInterval(downloadTimer);
+		}
+		timeleft -= 1;
+		console.log(timeleft)
 
-			console.log(timeleft)
-
-			if(timeleft == -1){ console.log("123") }
-		}, 1000);
+		if(timeleft == -1){ console.log("123") }
+	}, 1000);
 
 });
 

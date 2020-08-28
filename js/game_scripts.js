@@ -58,11 +58,12 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 //-----------------------------------------------------------------------------------------
 //---------------------Cascade of events based on entry for every user---------------------
 //-----------------------------------------------------------------------------------------
+
 // start game
-socket.emit("start game",{gameID:gameID,username:username});  
+socket.emit("start game",{gameID:gameID});  
 
 socket.on("start game", () => {
-  socket.emit("start timeout");  
+  socket.emit("update client list",{gameID:gameID});  
 });
 
 // hide chars in homepage
@@ -73,19 +74,21 @@ socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:userna
 
 // get chars from all users present in lobby
 socket.on("load chars on lobby", () => {
+  console.log(socket.id)
+
   removeParticipantsImg();
   socket.emit("load old chars on lobby", {id:socket.id,gameID:gameID});
-  socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img});
+  socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img,id:socket.id});
 });
 
 // get chars from all old users present
-socket.on("load old chars on lobby", (data) => socket.emit("display old chars for lobby", {username:username,img:img,return_address:data.id}));
+socket.on("load old chars on lobby", (data) => socket.emit("display old chars for lobby", {username:username,img:img,id:socket.id,return_address:data.id}));
 
 // display all the details of the users present in lobby
-socket.on("display chars for lobby", (data) => addParticipantsImg({char: data.username, img: data.img}));
+socket.on("display chars for lobby", (data) => addParticipantsImg({char: data.username, img: data.img, id:data.id}));
 
 // reload lobby when user leaves
-socket.on("reload lobby page", (data) => {  
+socket.on("reload lobby page", (data) => {
   removeParticipantsImg();
   socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:username});
 });
@@ -341,6 +344,7 @@ const addParticipantsImg = (data) => {
     var image = document.createElement("IMG");
     image.className = "characters_img";
     image.src = data.img;
+    image.alt = data.id;
     image.style.width = "100%";
     image.style.height = "100%";
     image.id = data.img;
