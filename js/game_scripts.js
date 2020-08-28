@@ -66,6 +66,37 @@ socket.on("start timer", (data) => {
   socket.emit("start timer",data); 
 });
 
+socket.on("set word", (data) => {
+  console.log(data.word)
+  document.getElementById("word").innerHTML = data.word;
+  // prepare clue for the other peeps
+  // for now we just go with a simple conversion to dashes
+  var clue = createClue(data.word)
+  socket.emit("set clue",{gameID:gameID,clue:clue}); 
+});
+
+socket.on("set clue", (data) => {
+  console.log(data.word)
+  document.getElementById("word").innerHTML = data.word;
+});
+
+socket.on("set timer", (data) => {
+  document.getElementById("timer").innerHTML = data.timeLeft + 1;
+});
+
+socket.on("show answer", (data) => {
+  var overlay = document.getElementsByClassName("overlay")[0]
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  overlay.style.display = "block";
+  var para = document.createElement("p");
+  para.innerHTML = "Answer: "+data.word;
+  overlay.appendChild(para);
+  setTimeout(function(){ 
+    overlay.style.display = "none"; 
+    socket.emit("start timer",{timeLeft:data.timeLeft,numOfRounds:data.numOfRounds,
+                            currentWordList:data.currentWordList,gameID:data.gameID}); 
+  }, 2000);
+});
 
 // hide chars in homepage
 socket.emit("send chars when entering", {img:img,gameID:gameID});
@@ -165,6 +196,26 @@ $inputMessage.click(() => $inputMessage.focus());
 
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------
+//--------------------------------------Game functions-------------------------------------
+//-----------------------------------------------------------------------------------------
+
+function createClue(orig_word){
+  var words = orig_word.split(" ");
+  var dashes;
+  var final_dashes = "";
+  words.forEach(function(word) {
+    dashes = word.replace(/./g, '_&nbsp');
+    final_dashes = final_dashes+"&nbsp&nbsp"+ dashes  
+  });
+  return final_dashes 
+}
+
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------------------
 //------------------------Clearscreen and color update and functions-----------------------

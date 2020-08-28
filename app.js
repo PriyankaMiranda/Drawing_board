@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+var fs = require("fs");
 const routes = require("./routes");
 const cookieSession = require("cookie-session");
 const keys = require("./keys");
@@ -178,32 +179,44 @@ socket.on("start game", (data) => {
 		// --------------------for now we set these variables  to constant values--------------------
 		// ------------------------------later allow user to set these!------------------------------
 		var numOfRounds = 2
-		var timeLeft = 3
-		socket.emit("start timer",{timeLeft:timeLeft,numOfRounds:numOfRounds,gameID:data.gameID});		
+		var timeLeft = 4
+		var currentWordList = "./assets/words/easy_words.txt"
+		// ------------------------------------------------------------------------------------------
+		socket.emit("start timer",{timeLeft:timeLeft,numOfRounds:numOfRounds,
+								currentWordList:currentWordList,gameID:data.gameID});		
 	}
 });
 
 socket.on("start timer", (data) => {
-	console.log(data)
 	console.log("starting timeout function")
-	var timeLeft = data.timeLeft - 1
+	var timeLeft = data.timeLeft
+	// select random word for the round
+	var currentWordList = fs.readFileSync(data.currentWordList, "utf-8").split("\n");
+	var currentWord = currentWordList[Math.floor(Math.random()*(currentWordList.length))]
+	// select the current client from the client list
+	var currentClient = Math.floor(Math.random()*(Object.keys(gameData[data.gameID]).length))
+
 	var downloadTimer = setInterval(function(){
 		if(timeLeft <= 0){
 			clearInterval(downloadTimer);
 		}
 		timeLeft -= 1;
-		// select word randomly
-		// select the surrent client from the cliient list
-		console.log(timeLeft)
 
-		if(timeLeft == -1 && data.numOfRounds > 0){ 
+		io.to(Object.keys(gameData[data.gameID])[currentClient]).emit('set word',{word:currentWord});
+
+		socket.emit("set timer",{timeLeft:timeLeft});		
+		socket.to(data.gameID).emit("set timer", {timeLeft:timeLeft});
+
+		if(timeLeft == -1 && data.numOfRounds > 0){
 			data.numOfRounds -=1
-			// console.log(data.numOfRounds) 
-			socket.emit("start timer",{timeLeft:data.timeLeft,numOfRounds:data.numOfRounds,gameID:data.gameID});
+			socket.to(data.gameID).emit("show answer", {word:currentWord,timeLeft:data.timeLeft,
+				numOfRounds:data.numOfRounds,currentWordList:data.currentWordList,gameID:data.gameID});
 		}
 	}, 1000);
 
 });
+
+socket.on("set clue", (data) => socket.to(data.gameID).emit("set clue", {word:data.clue}));
 
 
 // --------------------------------------------------------------------------

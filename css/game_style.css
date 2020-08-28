@@ -23,6 +23,7 @@ body{
 }
 
 .overlay > p {
+  font-size: 3vh;
   margin-top:40vh;
   text-align: center;
 }
@@ -56,6 +57,14 @@ body{
 
 #logo{
   height: 3vh;
+}
+
+#gameID{
+  font-size: 2vh;
+}
+
+#word{
+  font-size: 2vh;
 }
 
 #flex-container {
@@ -170,6 +179,14 @@ body{
     height: 8vh;
   }
 
+  #gameID{
+  font-size: 4vh;
+  }
+
+  #word{
+    font-size: 4vh;
+  }
+
   #flex-container {
   flex-direction: row;
   height:77vh;
@@ -245,7 +262,6 @@ body{
   }
 
 }
-
 
 .chat.page {
     /*  height : 100%;
