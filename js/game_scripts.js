@@ -62,7 +62,7 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 socket.emit("start game",{gameID:gameID,username:username});  
 
 socket.on("start game", () => {
-  console.log("233")
+  socket.emit("start timeout");  
 });
 
 // hide chars in homepage

@@ -32,10 +32,8 @@ var io = require("socket.io")(server);
 var ejs = require("ejs");
 
 
-var gameOwner = {};//for lobby
-
-var game_on_ = {};//for lobby
-
+var gameOwner = {};
+var gameStarted = {};
 
 io.on("connection", (socket) => {
 
@@ -43,38 +41,24 @@ io.on("connection", (socket) => {
 // --------------------------------------------------------------------------
 // ---------------------------------HOMEPAGE---------------------------------
 // --------------------------------------------------------------------------
-socket.on("get ongoing games", () =>{
-	socket.broadcast.emit("get ongoing games", {id:socket.id})
-});
+socket.on("get ongoing games", () => socket.broadcast.emit("get ongoing games", {id:socket.id}));
 
-socket.on("send game data", (data) =>{
-	io.to(data.id).emit('send game data', {gameID:data.gameID,img:data.img});
-});
+socket.on("send game data", (data) => io.to(data.id).emit('send game data', {gameID:data.gameID,img:data.img}));
 
-socket.on("check match", (data) =>{
-	socket.to(data.gameID).emit('check match', {gamePWD:data.gamePWD,id:socket.id});
-});
+socket.on("check match", (data) => socket.to(data.gameID).emit('check match', {gamePWD:data.gamePWD,id:socket.id}));
 
-socket.on("send issue",(data)=>{
-	io.to(data.id).emit('issue');
-});
+socket.on("send issue",(data) => io.to(data.id).emit('issue'));
 
-socket.on("no issue",(data)=>{
-	io.to(data.id).emit('no issue');
-});
+socket.on("no issue",(data) => io.to(data.id).emit('no issue'));
 
-socket.on("join game",(data)=>{
-	socket.join(data.gameID);
-});
+socket.on("join game",(data) => socket.join(data.gameID));
 
 socket.on("load chars", (data) => {
 	socket.join(data.gameID);
 	socket.to(data.gameID).emit('get chars', {id:socket.id});
 });
 
-socket.on("send chars", (data) => {
-	io.to(data.id).emit('hide chars', {img: data.img});
-});
+socket.on("send chars", (data) => io.to(data.id).emit('hide chars', {img: data.img}));
 
 socket.on("send chars when entering", (data) => {
 	socket.join(data.gameID);
@@ -109,13 +93,9 @@ socket.on("display chars for lobby", (data) => {
 	socket.to(data.gameID).emit("display chars for lobby", {username:data.username,img:data.img,owner:gameOwner[data.gameID]});
 });
 
-socket.on("load old chars on lobby", (data) => {	
-	socket.to(data.gameID).emit("load old chars on lobby",data);	
-});
+socket.on("load old chars on lobby", (data) => socket.to(data.gameID).emit("load old chars on lobby",data));
 
-socket.on("display old chars for lobby", (data) => {
-	io.to(data.is).emit("display chars for lobby", {username:data.username,img:data.img,owner:gameOwner[data.gameID]});
-});
+socket.on("display old chars for lobby", (data) => io.to(data.is).emit("display chars for lobby", {username:data.username,img:data.img,owner:gameOwner[data.gameID]}));
 
 socket.on("enter game", (data) => {
 	socket.emit("enter game");
@@ -140,14 +120,10 @@ socket.on("new message", (data) => {
 });
 
 // when the client emits 'typing', we broadcast it to others
-socket.on("typing", (data) => {
-	socket.to(data.gameID).emit("typing", data);
-});
+socket.on("typing", (data) => socket.to(data.gameID).emit("typing", data));
 
 // when the client emits 'stop typing', we broadcast it to others
-socket.on("stop typing", (data) => {
-	socket.to(data.gameID).emit("stop typing", data);
-});
+socket.on("stop typing", (data) => socket.to(data.gameID).emit("stop typing", data));
 
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
@@ -179,20 +155,35 @@ socket.on("new message in game", (data) => {
 });
 
 // when the client emits 'typing', we broadcast it to others
-socket.on("typing in game", (data) => {
-	socket.to(data.gameID).emit("typing in game", data);
-});
+socket.on("typing in game", (data) => socket.to(data.gameID).emit("typing in game", data));
 
 // when the client emits 'stop typing', we broadcast it to others
-socket.on("stop typing in game", (data) => {
-	socket.to(data.gameID).emit("stop typing in game", data);
-});
+socket.on("stop typing in game", (data) => socket.to(data.gameID).emit("stop typing in game", data));
 
 socket.on("start game", (data) => {
-	socket.emit("start game");
-	socket.to(data.gameID).emit("enter game");	
+	if(gameStarted[data.gameID] == undefined) {
+		gameStarted[data.gameID] = true
+		socket.emit("start game");
+	}
 });
 
+socket.on("start timeout", () => {
+
+
+		console.log("timer started")
+		var timeleft = 20
+		var downloadTimer = setInterval(function(){
+			if(timeleft <= 0){
+				clearInterval(downloadTimer);
+			}
+			timeleft -= 1;
+
+			console.log(timeleft)
+
+			if(timeleft == -1){ console.log("123") }
+		}, 1000);
+
+});
 
 
 // --------------------------------------------------------------------------
