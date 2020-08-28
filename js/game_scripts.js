@@ -62,8 +62,8 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 // start game
 socket.emit("start game",{gameID:gameID});  
 
-socket.on("start game", (data) => {
-  socket.emit("start timeout",data); 
+socket.on("start timer", (data) => {
+  socket.emit("start timer",data); 
 });
 
 

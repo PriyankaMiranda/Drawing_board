@@ -175,23 +175,32 @@ socket.on("start game", (data) => {
 	console.log(gameData[data.gameID])
 	if(gameStarted[data.gameID] == undefined) {
 		gameStarted[data.gameID] = true
-		socket.emit("start game",data);		
+		// --------------------for now we set these variables  to constant values--------------------
+		// ------------------------------later allow user to set these!------------------------------
+		var numOfRounds = 2
+		var timeLeft = 3
+		socket.emit("start timer",{timeLeft:timeLeft,numOfRounds:numOfRounds,gameID:data.gameID});		
 	}
 });
 
-socket.on("start timeout", (data) => {
+socket.on("start timer", (data) => {
+	console.log(data)
 	console.log("starting timeout function")
-	var timeleft = 20
+	var timeLeft = data.timeLeft - 1
 	var downloadTimer = setInterval(function(){
-		if(timeleft <= 0){
+		if(timeLeft <= 0){
 			clearInterval(downloadTimer);
 		}
-		timeleft -= 1;
-		// select word
+		timeLeft -= 1;
+		// select word randomly
 		// select the surrent client from the cliient list
-		console.log(timeleft)
+		console.log(timeLeft)
 
-		if(timeleft == -1){ console.log(" round ended !") }
+		if(timeLeft == -1 && data.numOfRounds > 0){ 
+			data.numOfRounds -=1
+			// console.log(data.numOfRounds) 
+			socket.emit("start timer",{timeLeft:data.timeLeft,numOfRounds:data.numOfRounds,gameID:data.gameID});
+		}
 	}, 1000);
 
 });
