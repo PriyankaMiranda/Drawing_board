@@ -34,6 +34,7 @@ var ejs = require("ejs");
 
 var gameOwner = {};
 var gameStarted = {};
+var gameData = {};
 
 io.on("connection", (socket) => {
 
@@ -161,31 +162,36 @@ socket.on("typing in game", (data) => socket.to(data.gameID).emit("typing in gam
 socket.on("stop typing in game", (data) => socket.to(data.gameID).emit("stop typing in game", data));
 
 socket.on("start game", (data) => {
+	
+	if(gameData[data.gameID] == undefined){
+		gameData[data.gameID] = {}
+	}
+	console.log(gameData[data.gameID][socket.id])
+	if(gameData[data.gameID][socket.id] == undefined){
+		var score = 0
+		var turn = 0
+		gameData[data.gameID][socket.id] = [score,turn]
+	}
+	console.log(gameData[data.gameID])
 	if(gameStarted[data.gameID] == undefined) {
 		gameStarted[data.gameID] = true
-		socket.emit("start game");		
+		socket.emit("start game",data);		
 	}
 });
 
-socket.on("update client list", (data) => {
-	if(gameStarted[data.gameID] == undefined) {
-		gameStarted[data.gameID] = true
-		socket.emit("start game");		
-	}
-});
-
-socket.on("start timeout", () => {
-
-
+socket.on("start timeout", (data) => {
+	console.log("starting timeout function")
 	var timeleft = 20
 	var downloadTimer = setInterval(function(){
 		if(timeleft <= 0){
 			clearInterval(downloadTimer);
 		}
 		timeleft -= 1;
+		// select word
+		// select the surrent client from the cliient list
 		console.log(timeleft)
 
-		if(timeleft == -1){ console.log("123") }
+		if(timeleft == -1){ console.log(" round ended !") }
 	}, 1000);
 
 });
@@ -201,17 +207,15 @@ socket.on("start timeout", () => {
 // --------------------------------------------------------------------------
 	// when the user disconnects.. perform this
 	socket.on("disconnect", () => {
-		if (!socket.gameID){
-			console.log("idk")
-			// socket.broadcast.emit("get chars for reloading upon disconnection");
-			// socket.broadcast.emit("user left", {username: socket.username});			
-		}else{
+		if (socket.gameID){
 			socket.leave(socket.gameID);
 			if(socket.id == gameOwner[socket.gameID]){
 				gameOwner[socket.gameID] = undefined
 			}
 			socket.to(socket.gameID).emit("reload lobby page", {gameID : socket.gameID});
-
+			console.log("idk")
+			// socket.broadcast.emit("get chars for reloading upon disconnection");
+			// socket.broadcast.emit("user left", {username: socket.username});			
 		}
 	});
 // --------------------------------------------------------------------------

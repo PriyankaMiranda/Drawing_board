@@ -62,9 +62,10 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 // start game
 socket.emit("start game",{gameID:gameID});  
 
-socket.on("start game", () => {
-  socket.emit("update client list",{gameID:gameID});  
+socket.on("start game", (data) => {
+  socket.emit("start timeout",data); 
 });
+
 
 // hide chars in homepage
 socket.emit("send chars when entering", {img:img,gameID:gameID});
@@ -74,8 +75,6 @@ socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:userna
 
 // get chars from all users present in lobby
 socket.on("load chars on lobby", () => {
-  console.log(socket.id)
-
   removeParticipantsImg();
   socket.emit("load old chars on lobby", {id:socket.id,gameID:gameID});
   socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img,id:socket.id});
