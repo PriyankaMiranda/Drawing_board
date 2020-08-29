@@ -21,6 +21,7 @@ var img;
 var gameID;
 var score = 0;
 var word = "___";
+var timeLeft;
 const cookie_val = document.cookie;
 
 try{
@@ -62,25 +63,22 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 // start game
 socket.emit("start game",{gameID:gameID});  
 
-socket.on("start timer", (data) => {
-  socket.emit("start timer",data); 
-});
+socket.on("start timer", () => socket.emit("start timer",{gameID:gameID}));
 
 socket.on("set word", (data) => {
   console.log(data.word)
-  document.getElementById("word").innerHTML = data.word;
-  // prepare clue for the other peeps
-  // for now we just go with a simple conversion to dashes
-  var clue = createClue(data.word)
-  socket.emit("set clue",{gameID:gameID,clue:clue}); 
+  document.getElementById("word").innerHTML = data.word;    
 });
 
-socket.on("set clue", (data) => {
-  console.log(data.word)
-  document.getElementById("word").innerHTML = data.word;
-});
 
 socket.on("set timer", (data) => {
+  var timeLeft = data.timeLeft;
+  if(data.timeLeft + 1 <=  5){
+    document.getElementById("timer").style.color = "#BE2625";
+  }
+  else{
+    document.getElementById("timer").style.color = "#005582";
+  }
   document.getElementById("timer").innerHTML = data.timeLeft + 1;
 });
 
@@ -93,10 +91,22 @@ socket.on("show answer", (data) => {
   overlay.appendChild(para);
   setTimeout(function(){ 
     overlay.style.display = "none"; 
-    socket.emit("start timer",{timeLeft:data.timeLeft,numOfRounds:data.numOfRounds,
-                            currentWordList:data.currentWordList,gameID:data.gameID}); 
+    socket.emit("start timer",{gameID:gameID}); 
   }, 2000);
 });
+
+socket.on("game completed", () => {
+  var overlay = document.getElementsByClassName("overlay")[0]
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  overlay.style.display = "block";
+  var para = document.createElement("p");
+  para.innerHTML = "Game complete";
+  overlay.appendChild(para);
+  // setTimeout(function(){ 
+  //   window.location.href = "/lobby";
+  // }, 5000);
+});
+
 
 // hide chars in homepage
 socket.emit("send chars when entering", {img:img,gameID:gameID});
@@ -147,8 +157,29 @@ socket.on("get chars", (data) => socket.emit("send chars", {img:img,id:data.id})
 
 socket.on('drawing', onDrawingEvent); 
 
+
+
 // Whenever the server emits 'new message', update the chat body
-socket.on("new message in game", (data) => addChatMessage(data));
+socket.on("new message in game", (data) => {
+  socket.emit("new message in game", data);
+  addChatMessage(data)
+});
+// WHen the aner is right, dont reflect it across the game
+socket.on("dont show message", (data) => {
+  addChatMessage(data)
+});
+
+socket.on("update score", (data) => {
+  var parent = document.getElementById("row_chars");
+  var children = parent.children;
+  for(var i = 0; i < children.length; i++){
+    if(data.id == children[i].children[0].alt){
+      children[i].children[1].children[1].innerText = data.score    
+    }
+  }
+  reorderCharacters()
+});
+
 
 // Whenever the server emits 'typing', show the typing message
 socket.on("typing in game", (data) => addChatTyping(data));
@@ -197,24 +228,6 @@ $inputMessage.click(() => $inputMessage.focus());
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------------------
-//--------------------------------------Game functions-------------------------------------
-//-----------------------------------------------------------------------------------------
-
-function createClue(orig_word){
-  var words = orig_word.split(" ");
-  var dashes;
-  var final_dashes = "";
-  words.forEach(function(word) {
-    dashes = word.replace(/./g, '_&nbsp');
-    final_dashes = final_dashes+"&nbsp&nbsp"+ dashes  
-  });
-  return final_dashes 
-}
-
-
-//-----------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------------------
@@ -411,8 +424,59 @@ const addParticipantsImg = (data) => {
     div_label.className = "characters_label";
     div_label.innerHTML = data.char;
     div_form.appendChild(div_label);
+
+    var div_label2 = document.createElement("LABEL");
+    div_label2.className = "characters_score";
+    div_label2.innerHTML = "0";
+    div_form.appendChild(div_label2);
   }
 };
+
+function reorderCharacters(){
+
+  var parent = document.getElementById("row_chars");
+  var children = parent.children;
+
+  var char_list = []
+  var img_list = []
+  var id_list = []
+  var score_list = []
+
+  for(var i = 0; i < children.length; i++){
+    char_list.push(children[i].children[1].innerText)
+    img_list.push(children[i].children[0].src)
+    id_list.push(children[i].children[0].id)
+    score_list.push(parseInt(children[i].children[1].children[1].innerText))
+  }
+
+  var sorted_char_list = char_list
+  var sorted_img_list = img_list
+  var sorted_id_list = id_list
+  var sorted_score_list = score_list.sort(function(a, b){return b - a});
+
+  for(var i = 0; i < children.length; i++){
+    if(score_list[i] != sorted_score_list[i]){
+      var prev_loc = score_list.indexOf(sorted_score_list[i]);
+      
+      // swap locs 
+      temp_img = children[i].children[0].src;
+      temp_id = children[i].children[0].alt;
+      temp_char = children[i].children[1].children[0].innerHTML;
+      temp_score = children[i].children[1].children[1].innerHTML;
+
+      children[prev_loc].children[0].src = temp_img; 
+      children[prev_loc].children[0].alt = temp_id;
+      children[prev_loc].children[1].children[0].innerHTML = temp_char;
+      children[prev_loc].children[1].children[1].innerHTML = temp_score;
+      
+      children[i].children[0].src = children[prev_loc].children[0].src; 
+      children[i].children[0].alt = children[prev_loc].children[0].alt;
+      children[i].children[1].children[0].innerHTML = children[prev_loc].children[1].children[0].innerHTML;
+      children[i].children[1].children[1].innerHTML = children[prev_loc].children[1].children[1].innerHTML;
+    }   
+  }
+
+}
 //-----------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------- 
 
@@ -425,12 +489,8 @@ const sendMessage = () => {
   var message = ' '+$inputMessage.val();
   // Prevent markup from being injected into the message
   message = cleanInput(message);
-  if (message) {
-    $inputMessage.val("");
-    var dataval = { username: username, message: message , gameID: gameID};
-    addChatMessage(dataval);
-    socket.emit("new message in game", dataval);
-  }
+  socket.emit("check answer", {username:username,message:message,gameID:gameID,timeLeft:timeLeft});
+
 };
 
 // structures the chat message
@@ -545,33 +605,6 @@ const getUsernameColor = (username) => {
 //-----------------------------------Other Socket events-----------------------------------
 //-----------------------------------------------------------------------------------------
 
-socket.on("update timer",(data)=>{
-  if(data.timeleft <=  5){
-    document.getElementById("timer").style.color = "#BE2625";
-  }
-  else{
-    document.getElementById("timer").style.color = "#005582";
-  }
-  time_val = data.timeleft;
-  document.getElementById("timer").innerHTML = data.timeleft;
-});
-
-socket.on("show word data",(data)=>{
-  document.getElementById("word").innerHTML = data.word;
- });
-
-
-socket.on("show correct answer",(data)=>{
-  var overlay = document.getElementsByClassName("overlay")[0]
-  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
-  overlay.style.display = "block";
-  var para = document.createElement("p");
-  para.style.fontSize = "30px";
-  para.innerHTML = "Answer: "+data.ans;
-  overlay.appendChild(para);
-  setTimeout(function(){ overlay.style.display = "none"; }, 2000);
-});
-
 socket.on("match score with username and img", (data) => {
     socket.emit("sending score", {id:data.id,username:username,img:img});
 });
@@ -589,7 +622,6 @@ socket.on("send score", (data) => {
 });
 
 socket.on("leader board", (data) => {
-
   setTimeout(function(){ 
     var para = document.createElement("h1");
     para.innerHTML = "Leaderboard ";
@@ -598,31 +630,9 @@ socket.on("leader board", (data) => {
     content.innerHTML = data;
     document.getElementsByClassName("login-form")[0].appendChild(content);
     document.getElementsByClassName("leaderboard-overlay")[0].style.width = "100%";
-
   }, 2000);
-
 });
 
 
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

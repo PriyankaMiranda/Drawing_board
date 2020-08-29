@@ -36,6 +36,14 @@ var ejs = require("ejs");
 var gameOwner = {};
 var gameStarted = {};
 var gameData = {};
+var gameWordList = {};
+var gameWord = {};
+var gameClue = {};
+var gameTarget = {};
+
+var gameRounds = {};
+var gameTotalTime = {};
+var gameTimeLeft = {};
 
 io.on("connection", (socket) => {
 
@@ -167,50 +175,82 @@ socket.on("start game", (data) => {
 	if(gameData[data.gameID] == undefined){
 		gameData[data.gameID] = {}
 	}
-	console.log(gameData[data.gameID][socket.id])
+
 	if(gameData[data.gameID][socket.id] == undefined){
-		var score = 0
-		var turn = 0
-		gameData[data.gameID][socket.id] = [score,turn]
+		// gameData includes score, turn
+		gameData[data.gameID][socket.id] = [0,0]
 	}
-	console.log(gameData[data.gameID])
+
 	if(gameStarted[data.gameID] == undefined) {
 		gameStarted[data.gameID] = true
 		// --------------------for now we set these variables  to constant values--------------------
 		// ------------------------------later allow user to set these!------------------------------
-		var numOfRounds = 2
-		var timeLeft = 4
-		var currentWordList = "./assets/words/easy_words.txt"
+		gameRounds[data.gameID] = 5
+		gameTotalTime[data.gameID] = 10
+		gameTimeLeft[data.gameID] = 10
+
+		gameWordList[data.gameID] = fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
+
+		gameTarget[data.gameID] = Object.keys(gameData[data.gameID])
+									[Math.floor(Math.random()*(Object.keys(gameData[data.gameID]).length))];
+		gameWord[data.gameID] = gameWordList[data.gameID][Math.floor(Math.random()*(gameWordList[data.gameID].length))]
+		gameClue[data.gameID] = "";
+		gameWord[data.gameID].split(" ").forEach(function(word) {
+			gameClue[data.gameID] = gameClue[data.gameID]+"&nbsp&nbsp"+ word.replace(/./g, '_&nbsp'); 
+		});
+
 		// ------------------------------------------------------------------------------------------
-		socket.emit("start timer",{timeLeft:timeLeft,numOfRounds:numOfRounds,
-								currentWordList:currentWordList,gameID:data.gameID});		
+		socket.emit("start timer");		
+	}else{
+		// prepare clue for the other peeps. For now we just go with a simple conversion to dashes
+		if(socket.id == gameTarget[data.gameID]){
+			console.log("setting word")
+			socket.emit('set word',{word:gameWord[data.gameID]});
+		}else{
+			console.log("setting dashes")
+			socket.emit('set word',{word:gameClue[data.gameID]});
+		}
 	}
 });
 
 socket.on("start timer", (data) => {
 	console.log("starting timeout function")
-	var timeLeft = data.timeLeft
-	// select random word for the round
-	var currentWordList = fs.readFileSync(data.currentWordList, "utf-8").split("\n");
-	var currentWord = currentWordList[Math.floor(Math.random()*(currentWordList.length))]
-	// select the current client from the client list
-	var currentClient = Math.floor(Math.random()*(Object.keys(gameData[data.gameID]).length))
+	
+	for( var i = 0; i < Object.keys(gameData[data.gameID]).length; i++ ){
+		if(gameTarget[data.gameID] == Object.keys(gameData[data.gameID])[i]){
+			io.to(Object.keys(gameData[data.gameID])[i]).emit('set word',{word:gameWord[data.gameID]});
+		}else{
+			io.to(Object.keys(gameData[data.gameID])[i]).emit('set word',{word:gameClue[data.gameID]});
+		}
+	}
 
 	var downloadTimer = setInterval(function(){
-		if(timeLeft <= 0){
+		if(gameTimeLeft[data.gameID] <= 0){
 			clearInterval(downloadTimer);
 		}
-		timeLeft -= 1;
+		gameTimeLeft[data.gameID] -= 1;
 
-		io.to(Object.keys(gameData[data.gameID])[currentClient]).emit('set word',{word:currentWord});
+		socket.emit("set timer",{timeLeft:gameTimeLeft[data.gameID]});		
+		socket.to(data.gameID).emit("set timer", {timeLeft:gameTimeLeft[data.gameID]});
 
-		socket.emit("set timer",{timeLeft:timeLeft});		
-		socket.to(data.gameID).emit("set timer", {timeLeft:timeLeft});
+		if(gameRounds[data.gameID] == 0){
+			socket.emit("game completed");
+			socket.to(data.gameID).emit("game completed");
+		}
 
-		if(timeLeft == -1 && data.numOfRounds > 0){
-			data.numOfRounds -=1
-			socket.to(data.gameID).emit("show answer", {word:currentWord,timeLeft:data.timeLeft,
-				numOfRounds:data.numOfRounds,currentWordList:data.currentWordList,gameID:data.gameID});
+		if(gameTimeLeft[data.gameID] == -1 && gameRounds[data.gameID] > 0){
+			socket.emit("show answer", {word:gameWord[data.gameID]});
+			socket.to(data.gameID).emit("show answer", {word:gameWord[data.gameID]});
+
+			gameRounds[data.gameID] -=1
+			gameTimeLeft[data.gameID] = gameTotalTime[data.gameID];
+			gameTarget[data.gameID] = Object.keys(gameData[data.gameID])
+										[Math.floor(Math.random()*(Object.keys(gameData[data.gameID]).length))];
+			gameWord[data.gameID] = gameWordList[data.gameID][Math.floor(Math.random()*(gameWordList[data.gameID].length))]
+			gameClue[data.gameID] = "";
+			gameWord[data.gameID].split(" ").forEach(function(word) {
+				gameClue[data.gameID] = gameClue[data.gameID]+"&nbsp&nbsp"+ word.replace(/./g, '_&nbsp'); 
+			});
 		}
 	}, 1000);
 
@@ -218,6 +258,19 @@ socket.on("start timer", (data) => {
 
 socket.on("set clue", (data) => socket.to(data.gameID).emit("set clue", {word:data.clue}));
 
+socket.on("check answer", (data) => {
+	if(data.message == gameWord[data.gameID]){
+		socket.emit("dont show message",data)
+		score = (gameTimeLeft[data.gameID])*100/gameTotalTime[data.gameID];
+		gameData[data.gameID][socket.id][0] += score
+		gameData[data.gameID][socket.id][1] += 1
+		socket.emit("update score",{score:gameData[data.gameID][socket.id][0],id:socket.id})
+		socket.to(data.gameID).emit("update score",{score:gameData[data.gameID][socket.id][0],id:socket.id})
+	}else{
+		socket.emit("new message in game",data)
+	}
+
+});
 
 // --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
