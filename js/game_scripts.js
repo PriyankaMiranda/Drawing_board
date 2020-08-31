@@ -53,6 +53,24 @@ if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine
   isMobile = true;
 }
 var current = {color: 'black', prev_color: 'black',lineWidth: 5};
+
+var overlay = document.getElementsByClassName("overlay")[0]
+while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+overlay.style.display = "block";
+var para = document.createElement("p");
+var my_time = 3
+para.innerHTML = "Game starts in "+(my_time);
+overlay.appendChild(para);
+
+var downloadTimer = setInterval(function(){
+  if(my_time <= 0){ clearInterval(downloadTimer); }
+  my_time -= 1;
+  para.innerHTML = "Game starts in "+(my_time);
+  if(my_time == -1){  
+    overlay.style.display = "none"; 
+    socket.emit("start game", {gameID : gameID}); 
+  }
+}, 1000); 
 //-----------------------------------------------------------------------------------------  
 //-----------------------------------------------------------------------------------------
 
@@ -60,26 +78,23 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 //---------------------Cascade of events based on entry for every user---------------------
 //-----------------------------------------------------------------------------------------
 
-// start game
-socket.emit("start game",{gameID:gameID});  
+// join game
+socket.emit("join game",{gameID:gameID});  
 
-socket.on("start timer", (data) => {
+socket.on("set word", (data) => {
+  console.log(data.word)
+  document.getElementById("word").innerHTML = data.word; 
   var downloadTimer = setInterval(function(){
     if(data.time <= 0){ clearInterval(downloadTimer); }
     data.time -= 1;
 
     console.log(data.time)
     if(data.time == -1){  
-      socket.emit("game over", {gameID : gameID});  
+      // round over
+      socket.emit("round over", {gameID : gameID});  
     }
 
-  }, 1000);
-
-});
-
-socket.on("set word", (data) => {
-  console.log(data.word)
-  document.getElementById("word").innerHTML = data.word;    
+  }, 1000);   
 });
 
 

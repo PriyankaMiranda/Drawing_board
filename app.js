@@ -38,16 +38,15 @@ var gameOwner = {};
 var gameData = {};
 
 var gameStarted = {};
-var gameWordList = {};
-var gameWord = {};
-var gameClue = {};
 var gameTarget = {};
 
 var gameTotalRounds = {};
-var gameRoundsLeft = {};
+var gameCurrentRound = {};
+var gameRoundComplete = {};
 
 var gameTotalTime = {};
 var gameTimeLeft = {};
+
 
 io.on("connection", (socket) => {
 
@@ -178,56 +177,67 @@ socket.on("join game", (data) => {
 	socket.join(data.gameID);
 	// ---------------------------------------------------------------------------------------------------
 	// ------for now we set these variables to constant values. we can later allow user to set these!-----
-	gameTotalRounds[data.gameID] = 2
-	gameRoundsLeft[data.gameID] = 2
+	gameTotalRounds[data.gameID] = 3
+	gameCurrentRound[data.gameID] = 1
+	gameRoundComplete[gameID] = {}
+
 	gameTotalTime[data.gameID] = 10
 	gameTimeLeft[data.gameID] = 10
+
 	gameWordList[data.gameID] = fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
 	gameWord[data.gameID] = gameWordList[data.gameID][Math.floor(Math.random()*(gameWordList[data.gameID].length))]
+	
 	gameClue[data.gameID] = "";
 	gameWord[data.gameID].split(" ").forEach(function(word) {
 		gameClue[data.gameID] = gameClue[data.gameID]+"&nbsp&nbsp"+ word.replace(/./g, '_&nbsp'); 
 	});
 	// ---------------------------------------------------------------------------------------------------
-	if ( gameData[data.gameID] == undefined ) {	gameData[data.gameID] = {}	}
+	if ( gameData[data.gameID] == undefined ) {	
+		gameData[data.gameID] = {}	
+		// socket.emit("start game")
+	}
+
 	if ( gameData[data.gameID][socket.id] == undefined ){	gameData[data.gameID][socket.id] = [0,0]  }
-	socket.emit("start game")
+	
+	
 });
 
 socket.on("start game", (data) => {	
-
-	for( var i = 0; i < Object.keys(gameData[data.gameID]).length; i++ ){
-		var currentUser = gameData[data.gameID][Object.keys(gameData[data.gameID])[i]][1];
-		if(currentUser < gameRounds[data.gameID]){
-			gameStarted[data.gameID] = true;
-			break;
+	console.log("avdvr")
+	/*
+	if(gameRoundComplete[gameID][gameCurrentRound[data.gameID]] == undefined){
+		gameRoundComplete[gameID][gameCurrentRound[data.gameID]] = "started"
+		var selectedUser = undefined;
+		for( var i = 0; i < Object.keys(gameData[data.gameID]).length; i++ ){
+			var currentUser = gameData[data.gameID][Object.keys(gameData[data.gameID])[i]];
+			var currentUserRound = gameData[data.gameID][Object.keys(gameData[data.gameID])[i]][1];
+			if(currentUserRound == gameCurrentRound[data.gameID] - 1){
+				selectedUser = currentUser
+				break;
+			}
+		}
+		if(selectedUser != undefined){
+			for( var i = 0; i < Object.keys(gameData[data.gameID]).length; i++ ){
+				var currentUser = gameData[data.gameID][Object.keys(gameData[data.gameID])[i]];
+				if(	currentUser == selectedUser	){ io.to(currentUser).emit('set word',{word:gameWord[data.gameID]}); }
+				else{ io.to(currentUser).emit('set word',{word:gameClue[data.gameID]}); }
+			}
+		}
+		else if( gameCurrentRound[data.gameID] < gameTotalRounds[data.gameID]){
+			// that means you have to update current round
+			gameCurrentRound[data.gameID] += 1
+		}else{
+			console.log("game over")
+			// emit to sockets that the game is over	
 		}
 	}
+	*/
+});
 
-	var clients = io.sockets.adapter.rooms[data.gameID];
-	console.log("Clients :")
-	console.log(clients)
-		
-	// var clients = io.sockets.adapter.rooms[data.gameID];
-	// console.log(clients)
-	// console.log(Object.keys(clients).length)
-	
-	// socket.to(data.gameID).emit("start timer", {time : gameTotalTime[data.gameID]},word : gameWord[data.gameID])
-	// ---------------------------------------------------------------------------------------------------		
-	// --------this loop check if there is atleast one user present that hasnt used up their turns--------
-	// for( var i = 0; i < Object.keys(gameData[data.gameID]).length; i++ ){
-	// 	var currentUser = gameData[data.gameID][Object.keys(gameData[data.gameID])[i]][1];
-	// 	if(currentUser < gameRounds[data.gameID]){
-	// 	// since the game is on, we have to set a targete client, word, clue
-	// 	gameTarget[data.gameID] = Object.keys(gameData[data.gameID])
-	// 								[Math.floor(Math.random()*(Object.keys(gameData[data.gameID]).length))];
-	// 	while(gameData[data.gameID][gameTarget[data.gameID]][1] >= gameRounds[data.gameID]){
-	// 		gameTarget[data.gameID] = Object.keys(gameData[data.gameID])
-	// 						[Math.floor(Math.random()	*(Object.keys(gameData[data.gameID]).length))];
-	// 	}
-
+socket.on("round over", (data) => {
 
 });
+
 
 socket.on("start timer", (data) => {	
 
