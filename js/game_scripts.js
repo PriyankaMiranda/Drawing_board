@@ -63,7 +63,19 @@ var current = {color: 'black', prev_color: 'black',lineWidth: 5};
 // start game
 socket.emit("start game",{gameID:gameID});  
 
-socket.on("start timer", () => socket.emit("start timer",{gameID:gameID}));
+socket.on("start timer", (data) => {
+  var downloadTimer = setInterval(function(){
+    if(data.time <= 0){ clearInterval(downloadTimer); }
+    data.time -= 1;
+
+    console.log(data.time)
+    if(data.time == -1){  
+      socket.emit("game over", {gameID : gameID});  
+    }
+
+  }, 1000);
+
+});
 
 socket.on("set word", (data) => {
   console.log(data.word)
