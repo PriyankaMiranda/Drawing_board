@@ -20,8 +20,8 @@ var username;
 var img;
 var gameID;
 var score = 0;
-var word = "___";
-var timeLeft;
+var word = "";
+var timerVal = 0;
 const cookie_val = document.cookie;
 
 try{
@@ -82,35 +82,29 @@ var downloadTimer = setInterval(function(){
 socket.emit("join game",{gameID:gameID});  
 
 socket.on("set word", (data) => {
+  overlay.style.display = "none"; 
+
   console.log(data.word)
   document.getElementById("word").innerHTML = data.word; 
   var downloadTimer = setInterval(function(){
+    timerVal = data.time 
     if(data.time <= 0){ clearInterval(downloadTimer); }
     data.time -= 1;
-
+    if(data.time <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
+    else{ document.getElementById("timer").style.color = "#005582"; }
+    document.getElementById("timer").innerHTML = data.time;
     console.log(data.time)
+    
     if(data.time == -1){  
       // round over
+      console.log("round over")
       socket.emit("round over", {gameID : gameID});  
     }
 
   }, 1000);   
 });
 
-
-socket.on("set timer", (data) => {
-  var timeLeft = data.timeLeft;
-  if(data.timeLeft + 1 <=  5){
-    document.getElementById("timer").style.color = "#BE2625";
-  }
-  else{
-    document.getElementById("timer").style.color = "#005582";
-  }
-  document.getElementById("timer").innerHTML = data.timeLeft + 1;
-});
-
 socket.on("show answer", (data) => {
-  var overlay = document.getElementsByClassName("overlay")[0]
   while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
   overlay.style.display = "block";
   var para = document.createElement("p");
@@ -123,7 +117,6 @@ socket.on("show answer", (data) => {
 });
 
 socket.on("game completed", () => {
-  var overlay = document.getElementsByClassName("overlay")[0]
   while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
   overlay.style.display = "block";
   var para = document.createElement("p");
@@ -133,6 +126,15 @@ socket.on("game completed", () => {
   //   window.location.href = "/lobby";
   // }, 5000);
 });
+
+socket.on("waiting page", () => {
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  overlay.style.display = "block";
+  var para = document.createElement("p");
+  para.innerHTML = "Please wait while the current round ends!";
+  overlay.appendChild(para);
+});
+
 
 
 // hide chars in homepage
@@ -172,11 +174,8 @@ socket.on("reload lobby page", (data) => {
 socket.on("get ongoing games", (data) => socket.emit("send game data",{id:data.id,gameID:gameID,img:img}));
 
 socket.on("check match",(data)=>{
-  if(data.gamePWD != gamePWD){
-    socket.emit("send issue",{id:data.id})
-  }else{
-    socket.emit("no issue",{id:data.id})
-  }
+  if(data.gamePWD != gamePWD){ socket.emit("send issue",{id:data.id}) }
+  else{ socket.emit("no issue",{id:data.id}) }
 });
 
 // get chars from all users present in game to hide in homempage
@@ -191,18 +190,14 @@ socket.on("new message in game", (data) => {
   socket.emit("new message in game", data);
   addChatMessage(data)
 });
-// WHen the aner is right, dont reflect it across the game
-socket.on("dont show message", (data) => {
-  addChatMessage(data)
-});
+// When the answer is right, dont reflect it across the game
+socket.on("dont show message", (data) => { addChatMessage(data) });
 
 socket.on("update score", (data) => {
   var parent = document.getElementById("row_chars");
   var children = parent.children;
   for(var i = 0; i < children.length; i++){
-    if(data.id == children[i].children[0].alt){
-      children[i].children[1].children[1].innerText = data.score    
-    }
+    if(data.id == children[i].children[0].alt){ children[i].children[1].children[1].innerText = data.score }
   }
   reorderCharacters()
 });
@@ -232,9 +227,7 @@ canvas.addEventListener('touchmove', throttle(onMouseMove, 1), false);
 
 document.getElementsByClassName("color refresh")[0].addEventListener('click', refreshPage, false);
 
-for (var i = 0; i < colors.length; i++){
-  colors[i].addEventListener('click', onColorUpdate, false);
-}
+for (var i = 0; i < colors.length; i++){ colors[i].addEventListener('click', onColorUpdate, false); }
 
 document.getElementsByClassName("color pencil")[0].addEventListener('click', setOrigColor, false);
 
@@ -266,14 +259,9 @@ function onColorUpdate(e){
   current.prev_color = current.color;
   current.color = e.target.style.backgroundColor;
   current.lineWidth = 5;
-  if (current.color == 'black'){
-    e.target.style.border = "thick solid rgba(255, 255, 255, .5)";
-  }else{
-    e.target.style.border = "thick solid rgba(0, 0, 0, .5)";
-  }
-  if(current.color == 'white'){
-    current.lineWidth = 45;
-  }
+  if (current.color == 'black'){ e.target.style.border = "thick solid rgba(255, 255, 255, .5)";}
+  else{ e.target.style.border = "thick solid rgba(0, 0, 0, .5)"; }
+  if(current.color == 'white'){ current.lineWidth = 45; }
   context.beginPath();
 }
 
@@ -281,12 +269,8 @@ function setOrigColor(e){
   refreshAllBorders()
   e.target.style.border = "thick solid rgba(0, 0, 0, .5)";
   if(current.color == 'white'){  
-    if(current.prev_color == 'white'){
-      current.color = 'black';
-    }
-    else{
-      current.color = current.prev_color;  
-    }
+    if(current.prev_color == 'white'){ current.color = 'black'; }
+    else{ current.color = current.prev_color; }
   }
   current.lineWidth = 5;
   context.beginPath();
@@ -302,9 +286,7 @@ function refreshPage (e){
 
 function refreshAllBorders(){
   var all_colors = document.getElementsByClassName("color")
-  for (var i = 0; i < all_colors.length; i++) {
-    all_colors[i].style.border = "thick solid rgba(255, 255, 255, .5)";
-  } 
+  for (var i = 0; i < all_colors.length; i++) { all_colors[i].style.border = "thick solid rgba(255, 255, 255, .5)"; } 
 }
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------  
@@ -315,16 +297,10 @@ function refreshAllBorders(){
 function onMouseDown(e){
   e.preventDefault();
   e.stopPropagation();
-  if(isChrome || isMobile){
-    drawing = true;
-  }
+  if(isChrome || isMobile){ drawing = true; }
   else{
-    if (drawing == false){
-      drawing = true;
-    }
-    else{
-      drawing = false;
-    } 
+    if (drawing == false){ drawing = true; }
+    else{ drawing = false; } 
   }
   if(typeof event.touches === 'undefined'){
     current.x = ((e.clientX - rect.left) / (rect.right - rect.left)) *canvas.width;
@@ -381,15 +357,7 @@ function drawLine(x0, y0, x1, y1, lineWidth, color, emit){
 
   if (!emit) { return; }
 
-  socket.emit('drawing', {
-    x0: x0 ,
-    y0: y0 ,
-    x1: x1 ,
-    y1: y1 ,
-    lineWidth: context.lineWidth ,
-    color: color,
-    gameID: gameID 
-  });
+  socket.emit('drawing', { x0: x0 , y0: y0 , x1: x1 , y1: y1 ,lineWidth: context.lineWidth ,color: color,gameID: gameID });
 }
 
 //to limit the number of events per second
@@ -516,8 +484,7 @@ const sendMessage = () => {
   var message = ' '+$inputMessage.val();
   // Prevent markup from being injected into the message
   message = cleanInput(message);
-  socket.emit("check answer", {username:username,message:message,gameID:gameID,timeLeft:timeLeft});
-
+  socket.emit("check answer", {username:username,message:message,gameID:gameID,timerVal:timerVal});
 };
 
 // structures the chat message
@@ -602,9 +569,7 @@ const cleanInput = (input) => { return $("<div/>").text(input).html(); };
 const getUsernameColor = (username) => {
   // Compute hash code
   var hash = 7;
-  for (var i = 0; i < username.length; i++) {
-    hash = username.charCodeAt(i) + (hash << 5) - hash;
-  }
+  for (var i = 0; i < username.length; i++) { hash = username.charCodeAt(i) + (hash << 5) - hash; }
   // Calculate color
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
@@ -632,22 +597,6 @@ const getUsernameColor = (username) => {
 //-----------------------------------Other Socket events-----------------------------------
 //-----------------------------------------------------------------------------------------
 
-socket.on("match score with username and img", (data) => {
-    socket.emit("sending score", {id:data.id,username:username,img:img});
-});
-
-socket.on("match score with username and img 2", (data) => {
-    socket.emit("sending score", {id:data.id,username:data.username,img:data.img});
-});
-
-socket.on("get score with username and img", (data) => {
-    socket.emit("sending score 2", {return_id : data.return_id, id : socket.id, username : username, img : img});
-});
-
-socket.on("send score", (data) => {
-    socket.emit("send score", data);
-});
-
 socket.on("leader board", (data) => {
   setTimeout(function(){ 
     var para = document.createElement("h1");
@@ -659,7 +608,6 @@ socket.on("leader board", (data) => {
     document.getElementsByClassName("leaderboard-overlay")[0].style.width = "100%";
   }, 2000);
 });
-
 
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------

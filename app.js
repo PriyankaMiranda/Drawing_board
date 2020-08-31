@@ -40,6 +40,9 @@ var gameData = {};
 var gameStarted = {};
 var gameTarget = {};
 
+var gameClue = {};
+var gameWord = {};
+
 var gameTotalRounds = {};
 var gameCurrentRound = {};
 var gameRoundComplete = {};
@@ -179,31 +182,69 @@ socket.on("join game", (data) => {
 	// ------for now we set these variables to constant values. we can later allow user to set these!-----
 	gameTotalRounds[data.gameID] = 3
 	gameCurrentRound[data.gameID] = 1
-	gameRoundComplete[gameID] = {}
+	gameRoundComplete[data.gameID] = {}
 
 	gameTotalTime[data.gameID] = 10
 	gameTimeLeft[data.gameID] = 10
 
-	gameWordList[data.gameID] = fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
-	gameWord[data.gameID] = gameWordList[data.gameID][Math.floor(Math.random()*(gameWordList[data.gameID].length))]
+	var gameWordList= fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
+	gameWord[data.gameID] = gameWordList[Math.floor(Math.random()*(gameWordList.length))]
 	
 	gameClue[data.gameID] = "";
 	gameWord[data.gameID].split(" ").forEach(function(word) {
 		gameClue[data.gameID] = gameClue[data.gameID]+"&nbsp&nbsp"+ word.replace(/./g, '_&nbsp'); 
 	});
 	// ---------------------------------------------------------------------------------------------------
-	if ( gameData[data.gameID] == undefined ) {	
-		gameData[data.gameID] = {}	
-		// socket.emit("start game")
-	}
+	// if ( gameData[data.gameID] == undefined ) {	
+	// 	gameData[data.gameID] = {}	
+	// }
 
-	if ( gameData[data.gameID][socket.id] == undefined ){	gameData[data.gameID][socket.id] = [0,0]  }
+	// if ( gameData[data.gameID][socket.id] == undefined ){	gameData[data.gameID][socket.id] = [0,0]  }
 	
 	
 });
 
 socket.on("start game", (data) => {	
-	console.log("avdvr")
+	var currentClients = io.sockets.adapter.rooms[data.gameID];
+	if ( gameData[data.gameID] == undefined ) {	
+		gameData[data.gameID] = {}	
+
+		// create an entry for the user
+		for( var i = 0; i < Object.keys(currentClients.sockets).length; i++ ){
+			if(gameData[data.gameID][Object.keys(currentClients.sockets)[i]] == undefined){
+				gameData[data.gameID][Object.keys(currentClients.sockets)[i]] = [0,0]
+			}
+		}
+
+		// this checks if there is a user that hasn't used their turn for the round
+		var selectedUser = undefined;
+		for( var i = 0; i < Object.keys(currentClients.sockets).length; i++ ){
+			var currentUser = Object.keys(currentClients.sockets)[i];
+			var currentUserRound = gameData[data.gameID][currentUser][1];
+			if(currentUserRound == gameCurrentRound[data.gameID] - 1){
+				selectedUser = currentUser
+				break;
+			}
+		}
+
+		// select the user and give them the word and the rest get the clue
+		if(selectedUser != undefined){
+			for( var i = 0; i < Object.keys(currentClients.sockets).length; i++ ){
+				var currentUser = Object.keys(currentClients.sockets)[i];
+				if(	currentUser == selectedUser	){ io.to(currentUser).emit('set word',{word:gameWord[data.gameID],time:gameTotalTime[data.gameID]});}
+				else{ io.to(currentUser).emit('set word',{word:gameClue[data.gameID],time:gameTotalTime[data.gameID]}); }
+			}
+		}
+
+		// console.log("4")
+	}else{
+		// console.log("5")
+		if ( gameData[data.gameID][socket.id] == undefined ){	gameData[data.gameID][socket.id] = [0,0]  }
+
+	}	
+
+	// socket.emit("start game")
+	
 	/*
 	if(gameRoundComplete[gameID][gameCurrentRound[data.gameID]] == undefined){
 		gameRoundComplete[gameID][gameCurrentRound[data.gameID]] = "started"
@@ -312,8 +353,8 @@ socket.on("check answer", (data) => {
 		score = (gameTimeLeft[data.gameID])*100/gameTotalTime[data.gameID];
 		gameData[data.gameID][socket.id][0] += score
 		gameData[data.gameID][socket.id][1] += 1
-		socket.emit("update score",{score:gameData[data.gameID][socket.id][0],id:socket.id})
-		socket.to(data.gameID).emit("update score",{score:gameData[data.gameID][socket.id][0],id:socket.id})
+		// socket.emit("update score",{score:gameData[data.gameID][socket.id][0],id:socket.id})
+		// socket.to(data.gameID).emit("update score",{score:gameData[data.gameID][socket.id][0],id:socket.id})
 	}else{
 		socket.emit("new message in game",data)
 	}
@@ -336,7 +377,7 @@ socket.on("check answer", (data) => {
 				gameOwner[socket.gameID] = undefined
 			}
 			socket.to(socket.gameID).emit("reload lobby page", {gameID : socket.gameID});
-			console.log("idk")
+			
 			// socket.broadcast.emit("get chars for reloading upon disconnection");
 			// socket.broadcast.emit("user left", {username: socket.username});			
 		}
