@@ -83,23 +83,22 @@ socket.emit("join game",{gameID:gameID});
 
 socket.on("set word", (data) => {
   overlay.style.display = "none"; 
-
-  console.log(data.word)
-  document.getElementById("word").innerHTML = data.word; 
+  document.getElementById("word").innerHTML = data.word1; 
+  var timerVal = data.time 
   var downloadTimer = setInterval(function(){
-    timerVal = data.time 
-    if(data.time <= 0){ clearInterval(downloadTimer); }
-    data.time -= 1;
-    if(data.time <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
-    else{ document.getElementById("timer").style.color = "#005582"; }
-    document.getElementById("timer").innerHTML = data.time;
-    console.log(data.time)
-    
-    if(data.time == -1){  
-      // round over
-      console.log("round over")
-      socket.emit("round over", {gameID : gameID});  
+    if(timerVal <= 0){ clearInterval(downloadTimer); }
+    if(timerVal <=  Math.floor(data.time/2) && timerVal > Math.floor(data.time/3)){ 
+      document.getElementById("word").innerHTML = data.word2; 
     }
+    if(timerVal <=  Math.floor(data.time/3)){ document.getElementById("word").innerHTML = data.word3; }
+
+    if(timerVal <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
+    else{ document.getElementById("timer").style.color = "#005582"; }
+    
+    document.getElementById("timer").innerHTML = timerVal;
+    timerVal -= 1;
+    
+    if(timerVal == -1){ socket.emit("show answer", {gameID : gameID}); }
 
   }, 1000);   
 });
@@ -112,9 +111,11 @@ socket.on("show answer", (data) => {
   overlay.appendChild(para);
   setTimeout(function(){ 
     overlay.style.display = "none"; 
-    socket.emit("start timer",{gameID:gameID}); 
+    socket.emit("end round", {gameID : gameID});  
   }, 2000);
 });
+
+socket.on("start game", () => socket.emit("start game", {gameID:gameID}));
 
 socket.on("game completed", () => {
   while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
@@ -122,9 +123,7 @@ socket.on("game completed", () => {
   var para = document.createElement("p");
   para.innerHTML = "Game complete";
   overlay.appendChild(para);
-  // setTimeout(function(){ 
-  //   window.location.href = "/lobby";
-  // }, 5000);
+  // setTimeout(function(){ window.location.href = "/lobby"; }, 5000);
 });
 
 socket.on("waiting page", () => {
