@@ -192,8 +192,12 @@ socket.on("join game", (data) => {
 	var clues1 = []
 	var clues2 = []
 	for( var j = 0; j < totalRounds; j++){
+		
 		var gameWordList = fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
 		var word = gameWordList[Math.floor(Math.random()*(gameWordList.length))];
+		while(!words.inclcudes(word)){
+			var word = gameWordList[Math.floor(Math.random()*(gameWordList.length))];
+		}
 
 		clue = "";
 		word.split(" ").forEach(function(letter) {
@@ -249,8 +253,6 @@ socket.on("start game", (data) => {
 		var currentClients = Object.keys(io.sockets.adapter.rooms[data.gameID].sockets);
 		currentClients.push(currentClients[0])
 		
-		var userOrder = []
-
 		for( var i = 0; i < currentClients.length - 1; i++ ){
 			if(playerData[currentClients[i]]){
 				playerData[currentClients[i]].nextPlayer = currentClients[i+1]
@@ -273,12 +275,21 @@ socket.on("start game", (data) => {
 	}	
 });
 
-socket.on("set clue", (data) => {
-	socket.to(data.gameID).emit("set clue",{clue : data.clue, time : data.time})
-});
+socket.on("set clue", (data) => socket.to(data.gameID).emit("set clue",{clue : data.clue, time : data.time}));
+
+socket.on("show answer", (data) => socket.to(data.gameID).emit("show answer", {word:data.word}));
 
 socket.on("next round", (data) => {
 	playerData[socket.id].totalRounds -= 1
+	var currentClients = Object.keys(io.sockets.adapter.rooms[data.gameID].sockets);
+
+	console.log(currentClients.every((client) => playerData[client].totalRounds <= 0));
+	
+	if(currentClients.every((client) => playerData[client].totalRounds <= 0)){
+		socket.emit("game completed")
+		socket.to(data.gameID).emit("game completed")
+	}
+
 	var nextPlayer = playerData[socket.id].nextPlayer
 	io.to(nextPlayer).emit('set data',{words : playerData[nextPlayer].gameWords,
 										clues : playerData[nextPlayer].clues,
@@ -335,7 +346,6 @@ socket.on("next round", (data) => {
 // 	}
 // });
 	
-socket.on("show answer", (data) => socket.emit("show answer", {word:gameWord[data.gameID]}));
 
 socket.on("check answer", (data) => {
 	if(data.message == gameWord[data.gameID]){

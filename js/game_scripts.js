@@ -83,41 +83,48 @@ var downloadTimer = setInterval(function(){
 // join game
 socket.emit("join game",{gameID:gameID});  
 
+socket.on("start game", () => socket.emit("start game", {gameID:gameID}));
+
 socket.on("set data", (data) => {
   if(data.words[words_completed.length] == undefined){
     socket.emit("next round", {gameID : gameID}); 
   }
-    if(playerData[nextPlayer].totalRounds > 0 ){}
-  overlay.style.display = "none"; 
-  document.getElementById("word").innerHTML = data.words[words_completed.length]; 
-  
-  if(!words_completed.includes(data.words[words_completed.length])){
-    words_completed.push(data.words[words_completed.length])
+  if(data.totalRounds <= 0){
+    socket.emit("next round", {gameID : gameID});  
+  }
+  else{
+    overlay.style.display = "none"; 
+    document.getElementById("word").innerHTML = data.words[words_completed.length]; 
+    
+    if(!words_completed.includes(data.words[words_completed.length])){
+      words_completed.push(data.words[words_completed.length])
+    }
+
+    var timerVal = data.time
+
+    var downloadTimer = setInterval(function(){
+      if(timerVal <= 0){ clearInterval(downloadTimer); }
+      if(timerVal <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
+      else{ document.getElementById("timer").style.color = "#005582"; }
+
+      document.getElementById("timer").innerHTML = timerVal;
+      if(timerVal > Math.floor(data.time/2)){
+        socket.emit("set clue" , {gameID : gameID, clue:data.clues[words_completed.length-1], time: timerVal})
+      }else if(timerVal > Math.floor(data.time/3)){ 
+        socket.emit("set clue" , {gameID : gameID, clue:data.clues1[words_completed.length-1], time: timerVal})
+      }else{ 
+        socket.emit("set clue" , {gameID : gameID, clue:data.clues2[words_completed.length-1], time: timerVal})
+      }
+
+      timerVal -= 1;
+      if(timerVal == -1){
+        socket.emit("show answer", {gameID : gameID, word : data.words[words_completed.length - 1]}); 
+      }
+    }, 1000);
+
   }
 
-  var timerVal = data.time
-
-  var downloadTimer = setInterval(function(){
-    if(timerVal <= 0){ clearInterval(downloadTimer); }
-    if(timerVal <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
-    else{ document.getElementById("timer").style.color = "#005582"; }
-    document.getElementById("timer").innerHTML = timerVal;
-
-    if(timerVal > Math.floor(data.time/2)){
-      socket.emit("set clue" , {gameID : gameID, clue:data.clues[words_completed.length-1], time: timerVal})
-    }else if(timerVal > Math.floor(data.time/3)){ 
-      socket.emit("set clue" , {gameID : gameID, clue:data.clues1[words_completed.length-1], time: timerVal})
-    }else{ 
-      socket.emit("set clue" , {gameID : gameID, clue:data.clues2[words_completed.length-1], time: timerVal})
-    }
-
-    timerVal -= 1;
-    if(timerVal == -1){
-      socket.emit("next round", {gameID : gameID, nextPlayer:data.nextPlayer}); 
-    }
-  }, 1000);
 });
-
 
 socket.on("set clue", (data) => {
   overlay.style.display = "none"; 
@@ -129,6 +136,8 @@ socket.on("set clue", (data) => {
 
 socket.on("show answer", (data) => {
   while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  document.getElementById("word").innerHTML = "";
+  document.getElementById("timer").innerHTML = "";
   overlay.style.display = "block";
   var para = document.createElement("p");
   para.innerHTML = "Answer: "+data.word;
@@ -140,14 +149,17 @@ socket.on("show answer", (data) => {
   }, 2000);
 });
 
-socket.on("start game", () => socket.emit("start game", {gameID:gameID}));
+
 
 socket.on("game completed", () => {
   while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  document.getElementById("word").innerHTML = "";
+  document.getElementById("timer").innerHTML = "";
   overlay.style.display = "block";
   var para = document.createElement("p");
   para.innerHTML = "Game complete";
   overlay.appendChild(para);
+  
   // setTimeout(function(){ window.location.href = "/lobby"; }, 5000);
 });
 
