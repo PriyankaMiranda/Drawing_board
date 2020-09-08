@@ -262,7 +262,7 @@ socket.on("start game", (data) => {
 											clues1 : playerData[socket.id].clues1,
 											clues2 : playerData[socket.id].clues2,
 											time : playerData[socket.id].totalTime,
-											nextPlayer : playerData[socket.id].nextPlayer});
+											totalRounds : playerData[socket.id].totalRounds});
 
 	}else{
 		if(playerData[socket.id].nextPlayer == undefined){
@@ -285,7 +285,7 @@ socket.on("next round", (data) => {
 										clues1 : playerData[nextPlayer].clues1,
 										clues2 : playerData[nextPlayer].clues2,
 										time : playerData[nextPlayer].totalTime,
-										nextPlayer : playerData[nextPlayer].nextPlayer});
+										totalRounds : playerData[nextPlayer].totalRounds});
 });
 
 

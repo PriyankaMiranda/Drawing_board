@@ -85,15 +85,15 @@ socket.emit("join game",{gameID:gameID});
 
 socket.on("set data", (data) => {
   if(data.words[words_completed.length] == undefined){
-    socket.emit("next round", {gameID : gameID, nextPlayer:data.nextPlayer}); 
+    socket.emit("next round", {gameID : gameID}); 
   }
+    if(playerData[nextPlayer].totalRounds > 0 ){}
   overlay.style.display = "none"; 
   document.getElementById("word").innerHTML = data.words[words_completed.length]; 
   
   if(!words_completed.includes(data.words[words_completed.length])){
     words_completed.push(data.words[words_completed.length])
   }
-  console.log(words_completed)
 
   var timerVal = data.time
 
@@ -124,8 +124,7 @@ socket.on("set clue", (data) => {
   document.getElementById("word").innerHTML = data.clue;
   document.getElementById("timer").innerHTML = data.time;
   if(data.time <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
-  else{ document.getElementById("timer").style.color = "#005582"; }
- 
+  else{ document.getElementById("timer").style.color = "#005582"; } 
 });
 
 socket.on("show answer", (data) => {
