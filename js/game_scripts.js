@@ -24,6 +24,8 @@ var word = "";
 var timerVal = 0;
 const cookie_val = document.cookie;
 
+var words_completed = [];
+
 try{
   username = cookie_val.split("name=")[1].split(";")[0];
   img = cookie_val.split("img=")[1].split(";")[0];
@@ -81,26 +83,49 @@ var downloadTimer = setInterval(function(){
 // join game
 socket.emit("join game",{gameID:gameID});  
 
-socket.on("set word", (data) => {
+socket.on("set data", (data) => {
+  if(data.words[words_completed.length] == undefined){
+    socket.emit("next round", {gameID : gameID, nextPlayer:data.nextPlayer}); 
+  }
   overlay.style.display = "none"; 
-  document.getElementById("word").innerHTML = data.word1; 
-  var timerVal = data.time 
+  document.getElementById("word").innerHTML = data.words[words_completed.length]; 
+  
+  if(!words_completed.includes(data.words[words_completed.length])){
+    words_completed.push(data.words[words_completed.length])
+  }
+  console.log(words_completed)
+
+  var timerVal = data.time
+
   var downloadTimer = setInterval(function(){
     if(timerVal <= 0){ clearInterval(downloadTimer); }
-    if(timerVal <=  Math.floor(data.time/2) && timerVal > Math.floor(data.time/3)){ 
-      document.getElementById("word").innerHTML = data.word2; 
-    }
-    if(timerVal <=  Math.floor(data.time/3)){ document.getElementById("word").innerHTML = data.word3; }
-
     if(timerVal <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
     else{ document.getElementById("timer").style.color = "#005582"; }
-    
     document.getElementById("timer").innerHTML = timerVal;
-    timerVal -= 1;
-    
-    if(timerVal == -1){ socket.emit("show answer", {gameID : gameID}); }
 
-  }, 1000);   
+    if(timerVal > Math.floor(data.time/2)){
+      socket.emit("set clue" , {gameID : gameID, clue:data.clues[words_completed.length-1], time: timerVal})
+    }else if(timerVal > Math.floor(data.time/3)){ 
+      socket.emit("set clue" , {gameID : gameID, clue:data.clues1[words_completed.length-1], time: timerVal})
+    }else{ 
+      socket.emit("set clue" , {gameID : gameID, clue:data.clues2[words_completed.length-1], time: timerVal})
+    }
+
+    timerVal -= 1;
+    if(timerVal == -1){
+      socket.emit("next round", {gameID : gameID, nextPlayer:data.nextPlayer}); 
+    }
+  }, 1000);
+});
+
+
+socket.on("set clue", (data) => {
+  overlay.style.display = "none"; 
+  document.getElementById("word").innerHTML = data.clue;
+  document.getElementById("timer").innerHTML = data.time;
+  if(data.time <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
+  else{ document.getElementById("timer").style.color = "#005582"; }
+ 
 });
 
 socket.on("show answer", (data) => {
@@ -111,7 +136,8 @@ socket.on("show answer", (data) => {
   overlay.appendChild(para);
   setTimeout(function(){ 
     overlay.style.display = "none"; 
-    socket.emit("end round", {gameID : gameID});  
+    socket.emit("next round", {gameID : gameID});  
+    // socket.emit("end round", {gameID : gameID});  
   }, 2000);
 });
 

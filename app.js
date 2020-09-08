@@ -35,7 +35,11 @@ var ejs = require("ejs");
 
 var gameOwner = {};
 
+
+var playerData = {};
 var gameOngoing = {};
+
+
 var gameData = {};
 
 var gameStarted = {};
@@ -182,143 +186,24 @@ socket.on("join game", (data) => {
 	socket.join(data.gameID);
 	// ---------------------------------------------------------------------------------------------------
 	// ------for now we set these variables to constant values. we can later allow user to set these!-----
+	var totalRounds = 3
+	var words = []
+	var clues = []
+	var clues1 = []
+	var clues2 = []
+	for( var j = 0; j < totalRounds; j++){
+		var gameWordList = fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
+		var word = gameWordList[Math.floor(Math.random()*(gameWordList.length))];
 
-	gameTotalRounds[data.gameID] = 3
-	gameCurrentRound[data.gameID] = 1
-	gameRoundComplete[data.gameID] = {}
-
-	gameTotalTime[data.gameID] = 10
-	gameTimeLeft[data.gameID] = 10 
-
-	var gameWordList = fs.readFileSync("./assets/words/easy_words.txt", "utf-8").split("\n");
-	gameWords[data.gameID] = []
-	var word = gameWordList[Math.floor(Math.random()*(gameWordList.length))];
-	while(!gameWords[data.gameID].includes(word) && gameWords[data.gameID].length < gameTotalRounds[data.gameID]*20){
-		gameWords[data.gameID].push(word)
-	}
-
-	gameWord[data.gameID] = gameWords[data.gameID][0]
-	
-	gameClue[data.gameID] = {}
-	gameClue[data.gameID][0] = "";
-	gameWord[data.gameID].split(" ").forEach(function(letter) {
-		gameClue[data.gameID][0] = gameClue[data.gameID][0] + letter.replace(/./g, '_&nbsp');
-	});
-
-	var clueLength = Math.ceil(40*gameWord[data.gameID].length/100)
-	var firstClueArr = []
-	while(firstClueArr.length != clueLength){
-		var loc = Math.floor(Math.random() * gameWord[data.gameID].length)
-		if(!firstClueArr.includes(loc)){ firstClueArr.push(loc) }
-	}
-	var indexToSplit = Math.floor(firstClueArr.length/2);
-	var first = firstClueArr.slice(0, indexToSplit);
-
-	var clueArr = []
-	var clueArr2 = []
-	for( var i = 0; i < gameWord[data.gameID].length; i++ ){
-		if( firstClueArr.includes(i) ){ clueArr.push(gameWord[data.gameID][i]) }
-		else{ clueArr.push('_') }
-		if( first.includes(i) ){ clueArr2.push(gameWord[data.gameID][i]) }
-		else{ clueArr2.push('_') }
-	}
-
-	gameClue[data.gameID][1] = "";
-	gameClue[data.gameID][2] = "";
-	clueArr2.forEach(function(letter) {
-		gameClue[data.gameID][1] = gameClue[data.gameID][1] + letter+'&nbsp'
-	});
-	clueArr.forEach(function(letter) {
-		gameClue[data.gameID][2] = gameClue[data.gameID][2] + letter+'&nbsp'
-	});
-
-	// ---------------------------------------------------------------------------------------------------
-});
-
-socket.on("start game", (data) => {	
-	var currentClients = io.sockets.adapter.rooms[data.gameID];
-	if (gameOngoing[data.gameID] == undefined || gameOngoing[data.gameID] == false ) {	
-		
-		gameOngoing[data.gameID] = true
-
-		if ( gameData[data.gameID] == undefined ) {	gameData[data.gameID] = {} }
-		
-		// create an entry for the user
-		for( var i = 0; i < Object.keys(currentClients.sockets).length; i++ ){
-			if(gameData[data.gameID][Object.keys(currentClients.sockets)[i]] == undefined){
-				gameData[data.gameID][Object.keys(currentClients.sockets)[i]] = [0,0]
-			}
-		}
-
-		var counter = gameTotalRounds[data.gameID]*Object.keys(gameData[data.gameID]).length
-		
-		var x = 1000*gameTotalTime[data.gameID]*+2000
-		console.log(x)
-		var downloadTimer = setInterval(function(){
-		console.log("1")
-			if(counter <= 0){ clearInterval(downloadTimer); }
-			counter -= 1;
-			// update counter
-			// var counter = gameTotalRounds[data.gameID]*Object.keys(gameData[data.gameID]).length
-			// if(counter > orig_counter){
-			// }
-
-			// this checks if there is a user that hasn't used their turn for the round
-			var selectedUser = undefined;
-			for( var i = 0; i < Object.keys(currentClients.sockets).length; i++ ){
-				var currentUser = Object.keys(currentClients.sockets)[i];
-				var currentUserRound = gameData[data.gameID][currentUser][1];
-				if(currentUserRound == gameCurrentRound[data.gameID] - 1){
-					selectedUser = currentUser
-					break;
-				}
-			}
-			console.log(selectedUser)
-			// select the user and give them the word and the rest get the clue
-			if(selectedUser != undefined){
-				for( var i = 0; i < Object.keys(currentClients.sockets).length; i++ ){
-					var currentUser = Object.keys(currentClients.sockets)[i];
-					if(	currentUser == selectedUser	){ io.to(currentUser).emit('set word',{word1:gameWord[data.gameID],word2:gameWord[data.gameID],word3:gameWord[data.gameID],time:gameTotalTime[data.gameID]});}
-					else{ io.to(currentUser).emit('set word',{word1:gameClue[data.gameID][0],word2:gameClue[data.gameID][1],word3:gameClue[data.gameID][2],time:gameTotalTime[data.gameID]}); }
-				}
-			}else{
-				gameCurrentRound[data.gameID] += 1
-			}
-
-			if(counter == -1){  
-				console.log("Game Ended")
-			}
-
-		}, x); 
-
-
-
-
-	}else{
-		if ( gameData[data.gameID][socket.id] == undefined ){	gameData[data.gameID][socket.id] = [0,0]  }
-		// socket.emit("waiting page")
-	}	
-
-});
-
-socket.on("end round", (data) => {
-	if(gameOngoing[data.gameID] == true){ 
-		console.log("game ended")
-		gameOngoing[data.gameID] = false 
-
-		gameWord[data.gameID] = gameWords[data.gameID][gameWords[data.gameID].findIndex(gameWord[data.gameID])+ 1]
-		gameWord[data.gameID] = gameWordList[Math.floor(Math.random()*(gameWordList.length))]
-		
-		gameClue[data.gameID] = {}
-		gameClue[data.gameID][0] = "";
-		gameWord[data.gameID].split(" ").forEach(function(letter) {
-			gameClue[data.gameID][0] = gameClue[data.gameID][0] + letter.replace(/./g, '_&nbsp');
+		clue = "";
+		word.split(" ").forEach(function(letter) {
+			clue = clue + letter.replace(/./g, '_&nbsp');
 		});
 
-		var clueLength = Math.ceil(40*gameWord[data.gameID].length/100)
+		var clueLength = Math.ceil(40*word.length/100)
 		var firstClueArr = []
 		while(firstClueArr.length != clueLength){
-			var loc = Math.floor(Math.random() * gameWord[data.gameID].length)
+			var loc = Math.floor(Math.random() * word.length)
 			if(!firstClueArr.includes(loc)){ firstClueArr.push(loc) }
 		}
 		var indexToSplit = Math.floor(firstClueArr.length/2);
@@ -326,28 +211,130 @@ socket.on("end round", (data) => {
 
 		var clueArr = []
 		var clueArr2 = []
-		for( var i = 0; i < gameWord[data.gameID].length; i++ ){
-			if(firstClueArr.includes(i)){ clueArr.push(gameWord[data.gameID][i]) }
+		for( var i = 0; i < word.length; i++ ){
+			if( firstClueArr.includes(i) ){ clueArr.push(word[i]) }
 			else{ clueArr.push('_') }
-			if(first.includes(i)){ clueArr2.push(gameWord[data.gameID][i]) }
+			if( first.includes(i) ){ clueArr2.push(word[i]) }
 			else{ clueArr2.push('_') }
 		}
 
-		gameClue[data.gameID][1] = "";
-		gameClue[data.gameID][2] = "";
+		var clue1 = "";
+		var clue2 = "";
 		clueArr2.forEach(function(letter) {
-			gameClue[data.gameID][1] = gameClue[data.gameID][1] + letter+'&nbsp'
+			clue1 = clue1 + letter+'&nbsp'
 		});
 		clueArr.forEach(function(letter) {
-			gameClue[data.gameID][2] = gameClue[data.gameID][2] + letter+'&nbsp'
+			clue2 = clue2 + letter+'&nbsp'
 		});
 
-		socket.emit("start game");	
+		words.push(word)
+		clues.push(clue)
+		clues1.push(clue1)
+		clues2.push(clue2)
 	}
+
+	playerData[socket.id] = {gameID : data.gameID, totalRounds : totalRounds, totalTime : 6, gameWords : words, 
+							clues: clues, clues1: clues1, clues2 : clues2, score : 0, nextPlayer : undefined}
+	console.log(playerData)
+	// ---------------------------------------------------------------------------------------------------
 });
 
 
 
+socket.on("start game", (data) => {	
+
+	if (gameOngoing[data.gameID] == undefined || gameOngoing[data.gameID] == false ) {	
+		gameOngoing[data.gameID] = true
+		
+		var currentClients = Object.keys(io.sockets.adapter.rooms[data.gameID].sockets);
+		currentClients.push(currentClients[0])
+		
+		var userOrder = []
+
+		for( var i = 0; i < currentClients.length - 1; i++ ){
+			if(playerData[currentClients[i]]){
+				playerData[currentClients[i]].nextPlayer = currentClients[i+1]
+			}
+		}
+
+		io.to(socket.id).emit('set data',{words : playerData[socket.id].gameWords,
+											clues : playerData[socket.id].clues,
+											clues1 : playerData[socket.id].clues1,
+											clues2 : playerData[socket.id].clues2,
+											time : playerData[socket.id].totalTime,
+											nextPlayer : playerData[socket.id].nextPlayer});
+
+	}else{
+		if(playerData[socket.id].nextPlayer == undefined){
+			var currentClients = Object.keys(io.sockets.adapter.rooms[data.gameID].sockets);
+			playerData[socket.id].nextPlayer = currentClients[0]
+			playerData[currentClients[currentClients.length]].nextPlayer = socket.id
+		}
+	}	
+});
+
+socket.on("set clue", (data) => {
+	socket.to(data.gameID).emit("set clue",{clue : data.clue, time : data.time})
+});
+
+socket.on("next round", (data) => {
+	playerData[socket.id].totalRounds -= 1
+	var nextPlayer = playerData[socket.id].nextPlayer
+	io.to(nextPlayer).emit('set data',{words : playerData[nextPlayer].gameWords,
+										clues : playerData[nextPlayer].clues,
+										clues1 : playerData[nextPlayer].clues1,
+										clues2 : playerData[nextPlayer].clues2,
+										time : playerData[nextPlayer].totalTime,
+										nextPlayer : playerData[nextPlayer].nextPlayer});
+});
+
+
+
+// socket.on("end round", (data) => {
+// 	if(gameOngoing[data.gameID] == true){ 
+// 		console.log("game ended")
+// 		gameOngoing[data.gameID] = false 
+
+// 		gameWord[data.gameID] = gameWords[data.gameID][gameWords[data.gameID].findIndex(gameWord[data.gameID])+ 1]
+// 		gameWord[data.gameID] = gameWordList[Math.floor(Math.random()*(gameWordList.length))]
+		
+// 		gameClue[data.gameID] = {}
+// 		gameClue[data.gameID][0] = "";
+// 		gameWord[data.gameID].split(" ").forEach(function(letter) {
+// 			gameClue[data.gameID][0] = gameClue[data.gameID][0] + letter.replace(/./g, '_&nbsp');
+// 		});
+
+// 		var clueLength = Math.ceil(40*gameWord[data.gameID].length/100)
+// 		var firstClueArr = []
+// 		while(firstClueArr.length != clueLength){
+// 			var loc = Math.floor(Math.random() * gameWord[data.gameID].length)
+// 			if(!firstClueArr.includes(loc)){ firstClueArr.push(loc) }
+// 		}
+// 		var indexToSplit = Math.floor(firstClueArr.length/2);
+// 		var first = firstClueArr.slice(0, indexToSplit);
+
+// 		var clueArr = []
+// 		var clueArr2 = []
+// 		for( var i = 0; i < gameWord[data.gameID].length; i++ ){
+// 			if(firstClueArr.includes(i)){ clueArr.push(gameWord[data.gameID][i]) }
+// 			else{ clueArr.push('_') }
+// 			if(first.includes(i)){ clueArr2.push(gameWord[data.gameID][i]) }
+// 			else{ clueArr2.push('_') }
+// 		}
+
+// 		gameClue[data.gameID][1] = "";
+// 		gameClue[data.gameID][2] = "";
+// 		clueArr2.forEach(function(letter) {
+// 			gameClue[data.gameID][1] = gameClue[data.gameID][1] + letter+'&nbsp'
+// 		});
+// 		clueArr.forEach(function(letter) {
+// 			gameClue[data.gameID][2] = gameClue[data.gameID][2] + letter+'&nbsp'
+// 		});
+
+// 		socket.emit("start game");	
+// 	}
+// });
+	
 socket.on("show answer", (data) => socket.emit("show answer", {word:gameWord[data.gameID]}));
 
 socket.on("check answer", (data) => {
