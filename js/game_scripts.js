@@ -83,34 +83,28 @@ var downloadTimer = setInterval(function(){
 // join game
 socket.emit("join game",{gameID:gameID});  
 
-socket.on("start game", () => socket.emit("start game", {gameID:gameID}));
-
 socket.on("set data", (data) => {
-  if(data.words[words_completed.length] == undefined){
-    socket.emit("next round", {gameID : gameID}); 
-  }
-  if(data.totalRounds <= 0){
-    socket.emit("next round", {gameID : gameID});  
-  }
+  if(data.words[words_completed.length] == undefined){ socket.emit("next round", {gameID : gameID}); }
+  if(data.totalRounds <= 0){  socket.emit("next round", {gameID : gameID});  }
   else{
     overlay.style.display = "none"; 
     document.getElementById("word").innerHTML = data.words[words_completed.length]; 
-    
+    socket.emit("set answer", {gameID : gameID, answer : data.words[words_completed.length]})
+
     if(!words_completed.includes(data.words[words_completed.length])){
       words_completed.push(data.words[words_completed.length])
     }
 
     var timerVal = data.time
-
     var downloadTimer = setInterval(function(){
       if(timerVal <= 0){ clearInterval(downloadTimer); }
       if(timerVal <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
       else{ document.getElementById("timer").style.color = "#005582"; }
 
       document.getElementById("timer").innerHTML = timerVal;
-      if(timerVal > Math.floor(data.time/2)){
+      if(timerVal > Math.ceil(3*data.time/4)){
         socket.emit("set clue" , {gameID : gameID, clue:data.clues[words_completed.length-1], time: timerVal})
-      }else if(timerVal > Math.floor(data.time/3)){ 
+      }else if(timerVal > Math.ceil(data.time/4)){ 
         socket.emit("set clue" , {gameID : gameID, clue:data.clues1[words_completed.length-1], time: timerVal})
       }else{ 
         socket.emit("set clue" , {gameID : gameID, clue:data.clues2[words_completed.length-1], time: timerVal})
@@ -119,6 +113,7 @@ socket.on("set data", (data) => {
       timerVal -= 1;
       if(timerVal == -1){
         socket.emit("show answer", {gameID : gameID, word : data.words[words_completed.length - 1]}); 
+        setTimeout(function(){  socket.emit("next round", {gameID : gameID});   }, 2000);
       }
     }, 1000);
 
@@ -129,12 +124,14 @@ socket.on("set data", (data) => {
 socket.on("set clue", (data) => {
   overlay.style.display = "none"; 
   document.getElementById("word").innerHTML = data.clue;
+  timerVal = data.time 
   document.getElementById("timer").innerHTML = data.time;
   if(data.time <=  5){ document.getElementById("timer").style.color = "#BE2625"; }
   else{ document.getElementById("timer").style.color = "#005582"; } 
 });
 
 socket.on("show answer", (data) => {
+  overlay.style.opacity = "0.5";
   while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
   document.getElementById("word").innerHTML = "";
   document.getElementById("timer").innerHTML = "";
@@ -142,11 +139,7 @@ socket.on("show answer", (data) => {
   var para = document.createElement("p");
   para.innerHTML = "Answer: "+data.word;
   overlay.appendChild(para);
-  setTimeout(function(){ 
-    overlay.style.display = "none"; 
-    socket.emit("next round", {gameID : gameID});  
-    // socket.emit("end round", {gameID : gameID});  
-  }, 2000);
+  setTimeout(function(){ overlay.style.display = "none"; }, 2000);
 });
 
 
@@ -159,46 +152,31 @@ socket.on("game completed", () => {
   var para = document.createElement("p");
   para.innerHTML = "Game complete";
   overlay.appendChild(para);
-  
-  // setTimeout(function(){ window.location.href = "/lobby"; }, 5000);
+  overlay.style.opacity = "1";
+  // showChars()
+  setTimeout(function(){ window.location.href = "/lobby"; }, 5000);
 });
-
-socket.on("waiting page", () => {
-  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
-  overlay.style.display = "block";
-  var para = document.createElement("p");
-  para.innerHTML = "Please wait while the current round ends!";
-  overlay.appendChild(para);
-});
-
 
 
 // hide chars in homepage
 socket.emit("send chars when entering", {img:img,gameID:gameID});
-
 // reload chars in lobby
 socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:username});  
-
 // get chars from all users present in lobby
 socket.on("load chars on lobby", () => {
   removeParticipantsImg();
   socket.emit("load old chars on lobby", {id:socket.id,gameID:gameID});
   socket.emit("display chars for lobby", {gameID:gameID,username:username,img:img,id:socket.id});
 });
-
 // get chars from all old users present
 socket.on("load old chars on lobby", (data) => socket.emit("display old chars for lobby", {username:username,img:img,id:socket.id,return_address:data.id}));
-
 // display all the details of the users present in lobby
 socket.on("display chars for lobby", (data) => addParticipantsImg({char: data.username, img: data.img, id:data.id}));
-
 // reload lobby when user leaves
 socket.on("reload lobby page", (data) => {
   removeParticipantsImg();
   socket.emit("load chars on lobby",{gameID:gameID,gamePWD:gamePWD,username:username});
 });
-
-
 //-----------------------------------------------------------------------------------------  
 //-----------------------------------------------------------------------------------------  
 
@@ -208,40 +186,40 @@ socket.on("reload lobby page", (data) => {
 
 // for the users using the application, send the existing game list
 socket.on("get ongoing games", (data) => socket.emit("send game data",{id:data.id,gameID:gameID,img:img}));
-
+// checking if the data set is correct or not
 socket.on("check match",(data)=>{
   if(data.gamePWD != gamePWD){ socket.emit("send issue",{id:data.id}) }
   else{ socket.emit("no issue",{id:data.id}) }
 });
-
 // get chars from all users present in game to hide in homempage
 socket.on("get chars", (data) => socket.emit("send chars", {img:img,id:data.id}));
-
+// on draw socket event 
 socket.on('drawing', onDrawingEvent); 
-
-
-
 // Whenever the server emits 'new message', update the chat body
-socket.on("new message in game", (data) => {
-  socket.emit("new message in game", data);
+socket.on("new message", (data) => {
   addChatMessage(data)
 });
 // When the answer is right, dont reflect it across the game
-socket.on("dont show message", (data) => { addChatMessage(data) });
-
+socket.on("correct guess", (data) => { 
+  addChatMessage({username : "Server ", message : "Correct answer!"})
+  addChatMessage(data) 
+});
+// Update score 
 socket.on("update score", (data) => {
   var parent = document.getElementById("row_chars");
   var children = parent.children;
-  for(var i = 0; i < children.length; i++){
-    if(data.id == children[i].children[0].alt){ children[i].children[1].children[1].innerText = data.score }
+
+  for(var j = 0; j < data.ids.length; j++){
+    for(var i = 0; i < children.length; i++){
+      if(data.ids[j] == children[i].children[0].alt){ 
+        children[i].children[1].children[1].innerText = data.scores[j]
+      }
+    }
   }
   reorderCharacters()
 });
-
-
 // Whenever the server emits 'typing', show the typing message
 socket.on("typing in game", (data) => addChatTyping(data));
-
 // Whenever the server emits 'stop typing', kill the typing message
 socket.on("stop typing in game", (data) => removeChatTyping(data));
 
@@ -262,9 +240,7 @@ canvas.addEventListener('touchcancel', onMouseUp, false);
 canvas.addEventListener('touchmove', throttle(onMouseMove, 1), false);
 
 document.getElementsByClassName("color refresh")[0].addEventListener('click', refreshPage, false);
-
 for (var i = 0; i < colors.length; i++){ colors[i].addEventListener('click', onColorUpdate, false); }
-
 document.getElementsByClassName("color pencil")[0].addEventListener('click', setOrigColor, false);
 
 $window.keydown((event) => {
@@ -277,7 +253,6 @@ $window.keydown((event) => {
 });
 
 $inputMessage.on("input", () => updateTyping()); 
-
 // Focus input when clicking on the message input's border
 $inputMessage.click(() => $inputMessage.focus());
 
@@ -420,13 +395,14 @@ const removeParticipantsImg = (data) => {
 };
 
 const addParticipantsImg = (data) => {
+
   var parent = document.getElementById("row_chars");
   var children = parent.children;
   var char_list = []
   var img_list = []
   
   for(var i = 0; i < children.length; i++){
-    char_list.push(children[i].children[1].innerText)
+    char_list.push(children[i].children[1].children[0].innerText)
     img_list.push(children[i].children[0].id)
   }
 
@@ -457,6 +433,7 @@ const addParticipantsImg = (data) => {
     div_form.appendChild(div_label);
 
     var div_label2 = document.createElement("LABEL");
+    div_label2.style.display = "none";
     div_label2.className = "characters_score";
     div_label2.innerHTML = "0";
     div_form.appendChild(div_label2);
@@ -464,7 +441,6 @@ const addParticipantsImg = (data) => {
 };
 
 function reorderCharacters(){
-
   var parent = document.getElementById("row_chars");
   var children = parent.children;
 
@@ -474,37 +450,103 @@ function reorderCharacters(){
   var score_list = []
 
   for(var i = 0; i < children.length; i++){
-    char_list.push(children[i].children[1].innerText)
+    char_list.push(children[i].children[1].children[0].innerText)
     img_list.push(children[i].children[0].src)
-    id_list.push(children[i].children[0].id)
+    id_list.push(children[i].children[0].alt)
     score_list.push(parseInt(children[i].children[1].children[1].innerText))
   }
 
-  var sorted_char_list = char_list
-  var sorted_img_list = img_list
-  var sorted_id_list = id_list
-  var sorted_score_list = score_list.sort(function(a, b){return b - a});
+  for (let i = 0; i < children.length; i++) {
+    for (let j = i; j < children.length; j++) {
+      if (score_list[i] < score_list[j]) {
+        let temp = score_list[i]; 
+        score_list[i] = score_list[j]; 
+        score_list[j] = temp; 
+        
+        let temp1 = char_list[i]; 
+        char_list[i] = char_list[j]; 
+        char_list[j] = temp1; 
+        
+        let temp2 = img_list[i]; 
+        img_list[i] = img_list[j]; 
+        img_list[j] = temp2; 
+
+        let temp3 = id_list[i]; 
+        id_list[i] = id_list[j]; 
+        id_list[j] = temp3; 
+      };
+    };
+  }
 
   for(var i = 0; i < children.length; i++){
-    if(score_list[i] != sorted_score_list[i]){
-      var prev_loc = score_list.indexOf(sorted_score_list[i]);
-      
-      // swap locs 
-      temp_img = children[i].children[0].src;
-      temp_id = children[i].children[0].alt;
-      temp_char = children[i].children[1].children[0].innerHTML;
-      temp_score = children[i].children[1].children[1].innerHTML;
+    children[i].children[0].src = img_list[i]; 
+    children[i].children[0].alt = id_list[i];
+    children[i].children[0].id = img_list[i];
+    children[i].children[1].children[0].innerHTML = char_list[i];
+    children[i].children[1].children[1].innerHTML = score_list[i];
+  }
+}
 
-      children[prev_loc].children[0].src = temp_img; 
-      children[prev_loc].children[0].alt = temp_id;
-      children[prev_loc].children[1].children[0].innerHTML = temp_char;
-      children[prev_loc].children[1].children[1].innerHTML = temp_score;
-      
-      children[i].children[0].src = children[prev_loc].children[0].src; 
-      children[i].children[0].alt = children[prev_loc].children[0].alt;
-      children[i].children[1].children[0].innerHTML = children[prev_loc].children[1].children[0].innerHTML;
-      children[i].children[1].children[1].innerHTML = children[prev_loc].children[1].children[1].innerHTML;
-    }   
+function showChars(){
+  reorderCharacters()
+
+  var children = document.getElementById("row_chars").children;
+  var char_list = []
+  var img_list = []
+  var id_list = []
+  var score_list = []
+
+  for(var i = 0; i < children.length; i++){
+    char_list.push(children[i].children[1].children[0].innerText)
+    img_list.push(children[i].children[0].src)
+    id_list.push(children[i].children[0].alt)
+    score_list.push(parseInt(children[i].children[1].children[1].innerText))
+  }
+
+  while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  var para = document.createElement("h1");
+  para.innerHTML = "Leaderboard";
+  overlay.appendChild(para);
+
+  var leaderboard = document.createElement("DIV");
+  leaderboard.className = "leaderboard";
+  leaderboard.display = "flex";
+  leaderboard.alignItems = "center"; 
+  leaderboard.justifyContent = "center";
+  overlay.appendChild(leaderboard);
+
+  let size = 100
+  for(var i = 0; i < children.length; i++){
+    var char_div = document.createElement("DIV");
+    char_div.className = "characters";
+    leaderboard.appendChild(char_div);
+
+    var image = document.createElement("IMG");
+    image.className = "characters_img";
+    image.src = img_list[i];
+    image.alt = id_list[i];
+    image.style.width = String(size)+"%";
+    image.style.height = String(size)+"%";
+    image.id = img_list[i];
+    char_div.appendChild(image);
+
+    var div_form = document.createElement("FORM");
+    div_form.className = "characters_form";
+    div_form.style.textAlign = "center";
+    div_form.style.fontStyle = "italic";
+    div_form.style.fontFamily = "cursive";
+    char_div.appendChild(div_form);
+
+    var div_label = document.createElement("LABEL");
+    div_label.className = "characters_label";
+    div_label.innerHTML = char_list[i];
+    div_form.appendChild(div_label);
+
+    var div_label2 = document.createElement("LABEL");
+    div_label2.className = "characters_score";
+    div_label2.innerHTML = " : "+String(score_list[i]);
+    div_form.appendChild(div_label2);
+    size = size - (20*size/100) 
   }
 
 }
@@ -518,9 +560,9 @@ function reorderCharacters(){
 // sends chat message
 const sendMessage = () => {
   var message = ' '+$inputMessage.val();
-  // Prevent markup from being injected into the message
   message = cleanInput(message);
-  socket.emit("check answer", {username:username,message:message,gameID:gameID,timerVal:timerVal});
+  document.getElementsByClassName('inputMessage')[0].value = "";
+  socket.emit("check answer", {username:username,message:message,gameID:gameID,timer:timerVal});
 };
 
 // structures the chat message
@@ -552,7 +594,6 @@ const addMessageElement = (el, options) => {
   if (!options) { options = {}; }
   if (typeof options.fade === "undefined") { options.fade = true; }
   if (typeof options.prepend === "undefined") { options.prepend = false; }
-
   // Apply options
   if (options.fade) { $el.hide().fadeIn(FADE_TIME); }
   if (options.prepend) { $messages.prepend($el);} 
@@ -612,38 +653,3 @@ const getUsernameColor = (username) => {
 };
 //-----------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-----------------------------------------------------------------------------------------
-//-----------------------------------Other Socket events-----------------------------------
-//-----------------------------------------------------------------------------------------
-
-socket.on("leader board", (data) => {
-  setTimeout(function(){ 
-    var para = document.createElement("h1");
-    para.innerHTML = "Leaderboard ";
-    document.getElementsByClassName("login-form")[0].appendChild(para);
-    var content = document.createElement("a");
-    content.innerHTML = data;
-    document.getElementsByClassName("login-form")[0].appendChild(content);
-    document.getElementsByClassName("leaderboard-overlay")[0].style.width = "100%";
-  }, 2000);
-});
-
-//-----------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------
