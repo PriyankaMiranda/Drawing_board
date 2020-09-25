@@ -153,8 +153,11 @@ socket.on("game completed", () => {
   para.innerHTML = "Game complete";
   overlay.appendChild(para);
   overlay.style.opacity = "1";
-  // showChars()
-  setTimeout(function(){ window.location.href = "/lobby"; }, 5000);
+  showChars()
+});
+
+socket.on("enter lobby", () => {
+  window.location.href = "/lobby"
 });
 
 
@@ -525,8 +528,8 @@ function showChars(){
     image.className = "characters_img";
     image.src = img_list[i];
     image.alt = id_list[i];
-    image.style.width = String(size)+"%";
-    image.style.height = String(size)+"%";
+    image.style.width = String(size/2)+"%";
+    image.style.height = String(size/2)+"%";
     image.id = img_list[i];
     char_div.appendChild(image);
 

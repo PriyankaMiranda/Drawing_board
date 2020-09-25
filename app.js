@@ -293,6 +293,8 @@ socket.on("next round", (data) => {
 	if(currentClients.every((client) => playerData[client].totalRounds <= 0)){
 		socket.emit("game completed")
 		socket.to(data.gameID).emit("game completed")
+		// setTimeout(function(){ socket.emit("enter lobby") }, 5000);
+		// setTimeout(function(){ socket.to(data.gameID).emit("enter lobby") }, 5000);
 	}
 
 	var nextPlayer = playerData[socket.id].nextPlayer
