@@ -549,7 +549,7 @@ function showChars(){
     div_label2.className = "characters_score";
     div_label2.innerHTML = " : "+String(score_list[i]);
     div_form.appendChild(div_label2);
-    size = size - (20*size/100) 
+    // size = size - (20*size/100) 
   }
 
 }
